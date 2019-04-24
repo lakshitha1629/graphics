@@ -151,6 +151,8 @@ py_test(
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/util:test_data",
+        "//tensorflow_graphics/util:test_helper",
     ],
 )
 
@@ -168,6 +170,7 @@ py_test(
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/util:test_helper",
     ],
 )
 
@@ -200,6 +203,8 @@ py_test(
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/util:test_data",
+        "//tensorflow_graphics/util:test_helper",
     ],
 )
 
@@ -216,6 +221,8 @@ py_test(
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/util:test_data",
+        "//tensorflow_graphics/util:test_helper",
     ],
 )
 
@@ -235,5 +242,7 @@ py_test(
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/util:test_data",
+        "//tensorflow_graphics/util:test_helper",
     ],
 )
