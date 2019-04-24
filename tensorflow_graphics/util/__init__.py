@@ -22,6 +22,8 @@ from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
 from tensorflow_graphics.util import shape
 from tensorflow_graphics.util import test_case
+from tensorflow_graphics.util import test_data
+from tensorflow_graphics.util import test_helper
 from tensorflow_graphics.util import tfg_flags
 
 # The util modules are not exported.

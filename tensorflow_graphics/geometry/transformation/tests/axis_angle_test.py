@@ -25,8 +25,8 @@ import tensorflow as tf
 from tensorflow_graphics.geometry.transformation import axis_angle
 from tensorflow_graphics.geometry.transformation import quaternion
 from tensorflow_graphics.geometry.transformation import rotation_matrix_3d
-from tensorflow_graphics.geometry.transformation.tests import test_helpers
 from tensorflow_graphics.util import test_case
+from tensorflow_graphics.util import test_helpers
 
 
 class AxisAngleTest(test_case.TestCase):

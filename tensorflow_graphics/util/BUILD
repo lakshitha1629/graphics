@@ -41,6 +41,28 @@ py_library(
 )
 
 py_library(
+    name = "test_data",
+    srcs = ["test_data.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+    ],
+)
+
+py_library(
+    name = "test_helper",
+    srcs = ["test_helper.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        "//third_party/py/scipy",
+        # google internal,
+        "//tensorflow_graphics/geometry/transformation:axis_angle",
+        "//tensorflow_graphics/geometry/transformation:quaternion",
+        "//tensorflow_graphics/geometry/transformation:rotation_matrix_2d",
+        "//tensorflow_graphics/geometry/transformation:rotation_matrix_3d",
+    ],
+)
+
+py_library(
     name = "tfg_flags",
     srcs = ["tfg_flags.py"],
     srcs_version = "PY2AND3",
