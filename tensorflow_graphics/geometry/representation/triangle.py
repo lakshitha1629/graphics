@@ -29,7 +29,8 @@ def normal(v0, v1, v2, clockwise=False, normalize=True, name=None):
   """Computes face normals (triangles).
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which should be
+    broadcast compatible.
 
   Args:
     v0: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
@@ -53,28 +54,20 @@ def normal(v0, v1, v2, clockwise=False, normalize=True, name=None):
     v0 = tf.convert_to_tensor(value=v0)
     v1 = tf.convert_to_tensor(value=v1)
     v2 = tf.convert_to_tensor(value=v2)
-    if not shape.is_broadcast_compatible(v0.shape, v1.shape):
-      raise ValueError("'v0' and 'v1' should be broadcastable.")
-    if not shape.is_broadcast_compatible(v0.shape, v2.shape):
-      raise ValueError("'v0' and 'v2' should be broadcastable.")
 
-    shape_v0 = v0.shape.as_list()
-    shape_v1 = v1.shape.as_list()
-    shape_v2 = v2.shape.as_list()
-    if shape_v0[-1] != 3:
-      raise ValueError("'v0' must have 3 dimensions.")
-    if shape_v1[-1] != 3:
-      raise ValueError("'v1' must have 3 dimensions.")
-    if shape_v2[-1] != 3:
-      raise ValueError("'v2' must have 3 dimensions.")
+    shape.check_static(tensor=v0, tensor_name="v0", has_dim_equals=(-1, 3))
+    shape.check_static(tensor=v1, tensor_name="v1", has_dim_equals=(-1, 3))
+    shape.check_static(tensor=v2, tensor_name="v2", has_dim_equals=(-1, 3))
+    shape.compare_batch_dimensions(
+        tensors=(v0, v1, v2), last_axes=-2, broadcast_compatible=True)
 
-    n = vector.cross(v1 - v0, v2 - v0, axis=-1)
-    n = asserts.assert_nonzero_norm(n)
+    normal_vector = vector.cross(v1 - v0, v2 - v0, axis=-1)
+    normal_vector = asserts.assert_nonzero_norm(normal_vector)
     if not clockwise:
-      n *= -1.0
+      normal_vector *= -1.0
     if normalize:
-      return tf.nn.l2_normalize(n, axis=-1)
-    return n
+      return tf.nn.l2_normalize(normal_vector, axis=-1)
+    return normal_vector
 
 
 # API contains all public functions and classes.

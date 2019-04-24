@@ -30,6 +30,7 @@ except ImportError:
 from tensorflow_graphics import geometry
 from tensorflow_graphics import image
 from tensorflow_graphics import math
+from tensorflow_graphics import notebooks
 from tensorflow_graphics import rendering
 from tensorflow_graphics import util
 from tensorflow_graphics import version
@@ -38,6 +39,7 @@ __version__ = version.__version__
 
 # API contains submodules of tensorflow_graphics.
 __all__ = util.export_api.get_modules()
-# Remove modules util and version from API
+# Remove modules notebooks, util and version from API.
+__all__.remove("notebooks")
 __all__.remove("util")
 __all__.remove("version")

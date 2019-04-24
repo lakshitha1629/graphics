@@ -11,32 +11,45 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# Tensorflow-Graphics, a library for differentiable computer graphics and geometry.
+# Colab resources for tf-graphics.
 
-# google internal
-# google internal
-
-licenses(["notice"])  # Apache 2.0
+# google internal)
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["LICENSE"])
+licenses(["notice"])  # Apache 2.0
 
 py_library(
-    name = "tensorflow_graphics",
+    name = "resources",
     srcs = [
         "__init__.py",
-        "version.py",
     ],
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [
-        "//tensorflow_graphics/geometry",
-        "//tensorflow_graphics/image",
-        "//tensorflow_graphics/math",
-        "//tensorflow_graphics/notebooks",
-        "//tensorflow_graphics/rendering",
-        "//tensorflow_graphics/util",
-        "//tensorflow_graphics/util:export_api",
+        ":tfg_simplified_logo",
+        ":triangulated_stripe",
+    ],
+)
+
+py_library(
+    name = "tfg_simplified_logo",
+    srcs = [
+        "tfg_simplified_logo.py",
+    ],
+    srcs_version = "PY2AND3",
+    visibility = ["//visibility:public"],
+    deps = [
+    ],
+)
+
+py_library(
+    name = "triangulated_stripe",
+    srcs = [
+        "triangulated_stripe.py",
+    ],
+    srcs_version = "PY2AND3",
+    visibility = ["//visibility:public"],
+    deps = [
     ],
 )

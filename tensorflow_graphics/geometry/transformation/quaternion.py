@@ -39,6 +39,7 @@ from tensorflow_graphics.math import vector
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def _build_quaternion_from_sines_and_cosines(sin_half_angles, cos_half_angles):
@@ -94,12 +95,14 @@ def between_two_vectors_3d(vector1, vector2, name=None):
                                [vector1, vector2]):
     vector1 = tf.convert_to_tensor(value=vector1)
     vector2 = tf.convert_to_tensor(value=vector2)
-    shape1 = vector1.shape.as_list()
-    shape2 = vector2.shape.as_list()
-    if shape1[-1] != 3:
-      raise ValueError("'vector1' must have 3 dimensions.")
-    if shape2[-1] != 3:
-      raise ValueError("'vector2' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=vector1, tensor_name="vector1", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=vector2, tensor_name="vector2", has_dim_equals=(-1, 3))
+    shape.compare_batch_dimensions(
+        tensors=(vector1, vector2), last_axes=-2, broadcast_compatible=True)
+
     # Make sure we deal with unit vectors.
     vector1 = tf.nn.l2_normalize(vector1, axis=-1)
     vector2 = tf.nn.l2_normalize(vector2, axis=-1)
@@ -129,11 +132,11 @@ def conjugate(quaternion, name=None):
   """
   with tf.compat.v1.name_scope(name, "quaternion_conjugate", [quaternion]):
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape = quaternion.shape.as_list()
-    if shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
 
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
     quaternion = asserts.assert_normalized(quaternion)
+
     xyz, w = tf.split(quaternion, (3, 1), axis=-1)
     return tf.concat((-xyz, w), axis=-1)
 
@@ -162,14 +165,14 @@ def from_axis_angle(axis, angle, name=None):
                                [axis, angle]):
     axis = tf.convert_to_tensor(value=axis)
     angle = tf.convert_to_tensor(value=angle)
-    shape_axis = axis.shape.as_list()
-    shape_angle = angle.shape.as_list()
-    if shape_axis[-1] != 3:
-      raise ValueError("'axis' must have 3 dimensions.")
-    if shape_angle[-1] != 1:
-      raise ValueError("'angle' must have 1 dimension.")
 
+    shape.check_static(tensor=axis, tensor_name="axis", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=angle, tensor_name="angle", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(axis, angle), last_axes=-2, broadcast_compatible=True)
     axis = asserts.assert_normalized(axis)
+
     half_angle = 0.5 * angle
     w = tf.cos(half_angle)
     xyz = tf.sin(half_angle) * axis
@@ -187,9 +190,9 @@ def from_euler(angles, name=None):
 
   Args:
     angles: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-      represents the three Euler angles. `[A1, ..., An, 0]` is the angle about
-      `x` in radians `[A1, ..., An, 1]` is the angle about `y` in radians and
-      `[A1, ..., An, 2]` is the angle about `z` in radians.
+      represents the three Euler angles. `[..., 0]` is the angle about `x` in
+      radians, `[..., 1]` is the angle about `y` in radians and `[..., 2]` is
+      the angle about `z` in radians.
     name: A name for this op that defaults to "quaternion_from_euler".
 
   Returns:
@@ -201,9 +204,10 @@ def from_euler(angles, name=None):
   """
   with tf.compat.v1.name_scope(name, "quaternion_from_euler", [angles]):
     angles = tf.convert_to_tensor(value=angles)
-    angles_shape = angles.shape.as_list()
-    if angles_shape[-1] != 3:
-      raise ValueError("'angles' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=angles, tensor_name="angles", has_dim_equals=(-1, 3))
+
     half_angles = angles / 2.0
     cos_half_angles = tf.cos(half_angles)
     sin_half_angles = tf.sin(half_angles)
@@ -226,10 +230,10 @@ def from_euler_with_small_angles_approximation(angles, name=None):
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    angles: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-      represents the three small Euler angles. `[A1, ..., An, 0]` is the angle
-      about `x` in radians `[A1, ..., An, 1]` is the angle about `y` in radians
-      and `[A1, ..., An, 2]` is the angle about `z` in radians.
+   angles: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
+     represents the three Euler angles. `[..., 0]` is the angle about `x` in
+     radians, `[..., 1]` is the angle about `y` in radians and `[..., 2]` is the
+     angle about `z` in radians.
     name: A name for this op that defaults to "quaternion_from_euler".
 
   Returns:
@@ -241,9 +245,10 @@ def from_euler_with_small_angles_approximation(angles, name=None):
   """
   with tf.compat.v1.name_scope(name, "quaternion_from_euler", [angles]):
     angles = tf.convert_to_tensor(value=angles)
-    angles_shape = angles.shape.as_list()
-    if angles_shape[-1] != 3:
-      raise ValueError("'angles' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=angles, tensor_name="angles", has_dim_equals=(-1, 3))
+
     half_angles = angles / 2.0
     cos_half_angles = 1.0 - 0.5 * half_angles * half_angles
     sin_half_angles = half_angles
@@ -277,63 +282,66 @@ def from_rotation_matrix(rotation_matrix, name=None):
   with tf.compat.v1.name_scope(name, "quaternion_from_rotation_matrix",
                                [rotation_matrix]):
     rotation_matrix = tf.convert_to_tensor(value=rotation_matrix)
-    shape = rotation_matrix.shape.as_list()
-    if shape[-2:] != [3, 3]:
-      raise ValueError("'rotation_matrix' must have 3x3 dimensions.")
 
+    shape.check_static(
+        tensor=rotation_matrix,
+        tensor_name="rotation_matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-1, 3), (-2, 3)))
     rotation_matrix = rotation_matrix_3d.assert_rotation_matrix_normalized(
         rotation_matrix)
 
-    tr = tf.linalg.trace(rotation_matrix)
-    m = rotation_matrix
-    eps_addition = asserts.select_eps_for_addition(m.dtype)
+    trace = tf.linalg.trace(rotation_matrix)
+    eps_addition = asserts.select_eps_for_addition(rotation_matrix.dtype)
+    rows = tf.unstack(rotation_matrix, axis=-2)
+    entries = [tf.unstack(row, axis=-1) for row in rows]
 
-    def tr_positive(m):
-      s = tf.sqrt(tr + 1.0 + eps_addition) * 2.  # s=4*qw
-      qw = 0.25 * s
-      qx = safe_ops.safe_unsigned_div(m[..., 2, 1] - m[..., 1, 2], s)
-      qy = safe_ops.safe_unsigned_div(m[..., 0, 2] - m[..., 2, 0], s)
-      qz = safe_ops.safe_unsigned_div(m[..., 1, 0] - m[..., 0, 1], s)
+    def tr_positive():
+      sq = tf.sqrt(trace + 1.0) * 2.  # sq = 4 * qw.
+      qw = 0.25 * sq
+      qx = safe_ops.safe_unsigned_div(entries[2][1] - entries[1][2], sq)
+      qy = safe_ops.safe_unsigned_div(entries[0][2] - entries[2][0], sq)
+      qz = safe_ops.safe_unsigned_div(entries[1][0] - entries[0][1], sq)
       return tf.stack((qx, qy, qz, qw), axis=-1)
 
-    def cond_1(m):
-      s = tf.sqrt(1.0 + m[..., 0, 0] - m[..., 1, 1] - m[..., 2, 2] +
-                  eps_addition) * 2.  # s=4*qx
-      qw = safe_ops.safe_unsigned_div(m[..., 2, 1] - m[..., 1, 2], s)
-      qx = 0.25 * s
-      qy = safe_ops.safe_unsigned_div(m[..., 0, 1] + m[..., 1, 0], s)
-      qz = safe_ops.safe_unsigned_div(m[..., 0, 2] + m[..., 2, 0], s)
+    def cond_1():
+      sq = tf.sqrt(1.0 + entries[0][0] - entries[1][1] - entries[2][2] +
+                   eps_addition) * 2.  # sq = 4 * qx.
+      qw = safe_ops.safe_unsigned_div(entries[2][1] - entries[1][2], sq)
+      qx = 0.25 * sq
+      qy = safe_ops.safe_unsigned_div(entries[0][1] + entries[1][0], sq)
+      qz = safe_ops.safe_unsigned_div(entries[0][2] + entries[2][0], sq)
       return tf.stack((qx, qy, qz, qw), axis=-1)
 
-    def cond_2(m):
-      s = tf.sqrt(1.0 + m[..., 1, 1] - m[..., 0, 0] - m[..., 2, 2] +
-                  eps_addition) * 2.  # s=4*qy
-      qw = safe_ops.safe_unsigned_div(m[..., 0, 2] - m[..., 2, 0], s)
-      qx = safe_ops.safe_unsigned_div(m[..., 0, 1] + m[..., 1, 0], s)
-      qy = 0.25 * s
-      qz = safe_ops.safe_unsigned_div(m[..., 1, 2] + m[..., 2, 1], s)
+    def cond_2():
+      sq = tf.sqrt(1.0 + entries[1][1] - entries[0][0] - entries[2][2] +
+                   eps_addition) * 2.  # sq = 4 * qy.
+      qw = safe_ops.safe_unsigned_div(entries[0][2] - entries[2][0], sq)
+      qx = safe_ops.safe_unsigned_div(entries[0][1] + entries[1][0], sq)
+      qy = 0.25 * sq
+      qz = safe_ops.safe_unsigned_div(entries[1][2] + entries[2][1], sq)
       return tf.stack((qx, qy, qz, qw), axis=-1)
 
-    def cond_3(m):
-      s = tf.sqrt(1.0 + m[..., 2, 2] - m[..., 0, 0] - m[..., 1, 1] +
-                  eps_addition) * 2.  # s=4*q
-      qw = safe_ops.safe_unsigned_div(m[..., 1, 0] - m[..., 0, 1], s)
-      qx = safe_ops.safe_unsigned_div(m[..., 0, 2] + m[..., 2, 0], s)
-      qy = safe_ops.safe_unsigned_div(m[..., 1, 2] + m[..., 2, 1], s)
-      qz = 0.25 * s
+    def cond_3():
+      sq = tf.sqrt(1.0 + entries[2][2] - entries[0][0] - entries[1][1] +
+                   eps_addition) * 2.  # sq = 4 * qz.
+      qw = safe_ops.safe_unsigned_div(entries[1][0] - entries[0][1], sq)
+      qx = safe_ops.safe_unsigned_div(entries[0][2] + entries[2][0], sq)
+      qy = safe_ops.safe_unsigned_div(entries[1][2] + entries[2][1], sq)
+      qz = 0.25 * sq
       return tf.stack((qx, qy, qz, qw), axis=-1)
 
     def cond_idx(cond):
       cond = tf.expand_dims(cond, -1)
-      cond = tf.tile(cond, [1] * (len(shape) - 2) + [4])
+      cond = tf.tile(cond, [1] * (rotation_matrix.shape.ndims - 2) + [4])
       return cond
 
     where_2 = tf.where(
-        cond_idx(m[..., 1, 1] > m[..., 2, 2]), cond_2(m), cond_3(m))
+        cond_idx(entries[1][1] > entries[2][2]), cond_2(), cond_3())
     where_1 = tf.where(
-        cond_idx((m[..., 0, 0] > m[..., 1, 1]) & (m[..., 0, 0] > m[..., 2, 2])),
-        cond_1(m), where_2)
-    quat = tf.where(cond_idx(tr > 0), tr_positive(m), where_1)
+        cond_idx((entries[0][0] > entries[1][1])
+                 & (entries[0][0] > entries[2][2])), cond_1(), where_2)
+    quat = tf.where(cond_idx(trace > 0), tr_positive(), where_1)
     return quat
 
 
@@ -357,13 +365,13 @@ def inverse(quaternion, name=None):
   """
   with tf.compat.v1.name_scope(name, "quaternion_inverse", [quaternion]):
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape = quaternion.shape.as_list()
-    if shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
 
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
     quaternion = asserts.assert_normalized(quaternion)
-    qq = quaternion * quaternion
-    squared_norm = tf.reduce_sum(input_tensor=qq, axis=-1, keepdims=True)
+
+    squared_norm = tf.reduce_sum(
+        input_tensor=tf.square(quaternion), axis=-1, keepdims=True)
     return safe_ops.safe_unsigned_div(conjugate(quaternion), squared_norm)
 
 
@@ -388,9 +396,10 @@ def is_normalized(quaternion, atol=1e-3, name=None):
   """
   with tf.compat.v1.name_scope(name, "quaternion_is_normalized", [quaternion]):
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape = quaternion.shape.as_list()
-    if shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
+
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
+
     norms = tf.norm(tensor=quaternion, axis=-1, keepdims=True)
     return tf.where(
         tf.abs(norms - 1.) < atol, tf.ones_like(norms, dtype=bool),
@@ -418,9 +427,10 @@ def normalize(quaternion, eps=1e-12, name=None):
   """
   with tf.compat.v1.name_scope(name, "quaternion_normalize", [quaternion]):
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape = quaternion.shape.as_list()
-    if shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
+
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
+
     return tf.math.l2_normalize(quaternion, axis=-1, epsilon=eps)
 
 
@@ -432,13 +442,13 @@ def multiply(quaternion1, quaternion2, name=None):
 
   Args:
     quaternion1:  A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-      represents a normalized quaternion.
+      represents a quaternion.
     quaternion2:  A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-      represents a normalized quaternion.
+      represents a quaternion.
     name: A name for this op that defaults to "quaternion_multiply".
 
   Returns:
-    A tensor of shape `[A1, ..., An, 4]` representing normalized quaternions.
+    A tensor of shape `[A1, ..., An, 4]` representing quaternions.
 
   Raises:
     ValueError: If the shape of `quaternion1` or `quaternion2` is not supported.
@@ -447,12 +457,11 @@ def multiply(quaternion1, quaternion2, name=None):
                                [quaternion1, quaternion2]):
     quaternion1 = tf.convert_to_tensor(value=quaternion1)
     quaternion2 = tf.convert_to_tensor(value=quaternion2)
-    shape1 = quaternion1.shape.as_list()
-    shape2 = quaternion2.shape.as_list()
-    if shape1[-1] != 4:
-      raise ValueError("'quaternion1' must have 4 dimensions.")
-    if shape2[-1] != 4:
-      raise ValueError("'quaternion2' must have 4 dimensions.")
+
+    shape.check_static(
+        tensor=quaternion1, tensor_name="quaternion1", has_dim_equals=(-1, 4))
+    shape.check_static(
+        tensor=quaternion2, tensor_name="quaternion2", has_dim_equals=(-1, 4))
 
     x1, y1, z1, w1 = tf.unstack(quaternion1, axis=-1)
     x2, y2, z2, w2 = tf.unstack(quaternion2, axis=-1)
@@ -463,34 +472,34 @@ def multiply(quaternion1, quaternion2, name=None):
     return tf.stack((x, y, z, w), axis=-1)
 
 
-def normalized_random_uniform(shape, name=None):
+def normalized_random_uniform(quaternion_shape, name=None):
   """Random normalized quaternion following a uniform distribution law on SO(3).
 
   Args:
-    shape: A list representing the shape of the output tensor.
+    quaternion_shape: A list representing the shape of the output tensor.
     name: A name for this op that defaults to
       "quaternion_normalized_random_uniform".
 
   Returns:
   """
   with tf.compat.v1.name_scope(name, "quaternion_normalized_random_uniform"):
-    u1 = tf.random.uniform(shape, minval=0.0, maxval=1.0)
-    u2 = tf.random.uniform(shape, minval=0.0, maxval=2.0 * math.pi)
-    u3 = tf.random.uniform(shape, minval=0.0, maxval=2.0 * math.pi)
+    u1 = tf.random.uniform(quaternion_shape, minval=0.0, maxval=1.0)
+    u2 = tf.random.uniform(quaternion_shape, minval=0.0, maxval=2.0 * math.pi)
+    u3 = tf.random.uniform(quaternion_shape, minval=0.0, maxval=2.0 * math.pi)
     a = tf.sqrt(1.0 - u1)
     b = tf.sqrt(u1)
-    # pyformat: disable
-    return tf.stack((a * tf.sin(u2),
-                     a * tf.cos(u2),
-                     b * tf.sin(u3),
-                     b * tf.cos(u3)),
-                    axis=-1)
-    # pyformat: enable
+    return tf.stack(
+        (a * tf.sin(u2), a * tf.cos(u2), b * tf.sin(u3), b * tf.cos(u3)),
+        axis=-1)
 
 
 def normalized_random_uniform_initializer():
   """Random unit quaternion initializer."""
 
+  # Since variable initializers must take `shape` as input, we cannot prevent
+  # a clash between util.shape and the argument here. Therefore we have to
+  # disable redefined-outer-name for this function.
+  # pylint: disable=redefined-outer-name
   def _initializer(shape, dtype=tf.float32, partition_info=None):
     """Generate a random normalized quaternion.
 
@@ -514,9 +523,11 @@ def normalized_random_uniform_initializer():
       raise ValueError("'dtype' must be tf.float32.")
     if shape[-1] != 4:
       raise ValueError("Last dimension of 'shape' must be 4.")
+
     return normalized_random_uniform(shape[:-1])
 
   return _initializer
+  # pylint: enable=redefined-outer-name
 
 
 def rotate(point, quaternion, name=None):
@@ -542,15 +553,16 @@ def rotate(point, quaternion, name=None):
   with tf.compat.v1.name_scope(name, "quaternion_rotate", [point, quaternion]):
     point = tf.convert_to_tensor(value=point)
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape_point = point.shape.as_list()
-    shape_quaternion = quaternion.shape.as_list()
-    if shape_point[-1] != 3:
-      raise ValueError("'point' must have 3 dimensions.")
-    if shape_quaternion[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
 
+    shape.check_static(
+        tensor=point, tensor_name="point", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
+    shape.compare_batch_dimensions(
+        tensors=(point, quaternion), last_axes=-2, broadcast_compatible=True)
     quaternion = asserts.assert_normalized(quaternion)
-    padding = [[0, 0] for _ in range(len(shape_point))]
+
+    padding = [[0, 0] for _ in range(point.shape.ndims)]
     padding[-1][-1] = 1
     point = tf.pad(tensor=point, paddings=padding, mode="CONSTANT")
     point = multiply(quaternion, point)
@@ -587,24 +599,20 @@ def relative_angle(quaternion1, quaternion2, name=None):
                                 [quaternion1, quaternion2])):
     quaternion1 = tf.convert_to_tensor(value=quaternion1)
     quaternion2 = tf.convert_to_tensor(value=quaternion2)
-    shape1 = quaternion1.shape.as_list()
-    shape2 = quaternion2.shape.as_list()
-    if shape1[-1] != 4:
-      raise ValueError("'quaternion1' must have 4 dimensions.")
-    if shape2[-1] != 4:
-      raise ValueError("'quaternion2' must have 4 dimensions.")
 
-    # Ensure we deal with unit quaternions.
+    shape.check_static(
+        tensor=quaternion1, tensor_name="quaternion1", has_dim_equals=(-1, 4))
+    shape.check_static(
+        tensor=quaternion2, tensor_name="quaternion2", has_dim_equals=(-1, 4))
     quaternion1 = asserts.assert_normalized(quaternion1)
     quaternion2 = asserts.assert_normalized(quaternion2)
+
     dot_product = vector.dot(quaternion1, quaternion2, keepdims=False)
     # Ensure dot product is in range [-1. 1].
     eps_dot_prod = 4.0 * asserts.select_eps_for_addition(dot_product.dtype)
     dot_product = safe_ops.safe_shrink(
         dot_product, -1.0, 1.0, False, eps=eps_dot_prod)
-    angle = 2 * tf.acos(tf.abs(dot_product))
-
-    return angle
+    return 2.0 * tf.acos(tf.abs(dot_product))
 
 
 # API contains all public functions and classes.

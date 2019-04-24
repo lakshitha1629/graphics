@@ -42,8 +42,8 @@ class EulerTest(test_case.TestCase):
     self.assert_exception_is_not_raised(euler.from_axis_angle, shapes)
 
   @parameterized.parameters(
-      ("'axis' must have 3 dimensions.", (None,), (1,)),
-      ("'angle' must have 1 dimension.", (3,), (None,)),
+      ("must have exactly 3 dimensions", (None,), (1,)),
+      ("must have exactly 1 dimensions", (3,), (None,)),
   )
   def test_from_axis_angle_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -111,7 +111,7 @@ class EulerTest(test_case.TestCase):
     self.assert_exception_is_not_raised(euler.from_quaternion, shape)
 
   @parameterized.parameters(
-      ("'quaternion' must have 4 dimensions.", (None,)),)
+      ("must have exactly 4 dimensions", (None,)),)
   def test_from_quaternion_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
     self.assert_exception_is_raised(euler.from_quaternion, error_msg, shape)
@@ -172,9 +172,9 @@ class EulerTest(test_case.TestCase):
     self.assert_exception_is_not_raised(euler.from_rotation_matrix, shapes)
 
   @parameterized.parameters(
-      ("'rotation_matrix' must be of shape 3x3.", (3,)),
-      ("'rotation_matrix' must be of shape 3x3.", (None, 3)),
-      ("'rotation_matrix' must be of shape 3x3.", (3, None)),
+      ("must have a rank greater than 1", (3,)),
+      ("must have exactly 3 dimensions", (None, 3)),
+      ("must have exactly 3 dimensions", (3, None)),
   )
   def test_from_rotation_matrix_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -239,7 +239,7 @@ class EulerTest(test_case.TestCase):
     self.assert_exception_is_not_raised(euler.inverse, shape)
 
   @parameterized.parameters(
-      ("'euler_angle' must have 3 dimension.", (None,)),)
+      ("must have exactly 3 dimensions", (None,)),)
   def test_inverse_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
     self.assert_exception_is_raised(euler.inverse, error_msg, shape)

@@ -17,9 +17,20 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from google.colab.output import _js_builder
-from google.colab.output import _publish
-from google.colab.output import eval_js
+import sys
+
+# pylint: disable=g-import-not-at-top
+try:
+  from google.colab.output import _js_builder
+  from google.colab.output import _publish
+  from google.colab.output import eval_js
+except ImportError:
+  print(
+      'Warning: To use the threejs_vizualization, please install the colabtools'
+      ' package following the instructions detailed in the README at'
+      ' github.com/tensorflow/graphics.',
+      file=sys.stderr)
+# pylint: enable=g-import-not-at-top
 
 
 def _triangular_mesh_to_three_geometry(vertices, faces):

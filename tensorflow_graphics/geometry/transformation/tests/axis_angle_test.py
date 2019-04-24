@@ -40,7 +40,7 @@ class AxisAngleTest(test_case.TestCase):
     self.assert_exception_is_not_raised(axis_angle.from_euler, shapes)
 
   @parameterized.parameters(
-      ("'angles' must have 3 dimensions.", (None,)),)
+      ("must have exactly 3 dimensions", (None,)),)
   def test_from_euler_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
     self.assert_exception_is_raised(axis_angle.from_euler, error_msg, shapes)
@@ -81,7 +81,7 @@ class AxisAngleTest(test_case.TestCase):
         axis_angle.from_euler_with_small_angles_approximation, shapes)
 
   @parameterized.parameters(
-      ("'angles' must have 3 dimensions.", (None,)),)
+      ("must have exactly 3 dimensions", (None,)),)
   def test_from_euler_with_small_angles_approximation_exception_raised(
       self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""

@@ -29,10 +29,10 @@ def check_valid_graph_convolution_input(data, neighbors, sizes):
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    data: A float tensor with shape `[A1, ..., An, V1, V2]`.
+    data: A `float` tensor with shape `[A1, ..., An, V1, V2]`.
     neighbors: A SparseTensor with the same type as `data` and with
       shape `[A1, ..., An, V1, V1]`.
-    sizes: An int tensor of shape `[A1, ..., An]`. Optional, can be None.
+    sizes: An `int` tensor of shape `[A1, ..., An]`. Optional, can be `None`.
 
   Raises:
     TypeError: if the input types are invalid.
@@ -89,15 +89,15 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
 
   Args:
     data: A tensor with shape `[A1, ..., An, D1, D2]`.
-    sizes: An Int tensor with shape `[A1, ..., An]`. Can be None.
+    sizes: An `int` tensor with shape `[A1, ..., An]`. Can be `None`.
       `sizes[i] <= D1`.
     name: A name for this op. Defaults to `utils_flatten_batch_to_2d`.
 
   Returns:
-    A tensor with shape `[A1*...*An*D1, D2]` if sizes=None, otherwise a
+    A tensor with shape `[A1*...*An*D1, D2]` if `sizes==None`, otherwise a
       tensor  with shape `[sum(sizes), D2]`.
     A function that reshapes a tensor with shape `[A1*...*An*D1, D3]` to a
-      tensor with shape `[A1, ..., An, D1, D3]` if sizes=None, otherwise it
+      tensor with shape `[A1, ..., An, D1, D3]` if `sizes==None`, otherwise it
       reshapes a tensor with shape `[sum(sizes), D3]` to one with shape
       `[A1, ..., An, ..., D1, D3]`.
 
@@ -170,8 +170,8 @@ def convert_to_block_diag_2d(
 
   Args:
     data: A SparseTensor with dense shape `[A1, ..., An, D1, D2]`.
-    sizes: A tensor with shape `[A1, ..., An, 2]`. Can be None (indicates
-      no padding). If not None, `sizes` indicates the true sizes (before
+    sizes: A tensor with shape `[A1, ..., An, 2]`. Can be `None` (indicates
+      no padding). If not `None`, `sizes` indicates the true sizes (before
       padding) of the inner dimensions of `data`.
     validate_indices: A boolean. Ignored if `sizes==None`. If True,
       out-of-bounds indices in `data` are explicitly ignored, otherwise
@@ -234,8 +234,8 @@ def partition_sums_2d(data, group_ids, row_weights=None, name=None):
 
   Args:
     data: 2-D tensor with shape `[D1, D2]`.
-    group_ids: 1-D Int tensor with shape `[D1]`.
-    row_weights: 1-D tensor with shape `[D1]`. Can be None.
+    group_ids: 1-D `int` tensor with shape `[D1]`.
+    row_weights: 1-D tensor with shape `[D1]`. Can be `None`.
     name: A name for this op. Defaults to `utils_partition_sums_2d`.
 
   Returns:

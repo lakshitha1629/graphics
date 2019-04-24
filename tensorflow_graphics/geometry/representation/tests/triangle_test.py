@@ -51,11 +51,13 @@ class TriangleTest(test_case.TestCase):
     self.assert_exception_is_not_raised(triangle.normal, shapes)
 
   @parameterized.parameters(
-      ("'v0' and 'v1' should be broadcastable.", (2, 3), (3, 3), (2, 3)),
-      ("'v0' and 'v2' should be broadcastable.", (2, 3), (2, 3), (3, 3)),
-      ("'v0' must have 3 dimensions.", (None,), (3,), (3,)),
-      ("'v1' must have 3 dimensions.", (3,), (None,), (3,)),
-      ("'v2' must have 3 dimensions.", (3,), (3,), (None,)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 3), (3, 3),
+       (2, 3)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 3), (2, 3),
+       (3, 3)),
+      ("must have exactly 3 dimensions in axis -1", (1,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (2,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (4,)),
   )
   def test_normal_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -76,7 +78,9 @@ class TriangleTest(test_case.TestCase):
     v0_tensor, v1_tensor, v2_tensor = [
         tf.convert_to_tensor(value=v) for v in [v0_init, v1_init, v2_init]
     ]
+
     y = triangle.normal(v0_tensor, v1_tensor, v2_tensor)
+
     with self.subTest(name="v0"):
       self.assert_jacobian_is_correct(v0_tensor, v0_init, y)
     with self.subTest(name="v1"):
@@ -94,7 +98,9 @@ class TriangleTest(test_case.TestCase):
     v0_tensor, v1_tensor, v2_tensor = [
         tf.convert_to_tensor(value=v) for v in [v0_init, v1_init, v2_init]
     ]
+
     y = triangle.normal(v0_tensor, v1_tensor, v2_tensor)
+
     with self.subTest(name="v0"):
       self.assert_jacobian_is_correct(v0_tensor, v0_init, y)
     with self.subTest(name="v1"):
@@ -121,6 +127,7 @@ class TriangleTest(test_case.TestCase):
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     zeros = np.zeros(shape=tensor_shape + [1])
+
     for i in range(3):
       v0 = np.random.random(size=tensor_shape + [3])
       v1 = np.random.random(size=tensor_shape + [3])
@@ -131,6 +138,7 @@ class TriangleTest(test_case.TestCase):
       n = np.zeros_like(v0)
       n[..., i] = 1.
       normal = triangle.normal(v0, v1, v2, clockwise)
+
       with self.subTest():
         self.assertAllClose(tf.abs(normal), n)
       with self.subTest():

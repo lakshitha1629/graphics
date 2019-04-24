@@ -58,7 +58,7 @@ setup(
     long_description='',
     url='https://github.com/tensorflow/graphics',
     author='Google LLC',
-    author_email='packages@tensorflow.org',
+    author_email='tf-graphics-eng@google.com',
     install_requires=INSTALL_PACKAGES,
     setup_requires=SETUP_PACKAGES,
     tests_require=TEST_PACKAGES,

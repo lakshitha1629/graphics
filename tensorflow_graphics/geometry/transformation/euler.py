@@ -36,6 +36,7 @@ from tensorflow_graphics.geometry.transformation import rotation_matrix_3d
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def from_axis_angle(axis, angle, name=None):
@@ -94,9 +95,11 @@ def from_quaternion(quaternions, name=None):
 
   with tf.compat.v1.name_scope(name, "euler_from_quaternion", [quaternions]):
     quaternions = tf.convert_to_tensor(value=quaternions)
-    shape = quaternions.shape.as_list()
-    if len(shape) < 1 or shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
+
+    shape.check_static(
+        tensor=quaternions,
+        tensor_name="quaternions",
+        has_dim_equals=(-1, 4))
 
     x, y, z, w = tf.unstack(quaternions, axis=-1)
     tx = safe_ops.safe_shrink(2.0 * x, -2.0, 2.0, True)
@@ -189,11 +192,12 @@ def from_rotation_matrix(rotation_matrix, name=None):
   with tf.compat.v1.name_scope(name, "euler_from_rotation_matrix",
                                [rotation_matrix]):
     rotation_matrix = tf.convert_to_tensor(value=rotation_matrix)
-    shape_rotation_matrix = rotation_matrix.shape.as_list()
-    shape_length = len(shape_rotation_matrix)
-    if shape_length < 2 or shape_rotation_matrix[-2:] != [3, 3]:
-      raise ValueError("'rotation_matrix' must be of shape 3x3.")
 
+    shape.check_static(
+        tensor=rotation_matrix,
+        tensor_name="rotation_matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-1, 3), (-2, 3)))
     rotation_matrix = rotation_matrix_3d.assert_rotation_matrix_normalized(
         rotation_matrix)
 
@@ -226,9 +230,12 @@ def inverse(euler_angle, name=None):
   """
   with tf.compat.v1.name_scope(name, "euler_inverse", [euler_angle]):
     euler_angle = tf.convert_to_tensor(value=euler_angle)
-    euler_angle_shape = euler_angle.shape.as_list()
-    if euler_angle_shape[-1] != 3:
-      raise ValueError("'euler_angle' must have 3 dimension.")
+
+    shape.check_static(
+        tensor=euler_angle,
+        tensor_name="euler_angle",
+        has_dim_equals=(-1, 3))
+
     return -euler_angle
 
 

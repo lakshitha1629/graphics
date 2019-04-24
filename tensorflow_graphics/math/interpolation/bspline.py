@@ -193,7 +193,7 @@ def knot_weights(positions,
         shape=(-1,))
     ind_col = tf.reshape(ind_col, shape=(-1,)) + tiled_shifts
     if cyclical:
-      ind_col = tf.mod(ind_col, num_knots)
+      ind_col = tf.math.mod(ind_col, num_knots)
     indices = tf.stack((tf.reshape(ind_row, shape=(-1,)), ind_col), axis=-1)
     shape_indices = tf.concat((tf.reshape(
         num_positions, shape=(1,)), tf.constant(

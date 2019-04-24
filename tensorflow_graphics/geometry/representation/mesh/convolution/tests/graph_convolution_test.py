@@ -45,14 +45,14 @@ def _dummy_data(batch_size, num_vertices, num_channels):
   return data, neighbors
 
 
-def _dummy_variables(in_channels, out_channels, weight_matrices):
+def _dummy_variables(in_channels, out_channels, num_weight_matrices):
   """Create variable substitutes for feature_steered_convolution."""
-  variable_u = tf.zeros(shape=(in_channels, weight_matrices))
-  variable_v = tf.zeros(shape=(in_channels, weight_matrices))
-  variable_c = tf.zeros(shape=(weight_matrices))
-  variable_w = tf.zeros(shape=(weight_matrices, in_channels, out_channels))
-  variable_b = tf.zeros(shape=(out_channels))
-  return variable_u, variable_v, variable_c, variable_w, variable_b
+  var_u = tf.zeros(shape=(in_channels, num_weight_matrices))
+  var_v = tf.zeros(shape=(in_channels, num_weight_matrices))
+  var_c = tf.zeros(shape=(num_weight_matrices))
+  var_w = tf.zeros(shape=(num_weight_matrices, in_channels, out_channels))
+  var_b = tf.zeros(shape=(out_channels))
+  return var_u, var_v, var_c, var_w, var_b
 
 
 def _random_data(
@@ -101,18 +101,18 @@ def _random_data(
 
 
 def _random_variables(
-    in_channels, out_channels, weight_matrices, dtype=np.float32):
+    in_channels, out_channels, num_weight_matrices, dtype=np.float32):
   """Create random variables for feature_steered_convolution."""
   def _random_constant(shape, dtype):
     return tf.constant(np.random.uniform(size=shape).astype(dtype))
 
-  variable_u = _random_constant([in_channels, weight_matrices], dtype)
-  variable_v = _random_constant([in_channels, weight_matrices], dtype)
-  variable_c = _random_constant([weight_matrices], dtype)
-  variable_w = _random_constant(
-      [weight_matrices, in_channels, out_channels], dtype)
-  variable_b = _random_constant([out_channels], dtype)
-  return variable_u, variable_v, variable_c, variable_w, variable_b
+  var_u = _random_constant([in_channels, num_weight_matrices], dtype)
+  var_v = _random_constant([in_channels, num_weight_matrices], dtype)
+  var_c = _random_constant([num_weight_matrices], dtype)
+  var_w = _random_constant(
+      [num_weight_matrices, in_channels, out_channels], dtype)
+  var_b = _random_constant([out_channels], dtype)
+  return var_u, var_v, var_c, var_w, var_b
 
 
 class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
@@ -125,47 +125,70 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
   )
   def test_feature_steered_convolution_layer_exception_not_raised_shapes(
       self, batch_size, num_vertices, in_channels, out_channels,
-      weight_matrices, translation_invariant):
+      num_weight_matrices, translation_invariant):
     """Check if the convolution parameters and output have correct shapes."""
-    if tf.executing_eagerly():
-      return
     data, neighbors = _dummy_data(batch_size, num_vertices, in_channels)
-    try:
-      y = gc.feature_steered_convolution_layer(
-          data=data, neighbors=neighbors, sizes=None,
+    name_scope = "test"
+    if tf.executing_eagerly():
+      layer = gc.FeatureSteeredConvolutionKerasLayer(
           translation_invariant=translation_invariant,
-          weight_matrices=weight_matrices, output_channels=out_channels,
-          name=None, var_name="test")
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+          num_weight_matrices=num_weight_matrices,
+          num_output_channels=out_channels,
+          name=name_scope)
 
-    y_shape = y.shape.as_list()
+    def _run_convolution():
+      """Run the appropriate feature steered convolution layer."""
+      if tf.executing_eagerly():
+        try:
+          output = layer(inputs=[data, neighbors], sizes=None)
+        except Exception as e:  # pylint: disable=broad-except
+          self.fail("Exception raised: %s" % str(e))
+      else:
+        try:
+          output = gc.feature_steered_convolution_layer(
+              data=data, neighbors=neighbors, sizes=None,
+              translation_invariant=translation_invariant,
+              num_weight_matrices=num_weight_matrices,
+              num_output_channels=out_channels, name=None, var_name=name_scope)
+        except Exception as e:  # pylint: disable=broad-except
+          self.fail("Exception raised: %s" % str(e))
+      return output
+
+    output = _run_convolution()
+    output_shape = output.shape.as_list()
     out_channels = in_channels if out_channels is None else out_channels
-    self.assertEqual(y_shape[-1], out_channels)
-    self.assertAllEqual(y_shape[:-1], data.shape[:-1])
+    self.assertEqual(output_shape[-1], out_channels)
+    self.assertAllEqual(output_shape[:-1], data.shape[:-1])
 
-    def _get_variable_shape(name):
+    def _get_var_shape(var_name):
       """Get the shape of a variable by name."""
-      with tf.compat.v1.variable_scope("test", reuse=True):
-        x = tf.compat.v1.get_variable(name, initializer=tf.constant(0))
-        return x.shape.as_list()
+      if tf.executing_eagerly():
+        trainable_variables = layer.trainable_variables
+        for tv in trainable_variables:
+          if tv.name == name_scope + "/" + var_name + ":0":
+            return tv.shape.as_list()
+        raise ValueError("Variable not found.")
+      else:
+        with tf.compat.v1.variable_scope(name_scope, reuse=True):
+          variable = tf.compat.v1.get_variable(
+              var_name, initializer=tf.constant(0))
+          return variable.shape.as_list()
 
     self.assertAllEqual(
-        _get_variable_shape("u"), [in_channels, weight_matrices])
+        _get_var_shape("u"), [in_channels, num_weight_matrices])
     self.assertAllEqual(
-        _get_variable_shape("c"), [weight_matrices])
+        _get_var_shape("c"), [num_weight_matrices])
     self.assertAllEqual(
-        _get_variable_shape("b"), [out_channels])
+        _get_var_shape("b"), [out_channels])
     self.assertAllEqual(
-        _get_variable_shape("w"), [weight_matrices, in_channels, out_channels])
+        _get_var_shape("w"),
+        [num_weight_matrices, in_channels, out_channels])
     if not translation_invariant:
       self.assertAllEqual(
-          _get_variable_shape("v"), [in_channels, weight_matrices])
+          _get_var_shape("v"), [in_channels, num_weight_matrices])
 
-  def test_feature_steered_convolution_layer_train_in_graph_mode(self):
+  def test_feature_steered_convolution_layer_training(self):
     """Test a simple training loop."""
-    if tf.executing_eagerly():
-      return
     # Generate a small valid input for a simple training task.
     # Four corners of a square.
     data = np.array([[1.0, 1.0], [-1.0, 1.0], [-1.0, -1.0], [1.0, -1.0]])
@@ -177,26 +200,28 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
         neighbors_indices, np.ones(shape=(12)) / 3.0, dense_shape=(4, 4))
     # Desired output is arbitrary.
     labels = np.reshape([-1.0, -0.5, 0.5, 1.0], (-1, 1))
-
     num_training_iterations = 5
-    if tf.executing_eagerly():
-      with tf.GradientTape() as tape:
-        y = gc.feature_steered_convolution_layer(
-            data=data, neighbors=neighbors, sizes=None,
-            translation_invariant=False, weight_matrices=1, output_channels=1)
-        loss = tf.nn.l2_loss(y - labels)
 
-      for global_step in range(num_training_iterations):
-        grads = tape.gradient(loss, tf.compat.v1.trainable_variables())
+    if tf.executing_eagerly():
+      with tf.GradientTape(persistent=True) as tape:
+        layer = gc.FeatureSteeredConvolutionKerasLayer(
+            translation_invariant=False, num_weight_matrices=1,
+            num_output_channels=1)
+        output = layer(inputs=[data, neighbors], sizes=None)
+        loss = tf.nn.l2_loss(output - labels)
+
+      trainable_variables = layer.trainable_variables
+      for _ in range(num_training_iterations):
+        grads = tape.gradient(loss, trainable_variables)
         tf.compat.v1.train.GradientDescentOptimizer(1e-4).apply_gradients(
-            zip(grads, tf.compat.v1.trainable_variables()),
-            global_step=global_step)
+            zip(grads, trainable_variables))
     else:
-      y = gc.feature_steered_convolution_layer(
+      output = gc.feature_steered_convolution_layer(
           data=data, neighbors=neighbors, sizes=None,
-          translation_invariant=False, weight_matrices=1, output_channels=1)
+          translation_invariant=False, num_weight_matrices=1,
+          num_output_channels=1)
       train_op = tf.compat.v1.train.GradientDescentOptimizer(1e-4).minimize(
-          tf.nn.l2_loss(y - labels))
+          tf.nn.l2_loss(output - labels))
       with tf.compat.v1.Session() as sess:
         sess.run(tf.compat.v1.initialize_all_variables())
         for _ in range(num_training_iterations):
@@ -214,15 +239,15 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
        np.float32, np.float64, np.int32, np.float32),
   )
   def test_feature_steered_convolution_exception_raised_types(
-      self, err_msg, data_type, neighbors_type, sizes_type, variable_type):
+      self, err_msg, data_type, neighbors_type, sizes_type, var_type):
     """Check the type errors for invalid input types."""
     data, neighbors, sizes = _random_data(
         1, 5, 3, True, False, data_type, neighbors_type, sizes_type)
-    u, v, c, w, b = _random_variables(3, 3, 1, variable_type)
+    u, v, c, w, b = _random_variables(3, 3, 1, var_type)
     with self.assertRaisesRegexp(TypeError, err_msg):
       _ = gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=sizes,
-          variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
 
   @parameterized.parameters(
       (np.float32, np.float32, np.int32, np.float32),
@@ -231,15 +256,15 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       (np.float64, np.float64, np.int64, np.float64),
   )
   def test_feature_steered_convolution_exception_not_raised_types(
-      self, data_type, neighbors_type, sizes_type, variable_type):
+      self, data_type, neighbors_type, sizes_type, var_type):
     """Check there are no exceptions for valid input types."""
     data, neighbors, sizes = _random_data(
         1, 5, 3, True, False, data_type, neighbors_type, sizes_type)
-    u, v, c, w, b = _random_variables(3, 3, 1, variable_type)
+    u, v, c, w, b = _random_variables(3, 3, 1, var_type)
     try:
       gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=sizes,
-          variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
     except Exception as e:  # pylint: disable=broad-except
       self.fail("Exception raised: %s" % str(e))
 
@@ -252,7 +277,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       data = data[0, :]
       _ = gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=None,
-          variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
 
     with self.assertRaisesRegexp(
         ValueError, "'data' and 'neighbors' must have rank >= 2."):
@@ -261,7 +286,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       neighbors = _dense_to_sparse(np.ones(shape=(5), dtype=np.float32))
       _ = gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=None,
-          variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
 
     with self.assertRaisesRegexp(
         ValueError,
@@ -270,7 +295,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       u, v, c, w, b = _dummy_variables(2, 2, 1)
       _ = gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=((1, 1), (1, 1)),
-          variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
 
   @parameterized.parameters(
       (1, 1, 1, 1, 1),
@@ -280,13 +305,14 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
   )
   def test_feature_steered_convolution_output_shape(
       self, batch_size, num_vertices, in_channels, out_channels,
-      weight_matrices):
+      num_weight_matrices):
     """Check that the output of convolution has the correct shape."""
     data, neighbors = _dummy_data(batch_size, num_vertices, in_channels)
-    u, v, c, w, b = _dummy_variables(in_channels, out_channels, weight_matrices)
+    u, v, c, w, b = _dummy_variables(
+        in_channels, out_channels, num_weight_matrices)
     y = gc.feature_steered_convolution(
         data=data, neighbors=neighbors, sizes=None,
-        variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+        var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
     y_shape = y.shape.as_list()
     self.assertEqual(y_shape[-1], out_channels)
     self.assertAllEqual(y_shape[:-1], data.shape[:-1])
@@ -299,19 +325,19 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
   )
   def test_feature_steered_convolution_only_self_edges(
       self, batch_size, num_vertices, in_channels, out_channels,
-      weight_matrices):
+      num_weight_matrices):
     """Test convolution when the graph only has self edges."""
     data, neighbors = _random_data(batch_size, num_vertices, in_channels,
                                    padding=False, only_self_edges=True)
     u, v, c, w, b = _random_variables(
-        in_channels, out_channels, weight_matrices)
+        in_channels, out_channels, num_weight_matrices)
 
     with self.subTest(name="w=0_expect_output=b"):
       # If w = 0, then y = b.
       y = gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=None,
-          variable_u=u, variable_v=v, variable_c=c, variable_w=tf.zeros_like(w),
-          variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=tf.zeros_like(w),
+          var_b=b)
       y_expected = tf.broadcast_to(b, y.shape)
       self.assertAllEqual(y, y_expected)
 
@@ -319,9 +345,9 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       # u = -v, and graph only has self-edges.
       y = gc.feature_steered_convolution(
           data=data, neighbors=neighbors, sizes=None,
-          variable_u=u, variable_v=-u, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=-u, var_c=c, var_w=w, var_b=b)
       q = tf.reshape(tf.exp(c) / tf.reduce_sum(input_tensor=tf.exp(c)),
-                     (weight_matrices, 1, 1))
+                     (num_weight_matrices, 1, 1))
       if batch_size > 0:
         q_times_w = tf.reduce_sum(input_tensor=q * w, axis=0, keepdims=True)
         q_times_w = tf.tile(q_times_w, (batch_size, 1, 1))
@@ -341,7 +367,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
             size=(1, in_channels)).astype(np.float32), (num_vertices, 1))
       y = gc.feature_steered_convolution(
           data=constant_data, neighbors=neighbors, sizes=None,
-          variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+          var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
       if batch_size > 0:
         y_expected = tf.tile(y[:, :1, :], (1, num_vertices, 1))
       else:
@@ -365,7 +391,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
     u, v, c, w, b = tensors
     y = gc.feature_steered_convolution(
         data=data, neighbors=_dense_to_sparse(neighbors), sizes=None,
-        variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+        var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
     self.assertAllClose(y, expected)
 
   @parameterized.parameters(
@@ -375,18 +401,18 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
   )
   def test_feature_steered_convolution_padding_random(
       self, batch_size, num_vertices, in_channels, out_channels,
-      weight_matrices):
+      num_weight_matrices):
     """Test mixed topology batches (random vertices and neighbors)."""
     data, neighbors, sizes = _random_data(batch_size, num_vertices, in_channels,
                                           padding=True, only_self_edges=False)
     u, v, c, w, b = _random_variables(
-        in_channels, out_channels, weight_matrices)
+        in_channels, out_channels, num_weight_matrices)
 
     # If w = 0, then y = b.
     y = gc.feature_steered_convolution(
         data=data, neighbors=neighbors, sizes=sizes,
-        variable_u=u, variable_v=v, variable_c=c, variable_w=tf.zeros_like(w),
-        variable_b=b)
+        var_u=u, var_v=v, var_c=c, var_w=tf.zeros_like(w),
+        var_b=b)
     for k in range(batch_size):
       y_crop = y[k, :sizes[k], :]
       y_expected = tf.broadcast_to(b, y_crop.shape)
@@ -401,7 +427,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       constant_data[k, :sizes[k], :] = np.tile(data[k, 0, :], (sizes[k], 1))
     y = gc.feature_steered_convolution(
         data=constant_data, neighbors=neighbors, sizes=sizes,
-        variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+        var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
     for k in range(batch_size):
       y_crop = y[k, :sizes[k], :]
       y_const = tf.broadcast_to(y_crop[0, :], y_crop.shape)
@@ -415,7 +441,8 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
       (1, 10, 3, 1, False), (3, 6, 1, 4, False), (0, 10, 5, 2, False),
   )
   def test_feature_steered_convolution_jacobian_random(
-      self, batch_size, num_vertices, in_channels, weight_matrices, padding):
+      self, batch_size, num_vertices, in_channels, num_weight_matrices,
+      padding):
     """Test the jacobian for random input data."""
     random_data = _random_data(
         batch_size, num_vertices, in_channels, padding,
@@ -424,11 +451,11 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
     neighbors = random_data[1]
     sizes = None if not padding else random_data[2]
     u, v, c, w, b = _random_variables(
-        in_channels, in_channels, weight_matrices, dtype=np.float64)
+        in_channels, in_channels, num_weight_matrices, dtype=np.float64)
     data = tf.convert_to_tensor(value=data_init)
     y = gc.feature_steered_convolution(
         data=data, neighbors=neighbors, sizes=sizes,
-        variable_u=u, variable_v=v, variable_c=c, variable_w=w, variable_b=b)
+        var_u=u, var_v=v, var_c=c, var_w=w, var_b=b)
     self.assert_jacobian_is_correct(data, data_init, y)
 
   @parameterized.parameters(
@@ -447,8 +474,8 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
     data = tf.convert_to_tensor(value=data_init)
     y = gc.feature_steered_convolution(
         data=data, neighbors=neighbors, sizes=None,
-        variable_u=u, variable_v=v, variable_c=c, variable_w=w,
-        variable_b=b)
+        var_u=u, var_v=v, var_c=c, var_w=w,
+        var_b=b)
     self.assert_jacobian_is_correct(data, data_init, y)
 
 

@@ -21,13 +21,15 @@ import tensorflow as tf
 
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 
 def cross(vector1, vector2, axis=-1, name=None):
   """Computes the cross product between two tensors along an axis.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which should be
+    broadcast compatible.
 
   Args:
     vector1: A tensor of shape `[A1, ..., Ai = 3, ..., An]`, where the dimension
@@ -44,12 +46,13 @@ def cross(vector1, vector2, axis=-1, name=None):
   with tf.compat.v1.name_scope(name, "vector_cross", [vector1, vector2]):
     vector1 = tf.convert_to_tensor(value=vector1)
     vector2 = tf.convert_to_tensor(value=vector2)
-    shape_vector1 = vector1.shape.as_list()
-    shape_vector2 = vector2.shape.as_list()
-    if shape_vector1[axis] != 3:
-      raise ValueError("'vector1' must have 3 dimensions at the given axis.")
-    if shape_vector2[axis] != 3:
-      raise ValueError("'vector2' must have 3 dimensions at the given axis.")
+
+    shape.check_static(
+        tensor=vector1, tensor_name="vector1", has_dim_equals=(axis, 3))
+    shape.check_static(
+        tensor=vector2, tensor_name="vector2", has_dim_equals=(axis, 3))
+    shape.compare_batch_dimensions(
+        tensors=(vector1, vector2), last_axes=-1, broadcast_compatible=True)
 
     vector1_x, vector1_y, vector1_z = tf.unstack(vector1, axis=axis)
     vector2_x, vector2_y, vector2_z = tf.unstack(vector2, axis=axis)
@@ -63,7 +66,8 @@ def dot(vector1, vector2, axis=-1, keepdims=True, name=None):
   """Computes the dot product between two tensors along an axis.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which should be
+    broadcast compatible.
 
   Args:
     vector1: Tensor of rank R and shape `[A1, ..., Ai, ..., An]`, where the
@@ -71,7 +75,7 @@ def dot(vector1, vector2, axis=-1, keepdims=True, name=None):
     vector2: Tensor of rank R and shape `[A1, ..., Ai, ..., An]`, where the
       dimension i = axis represents a vector.
     axis: The dimension along which to compute the dot product.
-    keepdims: If true, retains reduced dimensions with length 1.
+    keepdims: If True, retains reduced dimensions with length 1.
     name: A name for this op which defaults to "vector_dot".
 
   Returns:
@@ -81,12 +85,14 @@ def dot(vector1, vector2, axis=-1, keepdims=True, name=None):
   with tf.compat.v1.name_scope(name, "vector_dot", [vector1, vector2]):
     vector1 = tf.convert_to_tensor(value=vector1)
     vector2 = tf.convert_to_tensor(value=vector2)
-    shape_vector1 = vector1.shape.as_list()
-    shape_vector2 = vector2.shape.as_list()
-    if shape_vector1[axis] != shape_vector2[axis]:
-      raise ValueError(
-          "'vector1' and 'vector2' must have the same dimension at the given axis."
-      )
+
+    shape.compare_batch_dimensions(
+        tensors=(vector1, vector2), last_axes=-1, broadcast_compatible=True)
+    shape.compare_dimensions(
+        tensors=(vector1, vector2),
+        axes=axis,
+        tensor_names=("vector1", "vector2"))
+
     return tf.reduce_sum(
         input_tensor=vector1 * vector2, axis=axis, keepdims=keepdims)
 
@@ -99,7 +105,8 @@ def reflect(vector, normal, axis=-1, name=None):
   $$\mathbf{r} = $$\mathbf{v}$$ - 2(\mathbf{n}^T\mathbf{v})\mathbf{n}$$.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which should be
+    broadcast compatible.
 
   Args:
     vector: A tensor of shape `[A1, ..., Ai, ..., An]`, where the dimension i =
@@ -117,14 +124,13 @@ def reflect(vector, normal, axis=-1, name=None):
   with tf.compat.v1.name_scope(name, "vector_reflect", [vector, normal]):
     vector = tf.convert_to_tensor(value=vector)
     normal = tf.convert_to_tensor(value=normal)
-    shape_vector = vector.shape.as_list()
-    shape_normal = normal.shape.as_list()
-    if shape_vector[axis] != shape_normal[axis]:
-      raise ValueError(
-          "'vector' and 'normal' must have the same dimension at the given axis."
-      )
 
+    shape.compare_dimensions(
+        tensors=(vector, normal), axes=axis, tensor_names=("vector", "normal"))
+    shape.compare_batch_dimensions(
+        tensors=(vector, normal), last_axes=-1, broadcast_compatible=True)
     normal = asserts.assert_normalized(normal)
+
     dot_product = dot(vector, normal, axis=axis)
     return vector - 2.0 * dot_product * normal
 

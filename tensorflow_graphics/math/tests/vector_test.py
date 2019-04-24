@@ -36,8 +36,9 @@ class VectorTest(test_case.TestCase):
     self.assert_exception_is_not_raised(vector.cross, shapes)
 
   @parameterized.parameters(
-      ("'vector1' must have 3 dimensions at the given axis.", (None,), (3,)),
-      ("'vector2' must have 3 dimensions at the given axis.", (3,), (None,)),
+      ("must have exactly 3 dimensions in axis", (1,), (3,)),
+      ("must have exactly 3 dimensions in axis", (3,), (2,)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 3), (3, 3)),
   )
   def test_cross_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -62,7 +63,9 @@ class VectorTest(test_case.TestCase):
     """Tests the Jacobian of the dot product."""
     u_tensor = tf.convert_to_tensor(value=u_init)
     v_tensor = tf.convert_to_tensor(value=v_init)
+
     y = vector.cross(u_tensor, v_tensor)
+
     self.assert_jacobian_is_correct(u_tensor, u_init, y)
     self.assert_jacobian_is_correct(v_tensor, v_init, y)
 
@@ -74,7 +77,9 @@ class VectorTest(test_case.TestCase):
     v_init = np.random.random(size=tensor_shape + [3])
     u_tensor = tf.convert_to_tensor(value=u_init)
     v_tensor = tf.convert_to_tensor(value=v_init)
+
     y = vector.cross(u_tensor, v_tensor)
+
     self.assert_jacobian_is_correct(u_tensor, u_init, y)
     self.assert_jacobian_is_correct(v_tensor, v_init, y)
 
@@ -105,6 +110,7 @@ class VectorTest(test_case.TestCase):
     tensor_shape[axis] = 3
     u = np.random.random(size=tensor_shape)
     v = np.random.random(size=tensor_shape)
+
     self.assertAllClose(
         vector.cross(u, v, axis=axis), np.cross(u, v, axis=axis))
 
@@ -117,8 +123,9 @@ class VectorTest(test_case.TestCase):
     self.assert_exception_is_not_raised(vector.dot, shapes)
 
   @parameterized.parameters(
-      ("'vector1' and 'vector2' must have the same dimension at the given axis.",
-       (None, 1), (None, 2)),)
+      ("must have the same number of dimensions", (None, 1), (None, 2)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 3), (3, 3)),
+  )
   def test_dot_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
     self.assert_exception_is_raised(vector.dot, error_msg, shapes)
@@ -142,7 +149,9 @@ class VectorTest(test_case.TestCase):
     """Tests the Jacobian of the dot product."""
     u_tensor = tf.convert_to_tensor(value=u_init)
     v_tensor = tf.convert_to_tensor(value=v_init)
+
     y = vector.dot(u_tensor, v_tensor)
+
     self.assert_jacobian_is_correct(u_tensor, u_init, y)
     self.assert_jacobian_is_correct(v_tensor, v_init, y)
 
@@ -154,7 +163,9 @@ class VectorTest(test_case.TestCase):
     v_init = np.random.random(size=tensor_shape + [3])
     u_tensor = tf.convert_to_tensor(value=u_init)
     v_tensor = tf.convert_to_tensor(value=v_init)
+
     y = vector.dot(u_tensor, v_tensor)
+
     self.assert_jacobian_is_correct(u_tensor, u_init, y)
     self.assert_jacobian_is_correct(v_tensor, v_init, y)
 
@@ -188,8 +199,10 @@ class VectorTest(test_case.TestCase):
     axis = np.random.randint(tensor_size)
     u = np.random.random(size=tensor_shape)
     v = np.random.random(size=tensor_shape)
+
     dot = tf.linalg.tensor_diag_part(tf.tensordot(u, v, axes=[[axis], [axis]]))
     dot = tf.expand_dims(dot, axis=axis)
+
     self.assertAllClose(vector.dot(u, v, axis=axis), dot)
 
   @parameterized.parameters(
@@ -203,8 +216,9 @@ class VectorTest(test_case.TestCase):
     self.assert_exception_is_not_raised(vector.reflect, shapes)
 
   @parameterized.parameters(
-      ("'vector' and 'normal' must have the same dimension at the given axis.",
-       (None, 1), (None, 2)),)
+      ("must have the same number of dimensions", (None, 1), (None, 2)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 2), (3, 2)),
+  )
   def test_reflect_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
     self.assert_exception_is_raised(vector.reflect, error_msg, shapes)
@@ -229,7 +243,9 @@ class VectorTest(test_case.TestCase):
     """Tests the Jacobian of the reflect function."""
     u_tensor = tf.convert_to_tensor(value=u_init)
     v_tensor = tf.convert_to_tensor(value=v_init)
+
     y = vector.reflect(u_tensor, v_tensor)
+
     self.assert_jacobian_is_correct(u_tensor, u_init, y)
     self.assert_jacobian_is_correct(v_tensor, v_init, y)
 
@@ -242,7 +258,9 @@ class VectorTest(test_case.TestCase):
     v_init = np.random.random(size=tensor_shape + [3])
     u_tensor = tf.convert_to_tensor(value=u_init)
     v_tensor = tf.convert_to_tensor(value=v_init)
+
     y = vector.reflect(u_tensor, v_tensor)
+
     self.assert_jacobian_is_correct(u_tensor, u_init, y)
     self.assert_jacobian_is_correct(v_tensor, v_init, y)
 
@@ -271,9 +289,11 @@ class VectorTest(test_case.TestCase):
     axis = np.random.randint(tensor_size)
     u = np.random.random(size=tensor_shape)
     v = np.random.random(size=tensor_shape)
+
     v /= np.linalg.norm(v, axis=axis, keepdims=True)
     u_new = vector.reflect(u, v, axis=axis)
     u_new = vector.reflect(u_new, v, axis=axis)
+
     self.assertAllClose(u_new, u)
 
 
