@@ -45,8 +45,8 @@ TEST_PACKAGES = [
 
 EXTRA_PACKAGES = {
     'test': TEST_PACKAGES,
-    'tf': ['tensorflow>=1.12.0'],
-    'tf_gpu': ['tensorflow-gpu>=1.12.0'],
+    'tf': ['tf-nightly'],
+    'tf-gpu': ['tf-nightly-gpu'],
 }
 
 setup(

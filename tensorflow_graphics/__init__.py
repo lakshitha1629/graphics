@@ -24,7 +24,7 @@ except ImportError:
         " Graphics. To use TensorFlow Graphics, please install TensorFlow, by"
         " following instructions at https://tensorflow.org/install or by using"
         " pip install tensorflow_graphics[tf] or"
-        " pip install tensorflow_graphics[tf_gpu].")
+        " pip install tensorflow_graphics[tf-gpu].")
 # pylint: enable=g-statement-before-imports,g-import-not-at-top
 
 from tensorflow_graphics import geometry
