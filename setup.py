@@ -26,6 +26,13 @@ version_path = os.path.join(os.path.dirname(__file__), 'tensorflow_graphics')
 sys.path.append(version_path)
 from version import __version__  # pylint: disable=g-import-not-at-top
 
+INSTALL_PACKAGES = [
+    'absl-py >= 0.6.1',
+    'numpy >= 1.15.4',
+    'scipy >= 1.1.0',
+    'six >= 1.11.0',
+]
+
 SETUP_PACKAGES = [
     'pytest-runner',
 ]
@@ -40,13 +47,6 @@ EXTRA_PACKAGES = {
     'tf_gpu': ['tensorflow-gpu>=1.12.0'],
 }
 
-REQUIRED_PACKAGES = [
-    'absl-py >= 0.6.1',
-    'numpy >= 1.15.4',
-    'scipy >= 1.1.0',
-    'six >= 1.11.0',
-]
-
 setup(
     name='tensorflow-graphics',
     version=__version__,
@@ -57,7 +57,7 @@ setup(
     url='https://github.com/tensorflow/graphics',
     author='Google LLC',
     author_email='packages@tensorflow.org',
-    install_requires=REQUIRED_PACKAGES,
+    install_requires=INSTALL_PACKAGES,
     setup_requires=SETUP_PACKAGES,
     tests_require=TEST_PACKAGES,
     extras_require=EXTRA_PACKAGES,
