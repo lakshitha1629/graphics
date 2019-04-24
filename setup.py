@@ -23,12 +23,9 @@ from tensorflow_graphics import version
 
 __version__ = version.__version__
 
-test_deps = ['future', 'twine', 'pytest', 'pytest-mock', 'python-coveralls']
-
-extras = {
-    'test': test_deps,
-    'tf': ['tensorflow>=1.6.0'],
-    'tf_gpu': ['tensorflow-gpu>=1.6.0'],
+EXTRA_PACKAGES = {
+    'tf': ['tensorflow>=1.12.0'],
+    'tf_gpu': ['tensorflow-gpu>=1.12.0'],
 }
 
 REQUIRED_PACKAGES = [
@@ -49,6 +46,7 @@ setup(
     author='Google LLC',
     author_email='packages@tensorflow.org',
     install_requires=REQUIRED_PACKAGES,
+    extras_require=EXTRA_PACKAGES,
     packages=find_packages(),
     classifiers=[
         'Development Status :: 4 - Beta',
