@@ -23,3 +23,9 @@ script:
   - tox
 after_success:
   - coveralls
+notifications:
+  email:
+    recipients:
+      - tf-graphics-eng@google.com
+    on_success: always
+    on_failure: always
