@@ -16,7 +16,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tensorflow_graphics.util.data_formats import exr
+import sys
+
+# pylint: disable=g-import-not-at-top
+try:
+  from tensorflow_graphics.util.data_formats import exr
+except ImportError:
+  print(
+      "Warning: To use the exr data format, please install the OpenEXR"
+      " package following the instructions detailed in the README at"
+      " github.com/tensorflow/graphics.",
+      file=sys.stderr)
+# pylint: enable=g-import-not-at-top
 
 # The util modules are not exported.
 __all__ = []

@@ -45,22 +45,13 @@ from tensorflow_graphics.math import vector
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 class InterpolationType(enum.Enum):
   """Defines interpolation methods for slerp module."""
   VECTOR = 0
   QUATERNION = 1
-
-
-def _check_shapes(vector1, vector2, percent):
-  """Checks if input shapes are as expected."""
-  if vector1.shape.as_list() != vector2.shape.as_list():
-    raise ValueError("Input tensors should have the same shape.")
-  if percent.get_shape().as_list():
-    if percent.shape[-1] != 1:
-      raise ValueError(
-          "percent should be float or a tensor with last dimension of 1.")
 
 
 def _safe_dot(vector1, vector2, eps):
@@ -162,8 +153,8 @@ def quaternion_weights(quaternion1, quaternion2, percent, eps=None, name=None):
       quaternions in its last dimension.
     quaternion2: A tensor of shape `[A1, ... , An, 4]` storing normalized
       quaternions in its last dimension.
-    percent: A `float` or a tensor with a shape broadcastable to the shape
-      `[A1, ... , An]`.
+    percent: A `float` or a tensor with a shape broadcastable to the shape `[A1,
+      ... , An]`.
     eps: A `float` used to make operations safe. When left as None, the function
       automatically picks the best epsilon based on the dtype and the operation.
     name: A name for this op. Defaults to "quaternion_weights".
@@ -182,12 +173,18 @@ def quaternion_weights(quaternion1, quaternion2, percent, eps=None, name=None):
     quaternion1 = tf.convert_to_tensor(value=quaternion1)
     quaternion2 = tf.convert_to_tensor(value=quaternion2)
     percent = tf.convert_to_tensor(value=percent, dtype=quaternion1.dtype)
-    _check_shapes(quaternion1, quaternion2, percent)
 
-    if quaternion1.shape[-1] != 4 or quaternion2.shape[-1] != 4:
-      raise ValueError("Expected quaternions with last dimension 4.")
-
-    # Check norms if the debug flag is set, since we assume normalized inputs.
+    if percent.shape.ndims == 0:
+      percent = tf.expand_dims(percent, axis=0)
+    shape.check_static(
+        tensor=quaternion1, tensor_name="quaternion1", has_dim_equals=(-1, 4))
+    shape.check_static(
+        tensor=quaternion2, tensor_name="quaternion2", has_dim_equals=(-1, 4))
+    shape.compare_batch_dimensions(
+        tensors=(quaternion1, quaternion2, percent),
+        last_axes=(-2, -2, -1),
+        broadcast_compatible=True,
+        tensor_names=("quaternion1", "quaternion2", "percent"))
     quaternion1 = asserts.assert_normalized(quaternion1)
     quaternion2 = asserts.assert_normalized(quaternion2)
 
@@ -241,8 +238,18 @@ def vector_weights(vector1, vector2, percent, eps=None, name=None):
     vector1 = tf.convert_to_tensor(value=vector1)
     vector2 = tf.convert_to_tensor(value=vector2)
     percent = tf.convert_to_tensor(value=percent, dtype=vector1.dtype)
-    _check_shapes(vector1, vector2, percent)
 
+    if percent.shape.ndims == 0:
+      percent = tf.expand_dims(percent, axis=0)
+    shape.compare_dimensions(
+        tensors=(vector1, vector2),
+        axes=-1,
+        tensor_names=("vector1", "vector2"))
+    shape.compare_batch_dimensions(
+        tensors=(vector1, vector2, percent),
+        last_axes=(-2, -2, -1),
+        broadcast_compatible=True,
+        tensor_names=("vector1", "vector2", "percent"))
     normalized1 = tf.nn.l2_normalize(vector1, axis=-1)
     normalized2 = tf.nn.l2_normalize(vector2, axis=-1)
 

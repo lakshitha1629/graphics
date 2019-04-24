@@ -55,24 +55,13 @@ class BSplineTest(test_case.TestCase):
     """Tests that basis functions of degree 4 return expected values."""
     self.assertAllClose(bspline._quartic(position), weights)
 
-  @parameterized.parameters((((0.5,),), (((0.5, 0.5, 0.0),),)),
-                            (((1.5,),), (((0.0, 0.5, 0.5),),)),
-                            (((2.5,),), (((0.5, 0.0, 0.5),),)))
-  def test_low_degree_knot_weights(self, position, weights):
-    """Tests that knot weights are correct when degree < num_knots - 1."""
-    self.assertAllClose(
-        bspline.knot_weights(position, num_knots=3, degree=1, cyclical=True),
-        weights)
-
-    # pyformat: disable
   @parameterized.parameters(
-      (((0.5,), (1.5,), (2.5,)),
-       ((((0.5, 0.5),), ((0.5, 0.5),), ((0.5, 0.5),))),
+      (((0.5,), (1.5,), (2.5,)), (((0.5, 0.5),), ((0.5, 0.5),), ((0.5, 0.5),)),
        (((0,), (1,), (2,))), 1, True),
-      ((0.0, 1.0), ((0.5, 0.5, 0.0), (0.0, 0.5, 0.5)), (0, 0), 2, False))
-  # pyformat: enable
-  def test_sparse_mode(self, positions, gt_weights, gt_shifts, degree,
-                       cyclical):
+      ((0.0, 1.0), ((0.5, 0.5, 0.0), (0.0, 0.5, 0.5)), (0, 0), 2, False),
+  )
+  def test_knot_weights_sparse_mode_preset(self, positions, gt_weights,
+                                           gt_shifts, degree, cyclical):
     """Tests that sparse mode returns correct results."""
     weights, shifts = bspline.knot_weights(
         positions,
@@ -80,86 +69,134 @@ class BSplineTest(test_case.TestCase):
         degree=degree,
         cyclical=cyclical,
         sparse_mode=True)
+
     self.assertAllClose(weights, gt_weights)
     self.assertAllClose(shifts, gt_shifts)
 
   @parameterized.parameters(
+      (((0.5,),), (((0.5, 0.5, 0.0),),), 1),
+      (((1.5,),), (((0.0, 0.5, 0.5),),), 1),
+      (((2.5,),), (((0.5, 0.0, 0.5),),), 1),
       (((0.5,), (1.5,), (2.5,)),
-       ((((1.0 / 8.0, 0.75, 1.0 / 8.0),), ((1.0 / 8.0, 1.0 / 8.0, 0.75),),
-         ((0.75, 1.0 / 8.0, 1.0 / 8.0),)))))
-  def test_full_degree_knot_weights(self, positions, weights):
-    """Tests that cyclical weights are correct when using max degree."""
+       (((1.0 / 8.0, 0.75, 1.0 / 8.0),), ((1.0 / 8.0, 1.0 / 8.0, 0.75),),
+        ((0.75, 1.0 / 8.0, 1.0 / 8.0),)), 2),
+  )
+  def test_knot_weights_preset(self, position, weights, degree):
+    """Tests that knot weights are correct when degree < num_knots - 1."""
     self.assertAllClose(
-        bspline.knot_weights(positions, num_knots=3, degree=2, cyclical=True),
-        weights)
+        bspline.knot_weights(
+            position, num_knots=3, degree=degree, cyclical=True), weights)
 
   @parameterized.parameters((((0.0,), (0.25,), (0.5,), (0.75,)),))
   def test_full_degree_non_cyclical_knot_weights(self, positions):
     """Tests that noncyclical weights are correct when using max degree."""
-    num_knots = 3
-    degree = 2
-    cyc_weights = bspline.knot_weights(positions, num_knots, degree, True)
-    noncyc_weights = bspline.knot_weights(positions, num_knots, degree, False)
-    self.assertAllClose(cyc_weights, noncyc_weights)
+    cyclical_weights = bspline.knot_weights(
+        positions=positions, num_knots=3, degree=2, cyclical=True)
+    noncyclical_weights = bspline.knot_weights(
+        positions=positions, num_knots=3, degree=2, cyclical=False)
 
-  @parameterized.parameters(1, 2, 3, 4)
-  def test_positions_ranks(self, rank_positions):
-    """Tests that different rank inputs work correctly."""
-    shape = [2] * rank_positions
-    positions = tf.constant(0.5, shape=shape)
-    try:
-      bspline.knot_weights(
-          positions=positions, num_knots=3, degree=2, cyclical=True)
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
-
-  @parameterized.parameters(1, 2, 3, 4)
-  def test_none_positions(self, rank_positions):
-    """Tests that different rank inputs with None dimensions work correctly."""
-    if tf.executing_eagerly():
-      return
-    shape = [None] * rank_positions
-    shape_np = [2] * rank_positions
-    positions = tf.compat.v1.placeholder(shape=shape, dtype=tf.float32)
-    try:
-      result = bspline.knot_weights(
-          positions=positions, num_knots=3, degree=2, cyclical=True)
-      with self.cached_session() as sess:
-        sess.run(result, feed_dict={positions: np.ones(shape=shape_np)})
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    self.assertAllClose(cyclical_weights, noncyclical_weights)
 
   @parameterized.parameters(
-      (((0.5,), (1.5,), (2.5,)), (((0.5, 1.5), (1.5, 1.5), (2.5, 3.5)),)))
-  def test_num_knots_mismatch(self, weights, knots):
+      ("must have the same number of dimensions", ((None, 2), (None, 3, 3))),
+      ("must have the same number of dimensions", ((2,), (3,))),
+  )
+  def test_interpolate_with_weights_exception_is_raised(self, error_msg,
+                                                        shapes):
     """Tests that exception is raised when wrong number of knots is given."""
-    with self.assertRaises(ValueError):
-      bspline.interpolate_with_weights(knots, weights)
-
-  @parameterized.parameters((1, 1), (2, 2), (3, 3), (3, 4))
-  def test_large_degree(self, num_knots, degree):
-    """Tests that exception is raised when given degree is too high."""
-    positions = tf.constant(((0.5,), (1.5,), (2.5,)))
-    with self.assertRaises(ValueError):
-      bspline.knot_weights(positions, num_knots, degree, True)
-
-  @parameterized.parameters((5), (6), (7))
-  def test_max_degree(self, degree):
-    """Tests that exception is raised when degree is > 4."""
-    positions = tf.constant(((0.5,), (1.5,), (2.5,)))
-    with self.assertRaises(NotImplementedError):
-      bspline.knot_weights(positions, 10, degree, True)
+    self.assert_exception_is_raised(
+        bspline.interpolate_with_weights, error_msg, shapes=shapes)
 
   @parameterized.parameters(
       (((0.5,), (0.0,), (0.9,)), (((0.5, 1.5), (1.5, 1.5), (2.5, 3.5)),)))
-  def test_interpolate_with_weights(self, positions, knots):
+  def test_interpolate_with_weights_preset(self, positions, knots):
     """Tests that interpolate_with_weights works correctly."""
     degree = 1
     cyclical = False
     interp1 = bspline.interpolate(knots, positions, degree, cyclical)
     weights = bspline.knot_weights(positions, 2, degree, cyclical)
     interp2 = bspline.interpolate_with_weights(knots, weights)
+
     self.assertAllClose(interp1, interp2)
+
+  @parameterized.parameters(
+      (1, 2),
+      (1, None),
+      (2, 2),
+      (2, None),
+      (3, 2),
+      (3, None),
+      (4, 2),
+      (4, None),
+  )
+  def test_knot_weights_exception_is_not_raised(self, positions_rank, dims):
+    shapes = ([dims] * positions_rank,)
+
+    self.assert_exception_is_not_raised(
+        bspline.knot_weights,
+        shapes=shapes,
+        num_knots=3,
+        degree=2,
+        cyclical=True)
+
+  @parameterized.parameters(
+      ("Degree should be between 0 and 4.", 6, -1),
+      ("Degree should be between 0 and 4.", 6, 5),
+      ("Degree cannot be >= number of knots.", 2, 2),
+      ("Degree cannot be >= number of knots.", 2, 3),
+  )
+  def test_knot_weights_exception_is_raised(self, error_msg, num_knots, degree):
+    self.assert_exception_is_raised(
+        bspline.knot_weights,
+        error_msg,
+        shapes=((10, 1),),
+        num_knots=num_knots,
+        degree=degree,
+        cyclical=True)
+
+  @parameterized.parameters(
+      (1, 0, True),
+      (1, 0, False),
+      (2, 1, True),
+      (2, 1, False),
+      (3, 1, True),
+      (3, 1, False),
+      (3, 2, True),
+      (3, 2, False),
+      (4, 1, True),
+      (4, 1, False),
+      (4, 3, True),
+      (4, 3, False),
+      (5, 1, True),
+      (5, 1, False),
+      (5, 4, True),
+      (5, 4, False),
+  )
+  def test_knot_weights_jacobian_is_correct(self, num_knots, degree, cyclical):
+    """Tests that Jacobian is correct."""
+    positions_init = np.random.random_sample((10, 1))
+    scale = num_knots if cyclical else num_knots - degree
+    positions_init *= scale
+    positions = tf.convert_to_tensor(value=positions_init)
+
+    weights = bspline.knot_weights(
+        positions=positions,
+        num_knots=num_knots,
+        degree=degree,
+        cyclical=cyclical,
+        sparse_mode=False)
+    sparse_weights = bspline.knot_weights(
+        positions=positions,
+        num_knots=num_knots,
+        degree=degree,
+        cyclical=cyclical,
+        sparse_mode=True)[0]
+
+    with self.subTest(name="dense_mode"):
+      self.assert_jacobian_is_correct(positions, positions_init, weights)
+
+    with self.subTest(name="sparse_mode"):
+      self.assert_jacobian_is_correct(positions, positions_init, sparse_weights)
 
 
 if __name__ == "__main__":

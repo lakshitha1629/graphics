@@ -44,6 +44,7 @@ py_library(
         "//tensorflow_graphics/util:asserts",
         "//tensorflow_graphics/util:export_api",
         "//tensorflow_graphics/util:safe_ops",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 
@@ -55,6 +56,7 @@ py_library(
         # google internal,
         "//tensorflow_graphics/util:asserts",
         "//tensorflow_graphics/util:export_api",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 
@@ -68,6 +70,7 @@ py_library(
         "//tensorflow_graphics/util:asserts",
         "//tensorflow_graphics/util:export_api",
         "//tensorflow_graphics/util:safe_ops",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 

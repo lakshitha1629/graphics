@@ -23,6 +23,7 @@ from tensorflow_graphics.math import vector
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def interpolate(points,
@@ -65,6 +66,22 @@ def interpolate(points,
     weights = tf.convert_to_tensor(value=weights)
     indices = tf.convert_to_tensor(value=indices)
 
+    shape.check_static(
+        tensor=points, tensor_name="points", has_rank_greater_than=1)
+    shape.check_static(
+        tensor=indices,
+        tensor_name="indices",
+        has_rank_greater_than=1,
+        has_dim_equals=(-1, points.shape.ndims - 1))
+    shape.compare_dimensions(
+        tensors=(weights, indices),
+        axes=(-1, -2),
+        tensor_names=("weights", "indices"))
+    shape.compare_batch_dimensions(
+        tensors=(weights, indices),
+        last_axes=(-2, -3),
+        tensor_names=("weights", "indices"),
+        broadcast_compatible=True)
     if not allow_negative_weights:
       weights = asserts.assert_all_above(weights, 0.0, open_bound=False)
 
@@ -72,7 +89,6 @@ def interpolate(points,
       sums = tf.reduce_sum(input_tensor=weights, axis=-1, keepdims=True)
       sums = asserts.assert_nonzero_norm(sums)
       weights = safe_ops.safe_signed_div(weights, sums)
-
     point_lists = tf.gather_nd(points, indices)
     return vector.dot(
         point_lists, tf.expand_dims(weights, axis=-1), axis=-2, keepdims=False)

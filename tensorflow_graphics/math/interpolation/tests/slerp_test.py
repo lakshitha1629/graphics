@@ -43,21 +43,19 @@ class SlerpTest(test_case.TestCase):
     """Calls interpolate function for vectors."""
     return slerp.interpolate(q1, q2, p, slerp.InterpolationType.VECTOR)
 
-  def test_interpolate_attribute_exception(self):
-    """Tests if unknown InterpolationType entries raise exceptions."""
-    with self.assertRaises(AttributeError):
-      q1 = self._pick_random_quaternion()
-      q2 = q1
-      slerp.interpolate(q1, q2, 0.1, method=slerp.InterpolationType.SPLINE)
-
-  def test_interpolate_value_exception(self):
+  def test_interpolate_raises_exceptions(self):
     """Tests if unknown methods raise exceptions."""
-    q1 = self._pick_random_quaternion()
-    q2 = q1
-    with self.assertRaises(ValueError):
-      slerp.interpolate(q1, q2, 0.1, method=2)
+    vector1 = self._pick_random_quaternion()
+    self.assert_exception_is_raised(
+        slerp.interpolate,
+        error_msg="Unknown interpolation type supplied.",
+        shapes=[],
+        vector1=vector1,
+        vector2=-vector1,
+        percent=0.1,
+        method=2)
 
-  def test_interpolate_wrapper_for_quaternion(self):
+  def test_interpolate_with_weights_quaternion_preset(self):
     """Compares interpolate to quaternion_weights + interpolate_with_weights."""
     q1 = self._pick_random_quaternion()
     q2 = q1 + tf.ones_like(q1)
@@ -68,9 +66,10 @@ class SlerpTest(test_case.TestCase):
     qf = slerp.interpolate_with_weights(q1, q2, weight1, weight2)
     qi = slerp.interpolate(
         q1, q2, 0.25, method=slerp.InterpolationType.QUATERNION)
+
     self.assertAllClose(qf, qi, atol=1e-9)
 
-  def test_interpolate_wrapper_for_vector(self):
+  def test_interpolate_with_weights_vector_preset(self):
     """Compares interpolate to vector_weights + interpolate_with_weights."""
     # Any quaternion is a valid vector
     q1 = self._pick_random_quaternion()
@@ -78,6 +77,7 @@ class SlerpTest(test_case.TestCase):
 
     weight1, weight2 = slerp.vector_weights(q1, q2, 0.75)
     qf = slerp.interpolate_with_weights(q1, q2, weight1, weight2)
+
     qi = slerp.interpolate(q1, q2, 0.75, method=slerp.InterpolationType.VECTOR)
     self.assertAllClose(qf, qi, atol=1e-9)
 
@@ -112,31 +112,36 @@ class SlerpTest(test_case.TestCase):
         (-_SQRT2_DIV2, _SQRT2_DIV2, 0.0, 0.0), (-0.5,)),
        ((-0.408248290463863, -0.408248290463863, -0.816496580927726, 0.0),)),
   )
-  def test_quaternion_slerp_accuracy_preset(self, test_inputs, test_outputs):
+  def test_quaternion_slerp_preset(self, test_inputs, test_outputs):
     """Tests the accuracy of qslerp against numpy-quaternion values."""
     self.assert_output_is_correct(self._quaternion_slerp_helper, test_inputs,
                                   test_outputs)
 
-  def test_quaternion_weights_exception(self):
+  def test_unnormalized_quaternion_weights_exception_raised(self):
     """Tests if quaternion_weights raise exceptions for unnormalized input."""
     q1 = self._pick_random_quaternion()
     q2 = tf.nn.l2_normalize(q1, axis=-1)
     p = tf.constant((0.5), dtype=q1.dtype)
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
       self.evaluate(slerp.quaternion_weights(q1, q2, p))
 
   @parameterized.parameters(
       ((4,), (4,), (1,)),
       ((None, 4), (None, 4), (None, 1)),
+      ((None, 4), (None, 4), (None, 4)),
   )
   def test_quaternion_weights_exception_not_raised(self, *shapes):
     """Tests that valid input shapes do not raise exceptions for qslerp."""
     self.assert_exception_is_not_raised(slerp.quaternion_weights, shapes)
 
   @parameterized.parameters(
-      ("percent should be float or a tensor with last dimension of 1.", (None,),
-       (None,), (2,)),
-      ("Expected quaternions with last dimension 4.", (3,), (3,), (1,)),
+      ("must have exactly 4 dimensions in axis -1", (3,), (4,), (1,)),
+      ("must have exactly 4 dimensions in axis -1", (4,), (3,), (1,)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 4), (3, 4),
+       (1,)),
+      ("Not all batch dimensions are broadcast-compatible.", (1, 4), (3, 4),
+       (2,)),
   )
   def test_quaternion_weights_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised for qslerp."""
@@ -176,9 +181,14 @@ class SlerpTest(test_case.TestCase):
     self.assert_exception_is_not_raised(slerp.vector_weights, shapes)
 
   @parameterized.parameters(
-      ("percent should be float or a tensor with last dimension of 1.", (None,),
-       (None,), (2,)), ("Input tensors should have the same shape.", (3,), (4,),
-                        (1,)))
+      ("must have the same number of dimensions in axes", (None, 3), (None, 4),
+       (1,)),
+      ("must have the same number of dimensions in axes", (2, 3), (2, 4), (1,)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 3), (3, 3),
+       (1,)),
+      ("Not all batch dimensions are broadcast-compatible.", (1, 3), (3, 3),
+       (2,)),
+  )
   def test_vector_weights_exception_raised(self, error_msg, *shapes):
     """Tests that shape exceptions are properly raised for vector_weights."""
     self.assert_exception_is_raised(slerp.vector_weights, error_msg, shapes)
@@ -221,12 +231,14 @@ class SlerpTest(test_case.TestCase):
     self.assert_output_is_correct(self._vector_slerp_helper, test_inputs,
                                   test_outputs)
 
-  def test_vector_weights_reduce_to_lerp(self):
+  def test_vector_weights_reduce_to_lerp_preset(self):
     """Tests if vector slerp reduces to lerp for identical vectors as input."""
     q1 = tf.constant((_SQRT2_DIV2, 0.0, _SQRT2_DIV2, 0.0))
     q2 = tf.constant((_SQRT2_DIV2, 0.0, _SQRT2_DIV2, 0.0))
     p = tf.constant((0.75,), dtype=q1.dtype)
+
     w1, w2 = slerp.vector_weights(q1, q2, p)
+
     self.assertAllClose(w1, (0.25,), rtol=1e-6)
     self.assertAllClose(w2, (0.75,), rtol=1e-6)
 
