@@ -114,7 +114,7 @@ py_test(
         # package dep
 
         # google internal,
-        "//tensorflow_graphics/geometry/transformation:test_data",
         "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/util:test_data",
     ],
 )
