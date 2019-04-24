@@ -22,7 +22,7 @@ install:
   - sudo apt-get -y install libopenexr-dev
   - pip install OpenEXR
   - pip install tf-nightly
-  - pip install tensorflow-graphics
+  - python setup.py -q install
 script:
   - pytest
 after_success:
