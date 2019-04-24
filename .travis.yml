@@ -17,9 +17,12 @@ python:
   - "3.6"
 install:
   - pip install -U pip wheel
+  - pip install pytest
   - pip install python-coveralls
-  - pip install tox-travis
+  - sudo apt-get -y install libopenexr-dev
+  - pip install OpenEXR
+  - pip install tf-nightly
 script:
-  - tox
+  - pytest
 after_success:
   - coveralls
