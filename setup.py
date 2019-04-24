@@ -26,6 +26,12 @@ version_path = os.path.join(os.path.dirname(__file__), 'tensorflow_graphics')
 sys.path.append(version_path)
 from version import __version__  # pylint: disable=g-import-not-at-top
 
+TEST_PACKAGES = [
+    'pytest',
+    'pytest-mock',
+    'python-coveralls',
+]
+
 EXTRA_PACKAGES = {
     'tf': ['tensorflow>=1.12.0'],
     'tf_gpu': ['tensorflow-gpu>=1.12.0'],
@@ -49,6 +55,7 @@ setup(
     author='Google LLC',
     author_email='packages@tensorflow.org',
     install_requires=REQUIRED_PACKAGES,
+    tests_require=TEST_PACKAGES,
     extras_require=EXTRA_PACKAGES,
     packages=find_packages(),
     classifiers=[
