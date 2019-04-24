@@ -70,5 +70,9 @@ setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
     license='Apache 2.0',
-    keywords=('tensorflow graphics machine learning'),
+    keywords=[
+        'tensorflow',
+        'graphics',
+        'machine learning',
+    ],
 )
