@@ -112,29 +112,6 @@ py_library(
     ],
 )
 
-py_library(
-    name = "test_data",
-    srcs = ["tests/test_data.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-
-        # google internal,
-    ],
-)
-
-py_library(
-    name = "test_helpers",
-    srcs = ["tests/test_helpers.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":axis_angle",
-        ":quaternion",
-        ":rotation_matrix_2d",
-        ":rotation_matrix_3d",
-        # google internal,
-    ],
-)
-
 py_test(
     name = "quaternion_test",
     timeout = "long",
@@ -144,15 +121,13 @@ py_test(
         ":axis_angle",
         ":quaternion",
         ":rotation_matrix_3d",
-        ":test_data",
-        ":test_helpers",
         # package dep
         # package dep
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
         "//tensorflow_graphics/util:test_data",
-        "//tensorflow_graphics/util:test_helper",
+        "//tensorflow_graphics/util:test_helpers",
     ],
 )
 
@@ -164,13 +139,12 @@ py_test(
         ":axis_angle",
         ":quaternion",
         ":rotation_matrix_3d",
-        ":test_helpers",
         # package dep
         # package dep
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
-        "//tensorflow_graphics/util:test_helper",
+        "//tensorflow_graphics/util:test_helpers",
     ],
 )
 
@@ -196,15 +170,13 @@ py_test(
         ":axis_angle",
         ":quaternion",
         ":rotation_matrix_3d",
-        ":test_data",
-        ":test_helpers",
         # package dep
         # package dep
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
         "//tensorflow_graphics/util:test_data",
-        "//tensorflow_graphics/util:test_helper",
+        "//tensorflow_graphics/util:test_helpers",
     ],
 )
 
@@ -214,15 +186,13 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":rotation_matrix_2d",
-        ":test_data",
-        ":test_helpers",
         # package dep
         # package dep
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
         "//tensorflow_graphics/util:test_data",
-        "//tensorflow_graphics/util:test_helper",
+        "//tensorflow_graphics/util:test_helpers",
     ],
 )
 
@@ -235,14 +205,12 @@ py_test(
         ":euler",
         ":quaternion",
         ":rotation_matrix_3d",
-        ":test_data",
-        ":test_helpers",
         # package dep
         # package dep
 
         # google internal,
         "//tensorflow_graphics/util:test_case",
         "//tensorflow_graphics/util:test_data",
-        "//tensorflow_graphics/util:test_helper",
+        "//tensorflow_graphics/util:test_helpers",
     ],
 )

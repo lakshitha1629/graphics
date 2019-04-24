@@ -49,11 +49,10 @@ py_library(
 )
 
 py_library(
-    name = "test_helper",
-    srcs = ["test_helper.py"],
+    name = "test_helpers",
+    srcs = ["test_helpers.py"],
     srcs_version = "PY2AND3",
     deps = [
-        "//third_party/py/scipy",
         # google internal,
         "//tensorflow_graphics/geometry/transformation:axis_angle",
         "//tensorflow_graphics/geometry/transformation:quaternion",
@@ -112,6 +111,8 @@ py_library(
         ":safe_ops",
         ":shape",
         ":test_case",
+        ":test_data",
+        ":test_helpers",
         ":tfg_flags",
         "//tensorflow_graphics/util/data_formats",
     ],
