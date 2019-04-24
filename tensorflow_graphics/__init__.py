@@ -16,6 +16,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+# pylint: disable=g-statement-before-imports,g-import-not-at-top
+try:
+  import tensorflow as tf
+except ImportError:
+  print("Warning: TensorFlow is not installed when you install TensorFlow"
+        "Graphics. To use TensorFlow Graphics, please install TensorFlow, by"
+        "following instructions at https://tensorflow.org/install or by using"
+        "pip install tensorflow_graphics[tf] or"
+        "pip install tensorflow_graphics[tf_gpu].")
+# pylint: enable=g-statement-before-imports,g-import-not-at-top
+
 from tensorflow_graphics import geometry
 from tensorflow_graphics import image
 from tensorflow_graphics import math
