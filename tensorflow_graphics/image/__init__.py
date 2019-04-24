@@ -16,13 +16,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import inspect
-import sys
-
 from tensorflow_graphics.image import color_space
+from tensorflow_graphics.image import pyramid
+from tensorflow_graphics.util import export_api as _export_api
 
 # API contains submodules of tensorflow_graphics.image.
-__all__ = [
-    obj_name for obj_name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.ismodule(obj) and obj.__name__.rsplit(".", 1)[0] == __name__
-]
+__all__ = _export_api.get_modules()

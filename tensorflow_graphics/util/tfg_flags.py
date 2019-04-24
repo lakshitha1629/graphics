@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Global flags to be used by various tf.graphics modules."""
+"""Global flags to be used by various modules."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -26,3 +26,6 @@ flags.DEFINE_boolean(
     TFG_ADD_ASSERTS_TO_GRAPH, False,
     'If True, calling tensorflow_graphics functions may add assert '
     'nodes to the graph where necessary.')
+
+# The util functions or classes are not exported.
+__all__ = []

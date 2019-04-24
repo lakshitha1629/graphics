@@ -31,14 +31,11 @@ py_library(
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [
-        "//tensorflow_graphics/camera",
-        "//tensorflow_graphics/deformation_energies",
         "//tensorflow_graphics/geometry",
         "//tensorflow_graphics/image",
-        "//tensorflow_graphics/interpolation",
-        "//tensorflow_graphics/lighting",
-        "//tensorflow_graphics/reflectance",
-        "//tensorflow_graphics/transformation",
+        "//tensorflow_graphics/math",
+        "//tensorflow_graphics/rendering",
         "//tensorflow_graphics/util",
+        "//tensorflow_graphics/util:export_api",
     ],
 )

@@ -32,8 +32,10 @@ class SrgbTest(test_case.TestCase):
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     srgb_input = np.random.uniform(size=tensor_shape + [3])
+
     linear_output = srgb.to_linear(srgb_input)
     srgb_reverse = srgb.from_linear(linear_output)
+
     self.assertAllClose(srgb_input, srgb_reverse)
 
   @parameterized.parameters(
@@ -50,7 +52,9 @@ class SrgbTest(test_case.TestCase):
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     srgb_random_init = np.random.uniform(size=tensor_shape + [3])
     srgb_random = tf.convert_to_tensor(value=srgb_random_init)
+
     linear_random = srgb.to_linear(srgb_random)
+
     self.assert_jacobian_is_correct(srgb_random, srgb_random_init,
                                     linear_random)
 
@@ -59,7 +63,9 @@ class SrgbTest(test_case.TestCase):
   def test_to_linear_jacobian_preset(self, inputs_init):
     """Tests the Jacobian of the to_linear function for preset inputs."""
     inputs_tensor = tf.convert_to_tensor(value=inputs_init)
+
     outputs = srgb.to_linear(inputs_tensor)
+
     self.assert_jacobian_is_correct(inputs_tensor, inputs_init, outputs)
 
   @parameterized.parameters(
@@ -71,8 +77,8 @@ class SrgbTest(test_case.TestCase):
     self.assert_exception_is_not_raised(srgb.to_linear, shape)
 
   @parameterized.parameters(
-      ("Input Tensor must be of rank >= 1.", ()),
-      ("Input Tensor must have last dimension equal to 3.", (2, 3, 4)),
+      ("must have a rank greater than 0", ()),
+      ("must have exactly 3 dimensions in axis -1", (2, 3, 4)),
   )
   def test_to_linear_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""
@@ -83,8 +89,10 @@ class SrgbTest(test_case.TestCase):
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     linear_input = np.random.uniform(size=tensor_shape + [3])
+
     srgb_output = srgb.from_linear(linear_input)
     linear_reverse = srgb.to_linear(srgb_output)
+
     self.assertAllClose(linear_input, linear_reverse)
 
   @parameterized.parameters(
@@ -101,7 +109,9 @@ class SrgbTest(test_case.TestCase):
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     linear_random_init = np.random.uniform(size=tensor_shape + [3])
     linear_random = tf.convert_to_tensor(value=linear_random_init)
+
     srgb_random = srgb.from_linear(linear_random)
+
     self.assert_jacobian_is_correct(linear_random, linear_random_init,
                                     srgb_random)
 
@@ -110,7 +120,9 @@ class SrgbTest(test_case.TestCase):
   def test_from_linear_jacobian_preset(self, inputs_init):
     """Tests the Jacobian of the from_linear function for preset inputs."""
     inputs_tensor = tf.convert_to_tensor(value=inputs_init)
+
     outputs = srgb.from_linear(inputs_tensor)
+
     self.assert_jacobian_is_correct(inputs_tensor, inputs_init, outputs)
 
   @parameterized.parameters(
@@ -122,8 +134,8 @@ class SrgbTest(test_case.TestCase):
     self.assert_exception_is_not_raised(srgb.from_linear, shape)
 
   @parameterized.parameters(
-      ("Input Tensor must be of rank >= 1.", ()),
-      ("Input Tensor must have last dimension equal to 3.", (2, 3, 4)),
+      ("must have a rank greater than 0", ()),
+      ("must have exactly 3 dimensions in axis -1", (2, 3, 4)),
   )
   def test_from_linear_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""

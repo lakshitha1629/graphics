@@ -20,134 +20,16 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 py_library(
-    name = "point",
-    srcs = ["point.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        # google internal,
-        "//tensorflow_graphics/util:asserts",
-    ],
-)
-
-py_library(
-    name = "grid",
-    srcs = ["grid.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        # google internal,
-    ],
-)
-
-py_library(
-    name = "triangle",
-    srcs = ["triangle.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":vector",
-        # google internal,
-        "//tensorflow_graphics/util:asserts",
-        "//tensorflow_graphics/util:shape",
-    ],
-)
-
-py_library(
-    name = "vector",
-    srcs = ["vector.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        # google internal,
-        "//tensorflow_graphics/util:asserts",
-    ],
-)
-
-py_library(
     name = "geometry",
-    srcs = ["__init__.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":grid",
-        ":point",
-        ":ray",
-        ":triangle",
-        ":vector",
+    srcs = [
+        "__init__.py",
     ],
-)
-
-py_library(
-    name = "ray",
-    srcs = ["ray.py"],
     srcs_version = "PY2AND3",
+    visibility = ["//visibility:public"],
     deps = [
-        # google internal,
-    ],
-)
-
-py_test(
-    name = "point_test",
-    srcs = ["tests/point_test.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":point",
-        # package dep
-        # package dep
-
-        # google internal,
-        "//tensorflow_graphics/util:test_case",
-    ],
-)
-
-py_test(
-    name = "triangle_test",
-    srcs = ["tests/triangle_test.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":triangle",
-        ":vector",
-        # package dep
-
-        # google internal,
-        "//tensorflow_graphics/util:test_case",
-    ],
-)
-
-py_test(
-    name = "vector_test",
-    srcs = ["tests/vector_test.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":vector",
-        # package dep
-        # package dep
-
-        # google internal,
-        "//tensorflow_graphics/transformation:test_data",
-        "//tensorflow_graphics/util:test_case",
-    ],
-)
-
-py_test(
-    name = "grid_test",
-    srcs = ["tests/grid_test.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":grid",
-        # package dep
-
-        # google internal,
-        "//tensorflow_graphics/util:test_case",
-    ],
-)
-
-py_test(
-    name = "ray_test",
-    srcs = ["tests/ray_test.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":ray",
-        # package dep,
-        # package dep
-
-        # google internal,
-        "//tensorflow_graphics/util:test_case",
+        "//tensorflow_graphics/geometry/deformation_energy",
+        "//tensorflow_graphics/geometry/representation",
+        "//tensorflow_graphics/geometry/transformation",
+        "//tensorflow_graphics/util:export_api",
     ],
 )

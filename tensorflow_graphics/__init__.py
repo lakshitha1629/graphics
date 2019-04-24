@@ -16,26 +16,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import inspect
-import sys
-
-from tensorflow_graphics import camera
-from tensorflow_graphics import deformation_energies
 from tensorflow_graphics import geometry
 from tensorflow_graphics import image
-from tensorflow_graphics import interpolation
-from tensorflow_graphics import lighting
-from tensorflow_graphics import reflectance
-from tensorflow_graphics import transformation
+from tensorflow_graphics import math
+from tensorflow_graphics import rendering
 from tensorflow_graphics import util
 from tensorflow_graphics import version
 
 __version__ = version.__version__
 
 # API contains submodules of tensorflow_graphics.
-__all__ = [
-    obj_name for obj_name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.ismodule(obj) and obj.__name__.rsplit(".", 1)[0] == __name__
-]
+__all__ = util.export_api.get_modules()
+# Remove modules util and version from API
 __all__.remove("util")
 __all__.remove("version")

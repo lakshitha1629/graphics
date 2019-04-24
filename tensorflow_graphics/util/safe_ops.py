@@ -11,15 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Safe divisions and inverse trigonometric functions for tf.graphics.
+"""Safe divisions and inverse trigonometric functions.
 
-  This module uses safe fixes to prevent NaN's and Inf's from appearing due to
-  machine precision issues. Safe fixes ensure that the derivative is unchanged
-  and the sign of the perturbation is unbiased.
-
-  If tf.graphics debug flag is enabled (defined as TFG_ADD_ASSERTS_TO_GRAPH
-  in tfg_flags.py), all functions also add assrtions to the graph to ensure that
-  the fix has worked as expected.
+  This module implements safety mechanisms to prevent NaN's and Inf's from
+  appearing due to machine precision issues. These safety mechanisms ensure that
+  the derivative is unchanged and the sign of the perturbation is unbiased.
+  If the debug flag TFG_ADD_ASSERTS_TO_GRAPH is set to True, all affected
+  functions also add assertions to the graph to ensure that the fix has worked
+  as expected.
 """
 
 from __future__ import absolute_import
@@ -54,16 +53,16 @@ def safe_cospx_div_cosx(theta, factor, eps=None, name=None):
   correct values in all edge cases.
 
   Args:
-    theta: N-D tensor with any shape, representing angles in radians.
-    factor: Float or N-D tensor that has a compatible shape with theta for
+    theta: A N-D tensor with any shape, representing angles in radians.
+    factor: A `float` or a N-D tensor that has a compatible shape with theta for
       multiplication.
     eps: A float, used to perturb the angle. If left None, its value is
       automatically determined from the dtype of theta.
     name: A name for this op. Defaults to 'safe_cospx_div_cosx'.
 
   Raises:
-    tf.errors.InvalidArgumentError: If tfg debug flag is set and the division
-      returns NaN or Inf values.
+    InvalidArgumentError: If tfg debug flag is set and the division returns NaN
+      or Inf values.
 
   Returns:
     N-D tensor with the same shape as theta * factor.
@@ -107,26 +106,26 @@ def safe_shrink(vector,
   or in range (minval, maxval) when open_bounds is True.
 
   Args:
-    vector: N-D tensor of any shape.
-    minval: A float or an N-D tensor with the same shape as vector. Assumed
+    vector: A N-D tensor of any shape.
+    minval: A `float` or a N-D tensor with the same shape as vector. Assumed
       lower bound for tensor after shrinking. This is only used when the
       tf.graphics debug flag is set, in which case it cannot be None.
-    maxval: A float or an N-D tensor with the same shape as vector. Assumed
+    maxval: A `float` or a N-D tensor with the same shape as vector. Assumed
       upper bound for tensor after shrinking. This is only used when the
       tf.graphics debug flag is set, in which case it cannot be None.
-    open_bounds: A boolean indicating whether the assumed range is open or
+    open_bounds: A `bool` indicating whether the assumed range is open or
       closed, only to be used when tf.graphics debug flag is set.
-    eps: A float, used to shrink the vector. If left None, its value is
+    eps: A `float` that is used to shrink the vector. If left None, its value is
       automatically determined from the dtype of the vector.
     name: A name for this op. Defaults to 'safe_shrink'.
 
   Raises:
     ValueError: If tfg debug flag is set and minval or maxval is None.
-    tf.errors.InvalidArgumentError: If tfg debug flag is set and the vector is
-      not inside the expected range.
+    InvalidArgumentError: If tfg debug flag is set and the vector is not inside
+      the expected range.
 
   Returns:
-    N-D tensor with the same shape as vector, which holds the shrinked values.
+    A N-D tensor with the same shape as vector, which holds the shrinked values.
   """
   with tf.compat.v1.name_scope(name, 'safe_shrink',
                                [vector, minval, maxval, eps]):
@@ -154,19 +153,20 @@ def safe_signed_div(a, b, eps=None, name=None):
   abs(b + eps) is greather than zero, and the division has no NaN or Inf values.
 
   Args:
-    a: N-D tensor or a float, which is the nominator.
-    b: N-D tensor or a float for the denominator with non-negative values, with
-      a compatible shape with the nominator, so that a / b is a valid operation.
-    eps: A small float, to be adde to the denominator. If left None, its value
+    a: A N-D tensor or a `float`, which is the nominator.
+    b: A N-D tensor or a `float` for the denominator with non-negative values,
+      with a compatible shape with the nominator, so that a / b is a valid
+      operation.
+    eps: A small `float`, to be adde to the denominator. If left None, its value
       is automatically selected using b.dtype.
     name: A name for this op. Defaults to 'safe_signed_div'.
 
   Raises:
-     tf.errors.InvalidArgumentError: If tfg debug flag is set and abs(b + eps)
-       is not greater than 0, or when division causes NaN or Inf values.
+     InvalidArgumentError: If tfg debug flag is set and abs(b + eps) is not
+     greater than 0, or when division causes NaN or Inf values.
 
   Returns:
-     N-D tensor with shape determined by the division operation.
+     A N-D tensor with shape determined by the division operation.
   """
   with tf.compat.v1.name_scope(name, 'safe_signed_div', [a, b, eps]):
     a = tf.convert_to_tensor(value=a)
@@ -198,19 +198,19 @@ def safe_sinpx_div_sinx(theta, factor, eps=None, name=None):
   correct values estimated by l'Hopital rule in the case of zero / zero.
 
   Args:
-    theta: N-D tensor with any shape, representing angles in radians.
-    factor: Float or N-D tensor that has a compatible shape with theta for
+    theta: A N-D tensor with any shape, representing angles in radians.
+    factor: A `float` or a N-D tensor that has a compatible shape with theta for
       multiplication.
-    eps: A float, used to perturb the angle. If left None, its value is
+    eps: A `float`, used to perturb the angle. If left None, its value is
       automatically determined from the dtype of theta.
     name: A name for this op. Defaults to 'safe_sinpx_div_sinx'.
 
   Raises:
-    tf.errors.InvalidArgumentError: If tfg debug flag is set and the division
-      returns NaN or Inf values.
+    InvalidArgumentError: If tfg debug flag is set and the division returns NaN
+    or Inf values.
 
   Returns:
-    N-D tensor with the same shape as theta * factor, containing values
+    A N-D tensor with the same shape as theta * factor, containing values
       sin(factor * theta)/sin(theta).
   """
   with tf.compat.v1.name_scope(name, 'safe_sinpx_div_sinx',
@@ -240,19 +240,20 @@ def safe_unsigned_div(a, b, eps=None, name=None):
   b + eps is greather than zero, and the division has no NaN or Inf values.
 
   Args:
-    a: N-D tensor or a float, which is the nominator.
-    b: N-D tensor or a float for the denominator with non-negative values, with
-      a compatible shape with the nominator, so that a / b is a valid operation.
-    eps: A small float, to be added to the denominator. If left None, its value
-      is automatically selected using b.dtype.
+    a: A N-D tensor or a `float`, which is the nominator.
+    b: A N-D tensor or a `float` for the denominator with non-negative values,
+      with a compatible shape with the nominator, so that a / b is a valid
+      operation.
+    eps: A small `float`, to be added to the denominator. If left None, its
+      value is automatically selected using b.dtype.
     name: A name for this op. Defaults to 'safe_unsigned_div'.
 
   Raises:
-     tf.errors.InvalidArgumentError: If tfg debug flag is set and b + eps is not
-       greater than 0, or when division causes NaN or Inf values.
+     InvalidArgumentError: If tfg debug flag is set and b + eps is not greater
+     than 0, or when division causes NaN or Inf values.
 
   Returns:
-     N-D tensor with shape determined by the division operation.
+     A N-D tensor with shape determined by the division operation.
   """
   with tf.compat.v1.name_scope(name, 'safe_unsigned_div', [a, b, eps]):
     a = tf.convert_to_tensor(value=a)
@@ -271,3 +272,7 @@ def safe_unsigned_div(a, b, eps=None, name=None):
           message='Inf or NaN detected. Consider '
           'increasing eps if nominator >> 1.0.')
     return div
+
+
+# The util functions or classes are not exported.
+__all__ = []

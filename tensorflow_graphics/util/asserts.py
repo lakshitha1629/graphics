@@ -11,7 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Assert functions for tf.graphics modules."""
+"""Assert functions to be used by various modules.
+
+This module contains asserts that are intended to be used in TensorFlow
+Graphics. These asserts will be activated only if the debug flag
+TFG_ADD_ASSERTS_TO_GRAPH is set to True.
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -29,14 +34,19 @@ FLAGS = flags.FLAGS
 def assert_all_above(vector, minval, open_bound=False, name=None):
   """Checks whether all values of vector are above minval.
 
+  Note:
+    In the following, A1 to An are optional batch dimensions.
+
   Args:
-    vector: N-D tensor with any shape.
-    minval: A scalar or an N-D tensor representing the lower bound.
-    open_bound: A boolean indicating whether the range is open or closed.
+    vector: A tensor of shape `[A1, ..., An]` containing the values we want to
+      check.
+    minval: A scalar or a tensor of shape `[A1, ..., An]` representing the
+      desired lower bound for the values in `vector`.
+    open_bound: A `bool` indicating whether the range is open or closed.
     name: A name for this op. Defaults to 'assert_all_above'.
 
   Raises:
-    tf.errors.InvalidArgumentError: if any entry of the input is below `minval`.
+    tf.errors.InvalidArgumentError: If any entry of the input is below `minval`.
 
   Returns:
     The input vector, with dependence on the assertion operator in the graph.
@@ -58,14 +68,19 @@ def assert_all_above(vector, minval, open_bound=False, name=None):
 def assert_all_below(vector, maxval, open_bound=False, name=None):
   """Checks whether all values of vector are below maxval.
 
+  Note:
+    In the following, A1 to An are optional batch dimensions.
+
   Args:
-    vector: N-D tensor with any shape.
-    maxval: A scalar or an N-D tensor representing the upper bound.
+    vector: A tensor of shape `[A1, ..., An]` containing the values we want to
+      check.
+    maxval: A scalar or a tensor of shape `[A1, ..., An]` representing the
+      desired upper bound for the values in `vector`.
     open_bound: A boolean indicating whether the range is open or closed.
     name: A name for this op. Defaults to 'assert_all_below'.
 
   Raises:
-    tf.errors.InvalidArgumentError: if any entry of the input exceeds `maxval`.
+    tf.errors.InvalidArgumentError: If any entry of the input exceeds `maxval`.
 
   Returns:
     The input vector, with dependence on the assertion operator in the graph.
@@ -91,12 +106,16 @@ def assert_all_in_range(vector, minval, maxval, open_bounds=False, name=None):
   [minval, maxval] if open_bounds is False, or in ]minval, maxval[ if it is set
   to True.
 
+  Note:
+    In the following, A1 to An are optional batch dimensions.
+
   Args:
-    vector: N-D tensor with any shape.
-    minval: A float or an N-D tensor. Lower bound as a float or as a tensor with
-      the same shape as vector.
-    maxval: A float or an N-D tensor. Upper bound as a float or as a tensor with
-      the same shape as vector.
+    vector: A tensor of shape `[A1, ..., An]` containing the values we want to
+      check.
+    minval: A scalar or a tensor of shape `[A1, ..., An]` representing the
+      desired lower bound for the values in `vector`.
+    maxval: A scalar or a tensor of shape `[A1, ..., An]` representing the
+      desired upper bound for the values in `vector`.
     open_bounds: A boolean indicating whether the range is open or closed.
     name: A name for this op. Defaults to 'assert_all_in_range'.
 
@@ -133,13 +152,18 @@ def assert_nonzero_norm(vector, eps=None, name=None):
   the function will determine the most suitable value depending on the dtype of
   the vector.
 
+  Note:
+    In the following, A1 to An are optional batch dimensions.
+
   Args:
-    vector: N-D tensor with any shape.
-    eps: A float. Tolerance to determine if the norm is equal to zero.
+    vector: A tensor of shape `[A1, ..., An, V]`, where the last dimension
+      contains a V dimensional vector.
+    eps: A `float` describing the tolerance used to determine if the norm is
+      equal to zero.
     name: A name for this op. Defaults to 'assert_nonzero_norm'.
 
   Raises:
-    tf.errors.InvalidArgumentError: If vector is not safe to normalize.
+    InvalidArgumentError: If `vector` has a zero norm.
 
   Returns:
     The input vector, with dependence on the assertion operator in the graph.
@@ -161,13 +185,18 @@ def assert_nonzero_norm(vector, eps=None, name=None):
 def assert_normalized(vector, eps=None, name=None):
   """Checks whether vector/quaternion is normalized in its last dimension.
 
+  Note:
+    In the following, A1 to An are optional batch dimensions.
+
   Args:
-    vector: N-D tensor with shape [?, ..., ?, M].
-    eps: A float. Tolerance to determine if the norm is equal to 1.0.
+    vector: A tensor of shape [A1, ..., An, M], where the last dimension
+      contains M dimensional vectors.
+    eps: A `float` describing the tolerance used to determine if the norm is
+      equal to 1.0.
     name: A name for this op. Defaults to 'assert_normalized'.
 
   Raises:
-    tf.errors.InvalidArgumentError: If vector is not normalized.
+    InvalidArgumentError: If the norm of `vector` is not 1.0.
 
   Returns:
     The input vector, with dependence on the assertion operator in the graph.
@@ -187,6 +216,35 @@ def assert_normalized(vector, eps=None, name=None):
       return tf.identity(vector)
 
 
+def assert_at_least_k_non_zero_entries(tensor, k=1, name=None):
+  """Checks if `tensor` has at least k non-zero entries in the last dimension.
+
+  Args:
+    tensor: A N-D tensor.
+    k: An integer, corresponding to the minimum number of non-zero entries.
+    name: A name for this op. Defaults to 'assert_at_least_k_non_zero_entries'.
+
+  Raises:
+    InvalidArgumentError: If `tensor` has less than `k` non-zero entries.
+
+  Returns:
+    The input tensor, with dependence on the assertion operator in the graph.
+  """
+  if not FLAGS[tfg_flags.TFG_ADD_ASSERTS_TO_GRAPH].value:
+    return tensor
+
+  with tf.compat.v1.name_scope(name, 'assert_at_least_k_non_zero_entries',
+                               [tensor, k]):
+    tensor = tf.convert_to_tensor(value=tensor)
+    indicator = tf.cast(tf.math.greater(tensor, 0.0), dtype=tensor.dtype)
+    indicator_sum = tf.reduce_sum(input_tensor=indicator, axis=-1)
+    with tf.control_dependencies([
+        tf.compat.v1.assert_greater_equal(indicator_sum,
+                                          tf.cast(k, dtype=tensor.dtype))
+    ]):
+      return tf.identity(tensor)
+
+
 def select_eps_for_addition(dtype):
   """Returns 2 * machine epsilon based on dtype.
 
@@ -195,13 +253,13 @@ def select_eps_for_addition(dtype):
   1.0 + eps != 1.0.
 
   Args:
-    dtype: tf.DType. DType of the tensor to which eps will be added.
+    dtype: The `tf.DType` of the tensor to which eps will be added.
 
   Raises:
-    ValueError: If dtype is not a floating type.
+    ValueError: If `dtype` is not a floating type.
 
   Returns:
-    A float to be used to make operations safe, i.e. to prevent NaN or Inf.
+    A `float` to be used to make operations safe, i.e. to prevent NaN or Inf.
   """
   return 2.0 * np.finfo(dtype.as_numpy_dtype()).eps
 
@@ -216,12 +274,16 @@ def select_eps_for_division(dtype):
   increased accordingly. Only floating types are supported.
 
   Args:
-    dtype: tf.DType. DType of the tensor to which eps will be added.
+    dtype: The `tf.DType` of the tensor to which eps will be added.
 
   Raises:
-    ValueError: If dtype is not a floating type.
+    ValueError: If `dtype` is not a floating type.
 
   Returns:
     A float to be used to make operations safe, i.e. to prevent NaN or Inf.
   """
   return 4.0 * np.finfo(dtype.as_numpy_dtype()).tiny
+
+
+# The util functions or classes are not exported.
+__all__ = []

@@ -54,6 +54,13 @@ class AssertsTest(test_case.TestCase):
     vector_output = asserts.assert_normalized(vector_input)
     self.assertTrue(vector_input is vector_output)
 
+  @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
+  def test_assert_at_least_k_non_zero_entries_passthrough(self):
+    """Checks that the assert is a passthrough when the flag is False."""
+    vector_input = _pick_random_vector()
+    vector_output = asserts.assert_at_least_k_non_zero_entries(vector_input)
+    self.assertIs(vector_input, vector_output)
+
   def test_assert_nonzero_norm(self):
     """Checks whether assert_nonzero_norm works for almost zero vectors."""
     vector = _pick_random_vector()

@@ -25,20 +25,36 @@ from tensorflow_graphics.util import test_case
 class TestCaseTest(test_case.TestCase):
 
   def _dummy_tf_lite_compatible_function(self, data):
+    """Executes a simple supported function to test TFLite conversion."""
     data = tf.convert_to_tensor(value=data)
     return 2.0 * data
 
   def test_assert_tf_lite_convertible(self):
     """Tests that assert_tf_lite_convertible succeeds with a simple function."""
-    if tf.executing_eagerly():
-      return
-    tc = test_case.TestCase()
+    tc = test_case.TestCase(methodName="assert_tf_lite_convertible")
     tc.assert_tf_lite_convertible(
         func=self._dummy_tf_lite_compatible_function, shapes=((1,),))
     tc.assert_tf_lite_convertible(
         func=self._dummy_tf_lite_compatible_function,
         shapes=[[1]],
         test_inputs=((1.0,),))
+
+  def _dummy_failing_function(self, data):
+    """Fails instantly."""
+    del data  # Unused
+    raise ValueError("Fail.")
+
+  def test_assert_exception_is_not_raised_raises_exception(self):
+    """Tests that assert_exception_is_not_raised raises exception."""
+    if tf.executing_eagerly():
+      # In eager mode placeholders are assigned zeros by default, which fails
+      # for various tests. Therefore this function can only be tested in graph
+      # mode.
+      return
+    tc = test_case.TestCase(methodName="assert_exception_is_not_raised")
+    with self.assertRaises(AssertionError):
+      tc.assert_exception_is_not_raised(
+          self._dummy_failing_function, shapes=((1,),))
 
 
 if __name__ == "__main__":

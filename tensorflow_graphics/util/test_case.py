@@ -11,7 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Test utility class."""
+"""Unit test base class.
+
+This class is intended to be used as the unit test base class in TensorFlow
+Graphics. It implements new methods on top of the TensorFlow TestCase class
+that are used to simplify the code and check for various kinds of failure.
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -21,7 +26,6 @@ from absl import flags
 from absl.testing import parameterized
 import numpy as np
 import tensorflow as tf
-
 from tensorflow_graphics.util import tfg_flags
 
 FLAGS = flags.FLAGS
@@ -48,8 +52,8 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     """Computes the gradient error.
 
     Args:
-      x: a tensor or list of tensors
-      y: a tensor
+      x: a tensor or list of tensors.
+      y: a tensor.
       x_init_value: a numpy array of the same shape as "x" representing the
         initial value of x.
       delta: (optional) the amount of perturbation.
@@ -77,14 +81,14 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       return max_error, row_max_error, column_max_error
 
   def _create_placeholders_from_shapes(self, shapes, dtypes=None):
-    """Create a list of placeholders based on a list of shapes.
+    """Creates a list of placeholders based on a list of shapes.
 
     Args:
       shapes: A tuple or list of the input shapes.
       dtypes: A list of input types.
 
     Returns:
-      List of placeholders.
+      A list of placeholders.
     """
     if dtypes is None:
       dtypes = [tf.float32] * len(shapes)
@@ -102,7 +106,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     return placeholders
 
   def _tile_tensors(self, tiling, tensors):
-    """Tile a set of tensors using the tiling information.
+    """Tiles a set of tensors using the tiling information.
 
     Args:
       tiling: A list of integers defining how to tile the tensors.
@@ -117,23 +121,29 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     ]
     return tensors
 
-  def assert_exception_is_not_raised(self, func, shapes, dtypes=None):
+  def assert_exception_is_not_raised(self, func, shapes, dtypes=None, **kwargs):
     """Runs the function to make sure an exception is not raised.
 
     Args:
       func: A function to exectute.
       shapes: A tuple or list of the input shapes.
       dtypes: A list of input types.
+      **kwargs: A dict of keyword arguments to be passed to the function.
     """
     if tf.executing_eagerly():
       return
     placeholders = self._create_placeholders_from_shapes(shapes, dtypes)
     try:
-      func(*placeholders)
+      func(*placeholders, **kwargs)
     except Exception as e:  # pylint: disable=broad-except
       self.fail("Exception raised: %s" % str(e))
 
-  def assert_exception_is_raised(self, func, error_msg, shapes, dtypes=None):
+  def assert_exception_is_raised(self,
+                                 func,
+                                 error_msg,
+                                 shapes,
+                                 dtypes=None,
+                                 **kwargs):
     """Runs the function to make sure an exception is raised.
 
     Args:
@@ -141,6 +151,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       error_msg: The error message of the exception.
       shapes: A tuple or list of the input shapes.
       dtypes: A list of input types.
+      **kwargs: A dict of keyword arguments to be passed to the function.
     """
     if tf.executing_eagerly():
       shapes = self._remove_dynamic_shapes(shapes)
@@ -148,13 +159,9 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
         return
     placeholders = self._create_placeholders_from_shapes(shapes, dtypes)
     with self.assertRaisesRegexp(ValueError, error_msg):
-      func(*placeholders)
+      func(*placeholders, **kwargs)
 
-  def assert_jacobian_is_correct(self,
-                                 x,
-                                 x_init,
-                                 y,
-                                 atol=1e-6):
+  def assert_jacobian_is_correct(self, x, x_init, y, atol=1e-6, delta=1e-6):
     """Tests that the gradient error of y(x) is small.
 
     Args:
@@ -163,10 +170,11 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
         gradients of y.
       y: A tensor.
       atol: Maximum absolute tolerance in gradient error.
+      delta: The amount of perturbation.
     """
     if tf.executing_eagerly():
       return
-    max_error, _, _ = self._compute_gradient_error(x, y, x_init)
+    max_error, _, _ = self._compute_gradient_error(x, y, x_init, delta)
     self.assertLessEqual(max_error, atol)
 
   def assert_jacobian_is_finite(self, x, x_init, y):
@@ -206,10 +214,12 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     Args:
       func: A function to exectute.
       test_inputs: A tuple or list of test inputs.
-      test_outputs: A tuple or list of test outputs.
-      rtol: Relative tolerance.
-      atol: Absolute tolerance.
-      tile: Automatically tile the test inputs and outputs.
+      test_outputs: A tuple or list of test outputs against which the result of
+        calling `func` on `test_inputs` will be compared to.
+      rtol: The relative tolerance used during the comparison.
+      atol: The absolute tolerance used during the comparison.
+      tile: A `bool` indicating whether or not to automatically tile the test
+        inputs and outputs.
     """
     if tile:
       # Creates a rank 4 list of values between 1 and 10.
@@ -230,12 +240,15 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     """Runs the tf-lite converter to make sure the function can be exported.
 
     Args:
-      func: A function to exectute.
+      func: A function to execute with tf-lite.
       shapes: A tuple or list of input shapes.
       dtypes: A list of input types.
       test_inputs: A tuple or list of inputs. If not provided the test inputs
         will be randomly generated.
     """
+    if tf.executing_eagerly():
+      # Currently TFLite conversion is not supported in eager mode.
+      return
     # Generate graph with the function given as input.
     in_tensors = self._create_placeholders_from_shapes(shapes, dtypes)
     out_tensors = func(*in_tensors)
@@ -243,8 +256,9 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       out_tensors = [out_tensors]
     with tf.compat.v1.Session() as sess:
       try:
+        sess.run(tf.compat.v1.global_variables_initializer())
         # Convert to a TFLite model.
-        converter = tf.lite.TFLiteConverter.from_session(
+        converter = tf.compat.v1.lite.TFLiteConverter.from_session(
             sess, in_tensors, out_tensors)
         tflite_model = converter.convert()
         # Load TFLite model and allocate tensors.
@@ -282,3 +296,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
 def main(argv=None):
   """Main function."""
   tf.test.main(argv)
+
+
+# The util functions or classes are not exported.
+__all__ = []

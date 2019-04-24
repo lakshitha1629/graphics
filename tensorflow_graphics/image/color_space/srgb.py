@@ -11,17 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module implements Tensorflow sRGB color space utility functions."""
+"""This module implements Tensorflow sRGB color space utility functions.
+
+More details about sRGB can be found on [this page.]
+(https://en.wikipedia.org/wiki/SRGB)
+"""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import inspect
 import sys
 
 import tensorflow as tf
+
 from tensorflow_graphics.util import asserts
+from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 # Conversion constants following the naming convention from the 'theory of the
 # transformation' section at https://en.wikipedia.org/wiki/SRGB.
@@ -30,56 +36,68 @@ _PHI = 12.92
 _K0 = 0.04045
 
 
-def _check_shape(tensor):
-  """Checks if a Tensor has rank >=1 and last dimension 3."""
-  if len(tensor.get_shape()) < 1:
-    raise ValueError("Input Tensor must be of rank >= 1.")
-  if tensor.get_shape()[-1] != 3:
-    raise ValueError("Input Tensor must have last dimension equal to 3.")
-
-
 def to_linear(srgb, gamma=2.4, name=None):
   """Converts sRGB colors to linear colors.
 
+  Note:
+      In the following, A1 to An are optional batch dimensions.
+
   Args:
-    srgb: A Tensor of shape [dim_1, ..., dim_n, 3] with the last dimension
-      holding sRGB values.
+    srgb: A tensor of shape `[A_1, ..., A_n, 3]`, where the last dimension
+      represents sRGB values.
     gamma: A float gamma value to use for the conversion.
-    name: A name for this op. Defaults to "srgb_to_linear".
+    name: A name for this op that defaults to "srgb_to_linear".
 
   Raises:
     ValueError: If `srgb` has rank < 1 or has its last dimension not equal to 3.
 
   Returns:
-    A Tensor of RGB values in linear color space.
+    A tensor of shape `[A_1, ..., A_n, 3]`, where the last dimension represents
+    RGB values in linear color space.
   """
   with tf.compat.v1.name_scope(name, "srgb_to_linear", [srgb]):
     srgb = tf.convert_to_tensor(value=srgb)
-    _check_shape(srgb)
+
+    shape.check_static(
+        tensor=srgb,
+        tensor_name="srgb",
+        has_rank_greater_than=0,
+        has_dim_equals=(-1, 3))
     asserts.assert_all_in_range(srgb, 0., 1.)
+
     return tf.where(srgb <= _K0, srgb / _PHI, ((srgb + _A) / (1 + _A))**gamma)
 
 
 def from_linear(linear, gamma=2.4, name=None):
   """Converts linear colors to sRGB colors.
 
+  Note:
+      In the following, A1 to An are optional batch dimensions.
+
   Args:
-    linear: A Tensor of shape [dim_1, ..., dim_n, 3] with the last dimension
-      holding RGB values in the range [0, 1] in linear color space.
+    linear: A Tensor of shape `[A_1, ..., A_n, 3]`, where the last dimension
+      represents RGB values in the range [0, 1] in linear color space.
     gamma: A float gamma value to use for the conversion.
-    name: A name for this op. Defaults to "srgb_from_linear".
+    name: A name for this op that defaults to "srgb_from_linear".
 
   Raises:
     ValueError: If `linear` has rank < 1 or has its last dimension not equal to
       3.
 
   Returns:
-    A Tensor of sRGB values.
+    A tensor of shape `[A_1, ..., A_n, 3]`, where the last dimension represents
+    sRGB values.
   """
   with tf.compat.v1.name_scope(name, "srgb_from_linear", [linear]):
     linear = tf.convert_to_tensor(value=linear)
-    _check_shape(linear)
+
+    shape.check_static(
+        tensor=linear,
+        tensor_name="linear",
+        has_rank_greater_than=0,
+        has_dim_equals=(-1, 3))
     asserts.assert_all_in_range(linear, 0., 1.)
+
     # Adds a small eps to avoid nan gradients from the second branch of
     # tf.where.
     linear += sys.float_info.epsilon
@@ -87,8 +105,5 @@ def from_linear(linear, gamma=2.4, name=None):
                     (1 + _A) * (linear**(1 / gamma)) - _A)
 
 
-# API contains all public functions.
-__all__ = [
-    obj_name for obj_name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.isfunction(obj) and not obj_name.startswith("_")
-]
+# API contains all public functions and classes.
+__all__ = export_api.get_functions_and_classes()

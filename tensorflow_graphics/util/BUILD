@@ -20,6 +20,14 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 py_library(
+    name = "export_api",
+    srcs = ["export_api.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+    ],
+)
+
+py_library(
     name = "test_case",
     srcs = ["test_case.py"],
     srcs_version = "PY2AND3",
@@ -54,18 +62,6 @@ py_library(
 )
 
 py_library(
-    name = "math",
-    srcs = ["math.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":asserts",
-
-        # google internal,
-        "//tensorflow_graphics/util:safe_ops",
-    ],
-)
-
-py_library(
     name = "safe_ops",
     srcs = ["safe_ops.py"],
     srcs_version = "PY2AND3",
@@ -90,11 +86,12 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":asserts",
-        ":math",
+        ":export_api",
         ":safe_ops",
         ":shape",
         ":test_case",
         ":tfg_flags",
+        "//tensorflow_graphics/util/data_formats",
     ],
 )
 
@@ -104,25 +101,21 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":asserts",
+        ":test_case",
         # package dep
         # package dep
 
         # google internal,
-        "//tensorflow_graphics/util:test_case",
     ],
 )
 
 py_test(
-    name = "math_test",
-    srcs = ["tests/math_test.py"],
+    name = "export_api_test",
+    srcs = ["tests/export_api_test.py"],
     srcs_version = "PY2AND3",
     deps = [
-        ":math",
-        # package dep
-
-        # google internal,
-        "//tensorflow_graphics/util:asserts",
-        "//tensorflow_graphics/util:test_case",
+        ":export_api",
+        ":test_case",
     ],
 )
 
@@ -133,10 +126,10 @@ py_test(
     deps = [
         ":asserts",
         ":safe_ops",
+        ":test_case",
         # package dep
 
         # google internal,
-        "//tensorflow_graphics/util:test_case",
     ],
 )
 
@@ -146,8 +139,8 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":shape",
+        ":test_case",
         # package dep
         # google internal,
-        "//tensorflow_graphics/util:test_case",
     ],
 )

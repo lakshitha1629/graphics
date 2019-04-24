@@ -25,6 +25,7 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":srgb",
+        "//tensorflow_graphics/util:export_api",
     ],
 )
 
@@ -35,6 +36,8 @@ py_library(
     deps = [
         # google internal,
         "//tensorflow_graphics/util:asserts",
+        "//tensorflow_graphics/util:export_api",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 

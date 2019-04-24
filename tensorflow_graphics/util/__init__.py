@@ -16,18 +16,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import inspect
-import sys
-
 from tensorflow_graphics.util import asserts
-from tensorflow_graphics.util import math
+# from tensorflow_graphics.util import data_formats
+from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
 from tensorflow_graphics.util import shape
 from tensorflow_graphics.util import test_case
 from tensorflow_graphics.util import tfg_flags
 
-# API contains submodules of tensorflow_graphics.interpolation.
-__all__ = [
-    obj_name for obj_name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.ismodule(obj) and obj.__name__.rsplit(".", 1)[0] == __name__
-]
+# The util modules are not exported.
+__all__ = []

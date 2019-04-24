@@ -26,6 +26,7 @@ __version__ = version.__version__
 REQUIRED_PACKAGES = [
     'absl-py >= 0.6.1',
     'numpy >= 1.15.4',
+    'OpenEXR >= 1.3.2',
     'scipy >= 1.1.0',
     'six >= 1.11.0',
     'tensorflow >= 1.12.0',

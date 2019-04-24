@@ -24,6 +24,32 @@ py_library(
     srcs = ["__init__.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":pyramid",
         "//tensorflow_graphics/image/color_space",
+        "//tensorflow_graphics/util:export_api",
+    ],
+)
+
+py_library(
+    name = "pyramid",
+    srcs = ["pyramid.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+
+        # google internal,
+        "//tensorflow_graphics/util:shape",
+    ],
+)
+
+py_test(
+    name = "pyramid_test",
+    srcs = ["tests/pyramid_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":pyramid",
+        # package dep
+
+        # google internal,
+        "//tensorflow_graphics/util:test_case",
     ],
 )
