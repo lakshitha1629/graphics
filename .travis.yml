@@ -15,15 +15,14 @@ language: python
 python:
   - "2.7"
   - "3.6"
-before_install:
-  - sudo apt-get -y install libopenexr-dev
 install:
   - pip install -U pip wheel
   - pip install python-coveralls
   - pip install tox-travis
-  - pip install tensorflow
-  - pip install OpenEXR
 script:
   - tox
 after_success:
   - coveralls
+cache:
+  directories:
+    - $HOME/.cache/pip

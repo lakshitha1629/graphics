@@ -23,6 +23,14 @@ from tensorflow_graphics import version
 
 __version__ = version.__version__
 
+test_deps = ['future', 'twine', 'pytest', 'pytest-mock', 'python-coveralls']
+
+extras = {
+    'test': test_deps,
+    'tf': ['tensorflow>=1.6.0'],
+    'tf_gpu': ['tensorflow-gpu>=1.6.0'],
+}
+
 REQUIRED_PACKAGES = [
     'absl-py >= 0.6.1',
     'numpy >= 1.15.4',
