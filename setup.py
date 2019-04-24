@@ -28,7 +28,6 @@ from version import __version__  # pylint: disable=g-import-not-at-top
 
 TEST_PACKAGES = [
     'pytest',
-    'pytest-mock',
     'python-coveralls',
 ]
 
