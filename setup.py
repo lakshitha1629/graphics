@@ -16,12 +16,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+import sys
+
 from setuptools import find_packages
 from setuptools import setup
 
-from tensorflow_graphics import version
-
-__version__ = version.__version__
+version_path = os.path.join(os.path.dirname(__file__), 'tensorflow_graphics')
+sys.path.append(version_path)
+from version import __version__  # pylint: disable=g-import-not-at-top
 
 EXTRA_PACKAGES = {
     'tf': ['tensorflow>=1.12.0'],
