@@ -40,7 +40,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     try:
       seed = flags.FLAGS.test_random_seed
     except flags.UnparsedFlagAccessError:
-      seed = 301
+      seed = 301  # Default seed in case test_random_seed is not defined.
     tf.compat.v1.set_random_seed(seed)
     np.random.seed(seed)
     FLAGS[tfg_flags.TFG_ADD_ASSERTS_TO_GRAPH].value = True
