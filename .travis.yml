@@ -19,6 +19,7 @@ install:
   - pip install -U pip wheel
   - pip install python-coveralls
   - pip install tox-travis
+  - pip install tensorflow
 script:
   - tox
 after_success:
