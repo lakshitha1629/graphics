@@ -212,8 +212,6 @@ class RayTest(test_case.TestCase):
        (((1.0, 0.0, 3.0), (1.0, 0.0, 3.0)), ((1.0, 0.0, 0.0),
                                              (1.0, 0.0, 0.0)))),
       (((0.0, 0.0, 3.0), (1.0,), (0.0, 0.0, 1.0), (2.0, 0.0, 0.0)),
-       (((np.nan, np.nan, np.nan), (np.nan, np.nan, np.nan)),
-        ((np.nan, np.nan, np.nan), (np.nan, np.nan, np.nan)))),
   )
   def test_intersection_ray_sphere_preset(self, test_inputs, test_outputs):
     self.assert_output_is_correct(
