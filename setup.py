@@ -39,6 +39,7 @@ SETUP_PACKAGES = [
 
 TEST_PACKAGES = [
     'pytest',
+    'pytest-mock',
     'python-coveralls',
 ]
 
