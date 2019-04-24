@@ -131,7 +131,3 @@ def generate_random_test_rotation_matrix_2d():
       [stats.special_ortho_group.rvs(2) for _ in range(20)])
   random_matrix = np.reshape(random_matrix, [5, 4, 2, 2])
   return random_matrix
-
-
-# The util functions or classes are not exported.
-__all__ = []

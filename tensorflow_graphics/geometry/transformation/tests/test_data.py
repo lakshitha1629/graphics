@@ -145,6 +145,3 @@ MAT_3D_Y_180 = _rotation_3d_y(ANGLE_180)
 MAT_3D_Z_45 = _rotation_3d_z(ANGLE_45)
 MAT_3D_Z_90 = _rotation_3d_z(ANGLE_90)
 MAT_3D_Z_180 = _rotation_3d_z(ANGLE_180)
-
-# The util functions or classes are not exported.
-__all__ = []

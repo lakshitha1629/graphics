@@ -23,9 +23,9 @@ import numpy as np
 import tensorflow as tf
 
 from tensorflow_graphics.geometry.transformation import rotation_matrix_2d
+from tensorflow_graphics.geometry.transformation.tests import test_data as td
+from tensorflow_graphics.geometry.transformation.tests import test_helpers
 from tensorflow_graphics.util import test_case
-from tensorflow_graphics.util import test_data as td
-from tensorflow_graphics.util import test_helpers
 
 
 class RotationMatrix2dTest(test_case.TestCase):
