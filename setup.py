@@ -26,6 +26,10 @@ version_path = os.path.join(os.path.dirname(__file__), 'tensorflow_graphics')
 sys.path.append(version_path)
 from version import __version__  # pylint: disable=g-import-not-at-top
 
+SETUP_PACKAGES = [
+    'pytest-runner',
+]
+
 TEST_PACKAGES = [
     'pytest',
     'python-coveralls',
@@ -54,6 +58,7 @@ setup(
     author='Google LLC',
     author_email='packages@tensorflow.org',
     install_requires=REQUIRED_PACKAGES,
+    setup_requires=SETUP_PACKAGES,
     tests_require=TEST_PACKAGES,
     extras_require=EXTRA_PACKAGES,
     packages=find_packages(),
