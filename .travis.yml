@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 language: python
-matrix:
-    include:
-     - python: 2.7
-       env: TOXENV=py27
-     - python: 3.6
-       env: TOXENV=py36
+python:
+  - "2.7"
+  - "3.6"
 install:
   - pip install -U pip wheel
   - pip install python-coveralls
