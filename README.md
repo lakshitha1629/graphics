@@ -72,6 +72,29 @@ Coming soon...
 <img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
 </a>
 
+<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb">
+<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
+</a>
+
+<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb">
+<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
+</a>
+
+<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb">
+<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
+</a>
+
+<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb">
+<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
+</a>
+
+<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb">
+<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
+</a>
+
+<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb">
+<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
+</a>
 
 # Additional Information
 You may use this software under the Apache 2.0 License. See [LICENSE](https://github.com/tensorflow/graphics/blob/master/LICENSE).
