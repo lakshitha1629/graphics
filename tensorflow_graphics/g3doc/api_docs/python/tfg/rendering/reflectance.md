@@ -9,7 +9,7 @@ Reflectance module.
 
 
 
-Defined in [`rendering/reflectance/__init__.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/rendering/reflectance/__init__.py).
+Defined in [`rendering/reflectance/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/reflectance/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

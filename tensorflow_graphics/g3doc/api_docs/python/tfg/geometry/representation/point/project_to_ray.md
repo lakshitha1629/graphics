@@ -18,7 +18,7 @@ tfg.geometry.representation.point.project_to_ray(
 
 
 
-Defined in [`geometry/representation/point.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/representation/point.py).
+Defined in [`geometry/representation/point.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/point.py).
 
 <!-- Placeholder for "Used in" -->
 

@@ -16,7 +16,7 @@ tfg.rendering.reflectance.lambertian.brdf(
 
 
 
-Defined in [`rendering/reflectance/lambertian.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/rendering/reflectance/lambertian.py).
+Defined in [`rendering/reflectance/lambertian.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/reflectance/lambertian.py).
 
 <!-- Placeholder for "Used in" -->
 

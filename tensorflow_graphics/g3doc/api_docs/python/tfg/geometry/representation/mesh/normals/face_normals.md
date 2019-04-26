@@ -18,7 +18,7 @@ tfg.geometry.representation.mesh.normals.face_normals(
 
 
 
-Defined in [`geometry/representation/mesh/normals.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/representation/mesh/normals.py).
+Defined in [`geometry/representation/mesh/normals.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/mesh/normals.py).
 
 <!-- Placeholder for "Used in" -->
 

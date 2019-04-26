@@ -20,7 +20,7 @@ tfg.rendering.reflectance.phong.brdf(
 
 
 
-Defined in [`rendering/reflectance/phong.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/rendering/reflectance/phong.py).
+Defined in [`rendering/reflectance/phong.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/reflectance/phong.py).
 
 <!-- Placeholder for "Used in" -->
 

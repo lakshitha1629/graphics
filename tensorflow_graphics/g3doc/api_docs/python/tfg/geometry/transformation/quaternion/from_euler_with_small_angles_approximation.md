@@ -16,7 +16,7 @@ tfg.geometry.transformation.quaternion.from_euler_with_small_angles_approximatio
 
 
 
-Defined in [`geometry/transformation/quaternion.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/transformation/quaternion.py).
+Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/quaternion.py).
 
 <!-- Placeholder for "Used in" -->
 

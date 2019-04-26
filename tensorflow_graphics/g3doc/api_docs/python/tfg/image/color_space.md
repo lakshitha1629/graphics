@@ -9,7 +9,7 @@ Color space module.
 
 
 
-Defined in [`image/color_space/__init__.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/image/color_space/__init__.py).
+Defined in [`image/color_space/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/image/color_space/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

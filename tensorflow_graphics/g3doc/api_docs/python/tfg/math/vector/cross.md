@@ -18,7 +18,7 @@ tfg.math.vector.cross(
 
 
 
-Defined in [`math/vector.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/math/vector.py).
+Defined in [`math/vector.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/vector.py).
 
 <!-- Placeholder for "Used in" -->
 

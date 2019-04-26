@@ -9,7 +9,7 @@ This module implements various sparse data utilities for graphs and meshes.
 
 
 
-Defined in [`geometry/representation/mesh/convolution/utils.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/representation/mesh/convolution/utils.py).
+Defined in [`geometry/representation/mesh/convolution/utils.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/mesh/convolution/utils.py).
 
 <!-- Placeholder for "Used in" -->
 

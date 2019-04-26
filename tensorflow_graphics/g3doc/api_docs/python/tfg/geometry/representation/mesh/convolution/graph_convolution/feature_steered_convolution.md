@@ -23,7 +23,7 @@ tfg.geometry.representation.mesh.convolution.graph_convolution.feature_steered_c
 
 
 
-Defined in [`geometry/representation/mesh/convolution/graph_convolution.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/representation/mesh/convolution/graph_convolution.py).
+Defined in [`geometry/representation/mesh/convolution/graph_convolution.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/mesh/convolution/graph_convolution.py).
 
 <!-- Placeholder for "Used in" -->
 

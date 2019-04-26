@@ -9,7 +9,7 @@ Optimizer module.
 
 
 
-Defined in [`math/optimizer/__init__.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/math/optimizer/__init__.py).
+Defined in [`math/optimizer/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/optimizer/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

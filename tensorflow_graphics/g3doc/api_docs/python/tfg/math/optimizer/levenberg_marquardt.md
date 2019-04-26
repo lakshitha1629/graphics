@@ -9,7 +9,7 @@ This module implements a Levenberg-Marquardt optimizer.
 
 
 
-Defined in [`math/optimizer/levenberg_marquardt.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/math/optimizer/levenberg_marquardt.py).
+Defined in [`math/optimizer/levenberg_marquardt.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/optimizer/levenberg_marquardt.py).
 
 <!-- Placeholder for "Used in" -->
 

@@ -17,7 +17,7 @@ tfg.math.interpolation.bspline.interpolate_with_weights(
 
 
 
-Defined in [`math/interpolation/bspline.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/math/interpolation/bspline.py).
+Defined in [`math/interpolation/bspline.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/interpolation/bspline.py).
 
 <!-- Placeholder for "Used in" -->
 

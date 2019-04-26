@@ -18,7 +18,7 @@ tfg.rendering.camera.perspective.project(
 
 
 
-Defined in [`rendering/camera/perspective.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/rendering/camera/perspective.py).
+Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/camera/perspective.py).
 
 <!-- Placeholder for "Used in" -->
 

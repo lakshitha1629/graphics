@@ -9,7 +9,7 @@ Deformation energies module.
 
 
 
-Defined in [`geometry/deformation_energy/__init__.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/deformation_energy/__init__.py).
+Defined in [`geometry/deformation_energy/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/deformation_energy/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

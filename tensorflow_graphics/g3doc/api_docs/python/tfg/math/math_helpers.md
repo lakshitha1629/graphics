@@ -9,7 +9,7 @@ This module contains math routines that are shared by across different modules.
 
 
 
-Defined in [`math/math_helpers.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/math/math_helpers.py).
+Defined in [`math/math_helpers.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/math_helpers.py).
 
 <!-- Placeholder for "Used in" -->
 

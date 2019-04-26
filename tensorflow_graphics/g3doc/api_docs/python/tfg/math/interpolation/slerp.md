@@ -9,7 +9,7 @@ Tensorflow.graphics slerp interpolation module.
 
 
 
-Defined in [`math/interpolation/slerp.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/math/interpolation/slerp.py).
+Defined in [`math/interpolation/slerp.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/interpolation/slerp.py).
 
 <!-- Placeholder for "Used in" -->
 

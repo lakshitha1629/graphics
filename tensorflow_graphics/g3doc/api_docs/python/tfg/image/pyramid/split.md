@@ -17,7 +17,7 @@ tfg.image.pyramid.split(
 
 
 
-Defined in [`image/pyramid.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/image/pyramid.py).
+Defined in [`image/pyramid.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/image/pyramid.py).
 
 <!-- Placeholder for "Used in" -->
 

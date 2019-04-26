@@ -9,7 +9,7 @@ This module implements Tensorflow sRGB color space utility functions.
 
 
 
-Defined in [`image/color_space/srgb.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/image/color_space/srgb.py).
+Defined in [`image/color_space/srgb.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/image/color_space/srgb.py).
 
 <!-- Placeholder for "Used in" -->
 

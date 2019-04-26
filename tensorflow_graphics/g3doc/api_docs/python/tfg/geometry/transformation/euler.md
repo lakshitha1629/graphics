@@ -9,7 +9,7 @@ This modules implements Euler angles functionalities.
 
 
 
-Defined in [`geometry/transformation/euler.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/transformation/euler.py).
+Defined in [`geometry/transformation/euler.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/euler.py).
 
 <!-- Placeholder for "Used in" -->
 

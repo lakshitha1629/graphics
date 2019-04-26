@@ -9,7 +9,7 @@ This module implements TensorFlow As Rigid As Possible utility functions.
 
 
 
-Defined in [`geometry/deformation_energy/as_conformal_as_possible.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/deformation_energy/as_conformal_as_possible.py).
+Defined in [`geometry/deformation_energy/as_conformal_as_possible.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/deformation_energy/as_conformal_as_possible.py).
 
 <!-- Placeholder for "Used in" -->
 

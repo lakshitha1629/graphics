@@ -61,7 +61,7 @@ pip install OpenEXR
 ```
 
 ## API Documentation
-You can find our API documentation [here]().
+You can find our API documentation [here](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/g3doc/api_docs/python/tfg.md).
 
 ## Tensorboard Plugin
 Coming soon...

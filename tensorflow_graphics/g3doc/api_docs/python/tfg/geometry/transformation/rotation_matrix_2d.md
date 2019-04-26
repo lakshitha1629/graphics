@@ -9,7 +9,7 @@ This module implements 2d rotation matrix functionalities.
 
 
 
-Defined in [`geometry/transformation/rotation_matrix_2d.py`](https://cs.corp.google.com/#piper///depot/google3/third_party/py/tensorflow_graphics/geometry/transformation/rotation_matrix_2d.py).
+Defined in [`geometry/transformation/rotation_matrix_2d.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/rotation_matrix_2d.py).
 
 <!-- Placeholder for "Used in" -->
 
