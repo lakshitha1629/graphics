@@ -9,7 +9,7 @@ Tensorflow.graphics B-spline interpolation module.
 
 
 
-Defined in [`math/interpolation/bspline.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/interpolation/bspline.py).
+Defined in [`math/interpolation/bspline.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/interpolation/bspline.py).
 
 <!-- Placeholder for "Used in" -->
 

@@ -17,7 +17,7 @@ tfg.image.color_space.srgb.from_linear(
 
 
 
-Defined in [`image/color_space/srgb.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/image/color_space/srgb.py).
+Defined in [`image/color_space/srgb.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/image/color_space/srgb.py).
 
 <!-- Placeholder for "Used in" -->
 

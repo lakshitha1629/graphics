@@ -20,7 +20,7 @@ tfg.rendering.reflectance.blinn_phong.brdf(
 
 
 
-Defined in [`rendering/reflectance/blinn_phong.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/reflectance/blinn_phong.py).
+Defined in [`rendering/reflectance/blinn_phong.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/reflectance/blinn_phong.py).
 
 <!-- Placeholder for "Used in" -->
 

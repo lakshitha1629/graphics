@@ -17,7 +17,7 @@ tfg.geometry.transformation.rotation_matrix_common.is_valid(
 
 
 
-Defined in [`geometry/transformation/rotation_matrix_common.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/rotation_matrix_common.py).
+Defined in [`geometry/transformation/rotation_matrix_common.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/rotation_matrix_common.py).
 
 <!-- Placeholder for "Used in" -->
 

@@ -9,7 +9,7 @@ This module implements lambertian reflectance.
 
 
 
-Defined in [`rendering/reflectance/lambertian.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/reflectance/lambertian.py).
+Defined in [`rendering/reflectance/lambertian.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/reflectance/lambertian.py).
 
 <!-- Placeholder for "Used in" -->
 

@@ -9,7 +9,7 @@ Geometry module.
 
 
 
-Defined in [`geometry/representation/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/__init__.py).
+Defined in [`geometry/representation/__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

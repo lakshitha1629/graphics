@@ -9,7 +9,7 @@ This module implements weighted interpolation for point sets.
 
 
 
-Defined in [`math/interpolation/weighted.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/interpolation/weighted.py).
+Defined in [`math/interpolation/weighted.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/interpolation/weighted.py).
 
 <!-- Placeholder for "Used in" -->
 

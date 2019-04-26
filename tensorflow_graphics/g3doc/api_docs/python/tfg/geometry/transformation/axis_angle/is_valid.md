@@ -18,7 +18,7 @@ tfg.geometry.transformation.axis_angle.is_valid(
 
 
 
-Defined in [`geometry/transformation/axis_angle.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/axis_angle.py).
+Defined in [`geometry/transformation/axis_angle.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/axis_angle.py).
 
 <!-- Placeholder for "Used in" -->
 

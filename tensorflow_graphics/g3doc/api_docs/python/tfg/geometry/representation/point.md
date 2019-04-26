@@ -9,7 +9,7 @@ Tensorflow point utility functions.
 
 
 
-Defined in [`geometry/representation/point.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/point.py).
+Defined in [`geometry/representation/point.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/point.py).
 
 <!-- Placeholder for "Used in" -->
 

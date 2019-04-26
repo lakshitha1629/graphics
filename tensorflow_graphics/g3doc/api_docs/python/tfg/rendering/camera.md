@@ -9,7 +9,7 @@ Camera module.
 
 
 
-Defined in [`rendering/camera/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/camera/__init__.py).
+Defined in [`rendering/camera/__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/camera/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

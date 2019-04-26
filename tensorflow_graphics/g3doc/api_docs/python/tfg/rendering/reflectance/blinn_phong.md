@@ -9,7 +9,7 @@ This module implements the Blinn-Phong specular reflectance.
 
 
 
-Defined in [`rendering/reflectance/blinn_phong.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/reflectance/blinn_phong.py).
+Defined in [`rendering/reflectance/blinn_phong.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/reflectance/blinn_phong.py).
 
 <!-- Placeholder for "Used in" -->
 

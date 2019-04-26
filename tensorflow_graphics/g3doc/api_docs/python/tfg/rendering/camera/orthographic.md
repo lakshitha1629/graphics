@@ -9,7 +9,7 @@ This module implements orthographic camera functionalities.
 
 
 
-Defined in [`rendering/camera/orthographic.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/camera/orthographic.py).
+Defined in [`rendering/camera/orthographic.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/camera/orthographic.py).
 
 <!-- Placeholder for "Used in" -->
 

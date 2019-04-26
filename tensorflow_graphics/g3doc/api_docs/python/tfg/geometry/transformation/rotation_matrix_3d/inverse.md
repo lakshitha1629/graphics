@@ -16,7 +16,7 @@ tfg.geometry.transformation.rotation_matrix_3d.inverse(
 
 
 
-Defined in [`geometry/transformation/rotation_matrix_3d.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/rotation_matrix_3d.py).
+Defined in [`geometry/transformation/rotation_matrix_3d.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/rotation_matrix_3d.py).
 
 <!-- Placeholder for "Used in" -->
 

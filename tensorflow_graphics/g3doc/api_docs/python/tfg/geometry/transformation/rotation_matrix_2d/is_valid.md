@@ -17,7 +17,7 @@ tfg.geometry.transformation.rotation_matrix_2d.is_valid(
 
 
 
-Defined in [`geometry/transformation/rotation_matrix_2d.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/rotation_matrix_2d.py).
+Defined in [`geometry/transformation/rotation_matrix_2d.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/rotation_matrix_2d.py).
 
 <!-- Placeholder for "Used in" -->
 

@@ -9,7 +9,7 @@ Tensorflow grid utility functions.
 
 
 
-Defined in [`geometry/representation/grid.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/grid.py).
+Defined in [`geometry/representation/grid.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/grid.py).
 
 <!-- Placeholder for "Used in" -->
 

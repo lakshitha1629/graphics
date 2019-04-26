@@ -18,7 +18,7 @@ tfg.geometry.representation.mesh.convolution.utils.partition_sums_2d(
 
 
 
-Defined in [`geometry/representation/mesh/convolution/utils.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/mesh/convolution/utils.py).
+Defined in [`geometry/representation/mesh/convolution/utils.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/mesh/convolution/utils.py).
 
 <!-- Placeholder for "Used in" -->
 

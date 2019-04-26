@@ -9,7 +9,7 @@ Image module.
 
 
 
-Defined in [`image/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/image/__init__.py).
+Defined in [`image/__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/image/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

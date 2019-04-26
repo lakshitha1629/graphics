@@ -16,7 +16,7 @@ tfg.math.spherical_harmonics.tile_zonal_coefficients(
 
 
 
-Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/spherical_harmonics.py).
+Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/spherical_harmonics.py).
 
 <!-- Placeholder for "Used in" -->
 

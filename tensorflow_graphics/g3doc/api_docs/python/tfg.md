@@ -9,7 +9,7 @@ tensorflow_graphics module.
 
 
 
-Defined in [`__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/__init__.py).
+Defined in [`__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

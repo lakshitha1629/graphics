@@ -16,7 +16,7 @@ tfg.image.pyramid.merge(
 
 
 
-Defined in [`image/pyramid.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/image/pyramid.py).
+Defined in [`image/pyramid.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/image/pyramid.py).
 
 <!-- Placeholder for "Used in" -->
 

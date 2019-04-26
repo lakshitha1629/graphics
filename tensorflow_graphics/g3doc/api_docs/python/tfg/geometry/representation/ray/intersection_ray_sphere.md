@@ -18,7 +18,7 @@ tfg.geometry.representation.ray.intersection_ray_sphere(
 
 
 
-Defined in [`geometry/representation/ray.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/ray.py).
+Defined in [`geometry/representation/ray.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/ray.py).
 
 <!-- Placeholder for "Used in" -->
 

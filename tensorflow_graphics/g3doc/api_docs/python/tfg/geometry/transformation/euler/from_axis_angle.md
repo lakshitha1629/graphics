@@ -17,7 +17,7 @@ tfg.geometry.transformation.euler.from_axis_angle(
 
 
 
-Defined in [`geometry/transformation/euler.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/euler.py).
+Defined in [`geometry/transformation/euler.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/euler.py).
 
 <!-- Placeholder for "Used in" -->
 

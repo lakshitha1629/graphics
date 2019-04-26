@@ -20,7 +20,7 @@ tfg.geometry.representation.triangle.normal(
 
 
 
-Defined in [`geometry/representation/triangle.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/triangle.py).
+Defined in [`geometry/representation/triangle.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/triangle.py).
 
 <!-- Placeholder for "Used in" -->
 

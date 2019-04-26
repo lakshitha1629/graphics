@@ -19,7 +19,7 @@ tfg.math.interpolation.slerp.quaternion_weights(
 
 
 
-Defined in [`math/interpolation/slerp.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/interpolation/slerp.py).
+Defined in [`math/interpolation/slerp.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/interpolation/slerp.py).
 
 <!-- Placeholder for "Used in" -->
 

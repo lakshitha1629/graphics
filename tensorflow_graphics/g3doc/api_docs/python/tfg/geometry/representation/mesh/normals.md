@@ -9,7 +9,7 @@ Tensorflow utility functions to compute normals on meshes.
 
 
 
-Defined in [`geometry/representation/mesh/normals.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/representation/mesh/normals.py).
+Defined in [`geometry/representation/mesh/normals.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/mesh/normals.py).
 
 <!-- Placeholder for "Used in" -->
 

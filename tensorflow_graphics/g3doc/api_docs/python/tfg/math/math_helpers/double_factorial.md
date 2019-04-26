@@ -13,7 +13,7 @@ tfg.math.math_helpers.double_factorial(n)
 
 
 
-Defined in [`math/math_helpers.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/math_helpers.py).
+Defined in [`math/math_helpers.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/math_helpers.py).
 
 <!-- Placeholder for "Used in" -->
 

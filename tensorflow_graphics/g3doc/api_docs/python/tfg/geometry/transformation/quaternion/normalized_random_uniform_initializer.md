@@ -13,6 +13,6 @@ tfg.geometry.transformation.quaternion.normalized_random_uniform_initializer()
 
 
 
-Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/quaternion.py).
+Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/quaternion.py).
 
 <!-- Placeholder for "Used in" -->

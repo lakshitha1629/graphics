@@ -9,7 +9,7 @@ Transformation module.
 
 
 
-Defined in [`geometry/transformation/__init__.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/__init__.py).
+Defined in [`geometry/transformation/__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 

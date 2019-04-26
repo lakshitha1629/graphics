@@ -9,7 +9,7 @@ Tensorflow vector utility functions.
 
 
 
-Defined in [`math/vector.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/vector.py).
+Defined in [`math/vector.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/vector.py).
 
 <!-- Placeholder for "Used in" -->
 

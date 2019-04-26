@@ -19,7 +19,7 @@ tfg.math.spherical_harmonics.evaluate_spherical_harmonics(
 
 
 
-Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/math/spherical_harmonics.py).
+Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/math/spherical_harmonics.py).
 
 <!-- Placeholder for "Used in" -->
 

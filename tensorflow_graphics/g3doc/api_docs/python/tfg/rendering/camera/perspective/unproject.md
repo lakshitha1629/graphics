@@ -19,7 +19,7 @@ tfg.rendering.camera.perspective.unproject(
 
 
 
-Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/rendering/camera/perspective.py).
+Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/camera/perspective.py).
 
 <!-- Placeholder for "Used in" -->
 

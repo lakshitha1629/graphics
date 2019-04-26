@@ -17,7 +17,7 @@ tfg.geometry.transformation.quaternion.between_two_vectors_3d(
 
 
 
-Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorflow/agents/tree/master/tensorflow_graphics/geometry/transformation/quaternion.py).
+Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/quaternion.py).
 
 <!-- Placeholder for "Used in" -->
 
