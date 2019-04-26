@@ -5,6 +5,19 @@ the TensorFlow ecosystem, these graphics ops can also be used to build machine
 learning models and are for the most part differentiable.
 
 
+During the last few years we have seen a rise in the creation of novel
+differentiable graphics layers that can be inserted in standard neural network
+architectures. From spatial transformers to differentiable graphics renderers,
+these new layers allow to use the knowledge acquired in years of computer vision
+and graphics research for the design of efficient network architectures.
+Explicitly modeling geometric priors and constraints into a neural networks can 
+helps learning invariance to 3D geometric transformations, and also opens up the 
+door to architectures that can be trained in a self-supervised or even fully
+unsupervised fashion. TensorFlow Graphics aims at bringing some of these 
+functionalities into TensorFlow to stimulate research in this field by making 
+useful graphics functions widely accessible to the community.
+
+
 [![PyPI project status](https://img.shields.io/pypi/status/tensorflow-graphics.svg)]()
 [![Travis build status](https://img.shields.io/travis/tensorflow/graphics.svg)](https://travis-ci.org/tensorflow/graphics)
 [![Code coverage](https://img.shields.io/coveralls/github/tensorflow/graphics.svg)](https://coveralls.io/github/tensorflow/graphics)
