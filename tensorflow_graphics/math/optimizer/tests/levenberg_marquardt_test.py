@@ -68,8 +68,10 @@ class OptimizerTest(test_case.TestCase):
     """Tests the output of the minimization for some presets."""
     objective_value, output_variables = levenberg_marquardt.minimize(
         residuals, variables, max_iterations)
+
     with self.subTest(name="objective_value"):
       self.assertAllClose(objective_value, final_objective_value)
+
     with self.subTest(name="variables"):
       for output_variable, final_variable in zip(output_variables,
                                                  final_variables):
@@ -100,8 +102,10 @@ class OptimizerTest(test_case.TestCase):
                                            tf.int32)
     final_iteration_count = tf.py_function(lambda: iteration_count[0], [],
                                            tf.int32)
+
     with self.subTest(name="objective_value"):
       self.assertAllClose(final_objective, final_saved_objective)
+
     with self.subTest(name="iterations"):
       self.assertAllEqual(final_saved_iteration, final_iteration_count)
 
@@ -135,8 +139,10 @@ class OptimizerTest(test_case.TestCase):
     variables = np.random.uniform(low=-1.0, high=1.0, size=tensor_shape)
     objective_value, variables = levenberg_marquardt.minimize(
         lambda x: x, variables, max_iterations=1)
+
     with self.subTest(name="objective_value"):
       self.assertAllClose(objective_value, tf.zeros_like(objective_value))
+
     with self.subTest(name="variables"):
       for variable in variables:
         self.assertAllClose(variable, tf.zeros_like(variable))

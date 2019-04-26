@@ -24,40 +24,52 @@ from tensorflow_graphics.math import math_helpers
 from tensorflow_graphics.math import vector
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 
-def integration_product(f, g, keepdims=True, name=None):
-  """Computes the integral of f.g over the sphere.
+def integration_product(harmonics1, harmonics2, keepdims=True, name=None):
+  """Computes the integral of harmonics1.harmonics2 over the sphere.
 
   Note:
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    f: A tensor of shape `[A1, ..., An, C]`, where the last dimension represents
-      spherical harmonics coefficients.
-    g: A tensor of shape `[A1, ..., An, C]`, where the last dimension represents
-      spherical harmonics coefficients.
-    keepdims: If true, retains reduced dimensions with length 1.
+    harmonics1: A tensor of shape `[A1, ..., An, C]`, where the last dimension
+      represents spherical harmonics coefficients.
+    harmonics2: A tensor of shape `[A1, ..., An, C]`, where the last dimension
+      represents spherical harmonics coefficients.
+    keepdims: If True, retains reduced dimensions with length 1.
     name: A name for this op. Defaults to "spherical_harmonics_convolution".
 
   Returns:
     A tensor of shape `[A1, ..., An]` containing scalar values resulting from
-    integrating the product of the spherical harmonics `f` and `g`.
+    integrating the product of the spherical harmonics `harmonics1` and
+    `harmonics2`.
 
   Raises:
-    ValueError: if the last dimension of `f` is different from the last
-    dimension of `g`.
+    ValueError: if the last dimension of `harmonics1` is different from the last
+    dimension of `harmonics2`.
   """
-  with tf.compat.v1.name_scope(name, "spherical_harmonics_convolution", [f, g]):
-    f = tf.convert_to_tensor(value=f)
-    g = tf.convert_to_tensor(value=g)
-    if f.shape.as_list()[-1] != g.shape.as_list()[-1]:
-      raise ValueError("'f' and 'g' differ in their last dimension.")
-    return vector.dot(f, g, keepdims=keepdims)
+  with tf.compat.v1.name_scope(name, "spherical_harmonics_convolution",
+                               [harmonics1, harmonics2]):
+    harmonics1 = tf.convert_to_tensor(value=harmonics1)
+    harmonics2 = tf.convert_to_tensor(value=harmonics2)
+
+    shape.compare_dimensions(
+        tensors=(harmonics1, harmonics2),
+        axes=-1,
+        tensor_names=("harmonics1", "harmonics2"))
+    shape.compare_batch_dimensions(
+        tensors=(harmonics1, harmonics2),
+        last_axes=-2,
+        tensor_names=("harmonics1", "harmonics2"),
+        broadcast_compatible=True)
+
+    return vector.dot(harmonics1, harmonics2, keepdims=keepdims)
 
 
 def generate_l_m_permutations(max_band, name=None):
-  """Generates l and m coefficients for spherical harmonics.
+  """Generates permutations of degree l and order m for spherical harmonics.
 
   Args:
     max_band: An integer scalar storing the highest band.
@@ -67,15 +79,17 @@ def generate_l_m_permutations(max_band, name=None):
   Returns:
     Two tensors of shape `[max_band*max_band]`.
   """
-  with tf.compat.v1.name_scope(
-      name, "spherical_harmonics_generate_l_m_permutations", [max_band]):
-    l = []
-    m = []
-    for l_ in range(0, max_band + 1):
-      for m_ in range(-l_, l_ + 1):
-        l.append(l_)
-        m.append(m_)
-    return tf.convert_to_tensor(value=l), tf.convert_to_tensor(value=m)
+  with tf.compat.v1.name_scope(name,
+                               "spherical_harmonics_generate_l_m_permutations",
+                               [max_band]):
+    degree_l = []
+    order_m = []
+    for degree in range(0, max_band + 1):
+      for order in range(-degree, degree + 1):
+        degree_l.append(degree)
+        order_m.append(order)
+    return (tf.convert_to_tensor(value=degree_l),
+            tf.convert_to_tensor(value=order_m))
 
 
 def generate_l_m_zonal(max_band, name=None):
@@ -87,12 +101,13 @@ def generate_l_m_zonal(max_band, name=None):
       'spherical_harmonics_generate_l_m_zonal'.
 
   Returns:
-    Two tensors of shape `[max_band+1]`.
+    Two tensors of shape `[max_band+1]`, one for degree l and one for order m.
   """
   with tf.compat.v1.name_scope(name, "generate_l_m_zonal", [max_band]):
-    l = np.linspace(0, max_band, num=max_band + 1)
-    m = np.zeros(max_band + 1)
-    return tf.convert_to_tensor(value=l), tf.convert_to_tensor(value=m)
+    degree_l = np.linspace(0, max_band, num=max_band + 1)
+    order_m = np.zeros(max_band + 1)
+    return (tf.convert_to_tensor(value=degree_l),
+            tf.convert_to_tensor(value=order_m))
 
 
 def _evaluate_legendre_polynomial_pmm_eval(m, x):
@@ -104,8 +119,7 @@ def _evaluate_legendre_polynomial_pmm_eval(m, x):
   return pmm
 
 
-# pylint: disable=unused-argument
-def _evaluate_legendre_polynomial_loop_cond(x, n, l, m, pmm, pmm1):
+def _evaluate_legendre_polynomial_loop_cond(x, n, l, m, pmm, pmm1):  # pylint: disable=unused-argument
   return tf.cast(tf.math.count_nonzero(n <= l), tf.bool)
 
 
@@ -138,45 +152,53 @@ def _evaluate_legendre_polynomial_branch(l, m, x, pmm):
   return res
 
 
-def evaluate_legendre_polynomial(l, m, x):
+def evaluate_legendre_polynomial(degree_l, order_m, x):
   """Evaluates the Legendre polynomial of degree l and order m at x.
 
   Note:
-    This function is implementating the algorithm described p. 10 of `Spherical
+    This function is implementing the algorithm described in p. 10 of `Spherical
     Harmonic Lighting: The Gritty Details`.
 
   Note:
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    l: A tensor of shape `[A1, ..., An]` corresponding to the degree of the
-      associated Legendre polynomial. Note that `l` must satisfy `l >= 0`.
-    m: A tensor of shape `[A1, ..., An]` corresponding to the order of the
-      associated Legendre polynomial. Note that `m` must satisfy `0 <= m <= l`.
+    degree_l: An integer tensor of shape `[A1, ..., An]` corresponding to the
+      degree of the associated Legendre polynomial. Note that `degree_l` must be
+      non-negative.
+    order_m: An integer tensor of shape `[A1, ..., An]` corresponding to the
+      order of the associated Legendre polynomial. Note that `order_m` must
+      satisfy `0 <= order_m <= l`.
     x: A tensor of shape `[A1, ..., An]` with values in [-1,1].
 
   Returns:
     A tensor of shape `[A1, ..., An]` containing the evaluation of the legendre
     polynomial.
   """
-  # Conversion to tensors.
-  l = tf.convert_to_tensor(value=l)
-  m = tf.convert_to_tensor(value=m)
+  degree_l = tf.convert_to_tensor(value=degree_l)
+  order_m = tf.convert_to_tensor(value=order_m)
   x = tf.convert_to_tensor(value=x)
-  # Checks that the input is in the appropriate range.
-  l = asserts.assert_all_above(l, 0)
-  m = asserts.assert_all_in_range(m, 0, l)
+
+  if not degree_l.dtype.is_integer:
+    raise ValueError("`degree_l` must be of an integer type.")
+  if not order_m.dtype.is_integer:
+    raise ValueError("`order_m` must be of an integer type.")
+  shape.compare_batch_dimensions(
+      tensors=(degree_l, order_m, x),
+      last_axes=-1,
+      tensor_names=("degree_l", "order_m", "x"),
+      broadcast_compatible=True)
+  degree_l = asserts.assert_all_above(degree_l, 0)
+  order_m = asserts.assert_all_in_range(order_m, 0, degree_l)
   x = asserts.assert_all_in_range(x, -1.0, 1.0)
-  pmm = _evaluate_legendre_polynomial_pmm_eval(m, x)
-  # if l == m return pmm.
-  res = tf.where(
-      tf.equal(l, m), pmm, _evaluate_legendre_polynomial_branch(l, m, x, pmm))
-  return res
+
+  pmm = _evaluate_legendre_polynomial_pmm_eval(order_m, x)
+  return tf.where(
+      tf.equal(degree_l, order_m), pmm,
+      _evaluate_legendre_polynomial_branch(degree_l, order_m, x, pmm))
 
 
 def _spherical_harmonics_normalization(l, m, var_type=tf.float64):
-  l = tf.convert_to_tensor(value=l)
-  m = tf.convert_to_tensor(value=m)
   l = tf.cast(l, dtype=var_type)
   m = tf.cast(m, dtype=var_type)
   numerator = (2.0 * l + 1.0) * math_helpers.factorial(l - tf.abs(m))
@@ -198,11 +220,11 @@ def _evaluate_spherical_harmonics_branch(degree,
           degree, order, tf.cos(theta))
   positive = tmp * tf.cos(order_float * phi)
   negative = tmp * tf.sin(order_float * phi)
-  res = tf.where(tf.greater(sign_order, 0), positive, negative)
-  return res
+  return tf.where(tf.greater(sign_order, 0), positive, negative)
+  # pylint: enable=missing-docstring
 
 
-def evaluate_spherical_harmonics(l, m, theta, phi, name=None):
+def evaluate_spherical_harmonics(degree_l, order_m, theta, phi, name=None):
   """Evaluates a point sample of a Spherical Harmonic basis function.
 
   Note:
@@ -213,12 +235,12 @@ def evaluate_spherical_harmonics(l, m, theta, phi, name=None):
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    l: A tensor of shape `[A1, ..., An, C]`, where the last dimension represents
-      the band of the spherical harmonics. Note that bands must be positive
-      integers.
-    m: A tensor of shape `[A1, ..., An, C]`, where the last dimension represents
-      the index of the spherical harmonics in the band defined in `l`. This
-      varible must contain integer values in [-l, l].
+    degree_l: An integer tensor of shape `[A1, ..., An, C]`, where the last
+      dimension represents the band of the spherical harmonics. Note that
+      `degree_l` must be non-negative.
+    order_m: An integer tensor of shape `[A1, ..., An, C]`, where the last
+      dimension represents the index of the spherical harmonics in the band
+      `degree_l`. Note that `order_m` must satisfy `0 <= order_m <= l`.
     theta: A tensor of shape `[A1, ..., An, 1]`. This variable stores the polar
       angle of the sameple. Values of theta must be in [0, pi].
     phi: A tensor of shape `[A1, ..., An, 1]`. This variable stores the
@@ -237,41 +259,45 @@ def evaluate_spherical_harmonics(l, m, theta, phi, name=None):
   """
   with tf.compat.v1.name_scope(
       name, "spherical_harmonics_evaluate_spherical_harmonics",
-      [l, m, theta, phi]):
-    # Conversion to tensors.
-    l = tf.convert_to_tensor(value=l)
-    m = tf.convert_to_tensor(value=m)
+      [degree_l, order_m, theta, phi]):
+    degree_l = tf.convert_to_tensor(value=degree_l)
+    order_m = tf.convert_to_tensor(value=order_m)
     theta = tf.convert_to_tensor(value=theta)
     phi = tf.convert_to_tensor(value=phi)
-    # Checks that tensors have the appropriate shape.
-    l_shape = l.shape.as_list()
-    theta_shape = theta.shape.as_list()
-    if l_shape != m.shape.as_list():
-      raise ValueError("'l' and 'm' have different shapes.")
-    if theta_shape != phi.shape.as_list():
-      raise ValueError("'theta' and 'phi' have different shapes.")
-    if theta_shape[-1] != 1:
-      raise ValueError("The last dimension of 'theta' and 'phi' must be 1.")
-    if l_shape[:-1] != theta_shape[:-1]:
-      raise ValueError(
-          "'l', 'm', 'theta', and 'phi' must have the same batch dimension dimension."
-      )
+
+    if not degree_l.dtype.is_integer:
+      raise ValueError("`degree_l` must be of an integer type.")
+    if not order_m.dtype.is_integer:
+      raise ValueError("`order_m` must be of an integer type.")
+
+    shape.compare_dimensions(
+        tensors=(degree_l, order_m),
+        axes=-1,
+        tensor_names=("degree_l", "order_m"))
+    shape.check_static(tensor=phi, tensor_name="phi", has_dim_equals=(-1, 1))
+    shape.check_static(
+        tensor=theta, tensor_name="theta", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(degree_l, order_m, theta, phi),
+        last_axes=-2,
+        tensor_names=("degree_l", "order_m", "theta", "phi"),
+        broadcast_compatible=False)
     # Checks that tensors contain appropriate data.
-    l = asserts.assert_all_above(l, 0)
-    m = asserts.assert_all_in_range(m, -l, l)
+    degree_l = asserts.assert_all_above(degree_l, 0)
+    order_m = asserts.assert_all_in_range(order_m, -degree_l, degree_l)
     theta = asserts.assert_all_in_range(theta, 0.0, np.pi)
     phi = asserts.assert_all_in_range(phi, 0.0, 2.0 * np.pi)
-    # Evaluation point sample of a Spherical Harmonic basis function.
+
     var_type = theta.dtype
-    sign_m = tf.math.sign(m)
-    m = tf.abs(m)
-    zeros = tf.zeros_like(m)
+    sign_m = tf.math.sign(order_m)
+    order_m = tf.abs(order_m)
+    zeros = tf.zeros_like(order_m)
     result_m_zero = _spherical_harmonics_normalization(
-        l, zeros, var_type) * evaluate_legendre_polynomial(
-            l, zeros, tf.cos(theta))
+        degree_l, zeros, var_type) * evaluate_legendre_polynomial(
+            degree_l, zeros, tf.cos(theta))
     result_branch = _evaluate_spherical_harmonics_branch(
-        l, m, theta, phi, sign_m, var_type)
-    return tf.where(tf.equal(m, zeros), result_m_zero, result_branch)
+        degree_l, order_m, theta, phi, sign_m, var_type)
+    return tf.where(tf.equal(order_m, zeros), result_m_zero, result_branch)
 
 
 def rotate_zonal_harmonics(zonal_coeffs, theta, phi, name=None):
@@ -281,8 +307,7 @@ def rotate_zonal_harmonics(zonal_coeffs, theta, phi, name=None):
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    zonal_coeffs: A tensor of shape `[C]` storing zonal harmonics
-      coefficients.
+    zonal_coeffs: A tensor of shape `[C]` storing zonal harmonics coefficients.
     theta: A tensor of shape `[A1, ..., An, 1]` storing polar angles.
     phi: A tensor of shape `[A1, ..., An, 1]` storing azimuthal angles.
     name: A name for this op. Defaults to
@@ -302,16 +327,20 @@ def rotate_zonal_harmonics(zonal_coeffs, theta, phi, name=None):
     zonal_coeffs = tf.convert_to_tensor(value=zonal_coeffs)
     theta = tf.convert_to_tensor(value=theta)
     phi = tf.convert_to_tensor(value=phi)
-    if len(zonal_coeffs.shape.as_list()) != 1:
-      raise ValueError("'zonal_coeffs' must have 1 dimension.")
-    theta_shape = theta.shape.as_list()
-    phi_shape = phi.shape.as_list()
-    if theta_shape != phi_shape:
-      raise ValueError("'theta' and 'phi' have different shapes.")
-    if theta_shape[-1] != 1:
-      raise ValueError("The last dimension of 'theta' and 'phi' must be 1.")
+
+    shape.check_static(
+        tensor=zonal_coeffs, tensor_name="zonal_coeffs", has_rank=1)
+    shape.check_static(tensor=phi, tensor_name="phi", has_dim_equals=(-1, 1))
+    shape.check_static(
+        tensor=theta, tensor_name="theta", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(theta, phi),
+        last_axes=-2,
+        tensor_names=("theta", "phi"),
+        broadcast_compatible=False)
+
     tiled_zonal_coeffs = tile_zonal_coefficients(zonal_coeffs)
-    max_band = zonal_coeffs.shape.as_list()[-1]
+    max_band = tf.compat.dimension_value(zonal_coeffs.shape[-1])
     l, m = generate_l_m_permutations(max_band - 1)
     broadcast_shape = theta.shape.as_list()[:-1] + l.shape.as_list()
     l_broadcasted = tf.broadcast_to(l, broadcast_shape)
@@ -328,8 +357,7 @@ def tile_zonal_coefficients(coefficients, name=None):
   these coefficients for -l <= m <= l, where l is the rank of `coefficients`.
 
   Args:
-    coefficients: A tensor of shape `[C]` storing zonal harmonics
-      coefficients.
+    coefficients: A tensor of shape `[C]` storing zonal harmonics coefficients.
     name: A name for this op. Defaults to
       'spherical_harmonics_tile_zonal_coefficients'.
   Return: A tensor of shape `[C*C]` containing zonal coefficients tiled as
@@ -338,14 +366,17 @@ def tile_zonal_coefficients(coefficients, name=None):
   Raises:
     ValueError: if the shape of `coefficients` is not supported.
   """
-  with tf.compat.v1.name_scope(
-      name, "spherical_harmonics_tile_zonal_coefficients", [coefficients]):
+  with tf.compat.v1.name_scope(name,
+                               "spherical_harmonics_tile_zonal_coefficients",
+                               [coefficients]):
     coefficients = tf.convert_to_tensor(value=coefficients)
-    if len(coefficients.shape.as_list()) != 1:
-      raise ValueError("'coefficients' must have 1 dimension.")
+
+    shape.check_static(
+        tensor=coefficients, tensor_name="coefficients", has_rank=1)
+
     return tf.concat([
-        pair[1] * tf.ones(shape=(2 * pair[0] + 1,), dtype=coefficients.dtype)
-        for pair in enumerate(tf.unstack(coefficients, axis=0))
+        coeff * tf.ones(shape=(2 * index + 1,), dtype=coefficients.dtype)
+        for index, coeff in enumerate(tf.unstack(coefficients, axis=0))
     ],
                      axis=0)
 

@@ -24,7 +24,7 @@ import tensorflow as tf
 from tensorflow_graphics.math.interpolation import slerp
 from tensorflow_graphics.util import test_case
 
-_SQRT2_DIV2 = np.sqrt(2.0) * 0.5
+_SQRT2_DIV2 = np.sqrt(2.0).astype(np.float32) * 0.5
 
 
 class SlerpTest(test_case.TestCase):
@@ -114,8 +114,10 @@ class SlerpTest(test_case.TestCase):
   )
   def test_quaternion_slerp_preset(self, test_inputs, test_outputs):
     """Tests the accuracy of qslerp against numpy-quaternion values."""
+    test_inputs = [np.array(test_input).astype(np.float32)
+                   for test_input in test_inputs]
     self.assert_output_is_correct(self._quaternion_slerp_helper, test_inputs,
-                                  test_outputs)
+                                  test_outputs, tile=False)
 
   def test_unnormalized_quaternion_weights_exception_raised(self):
     """Tests if quaternion_weights raise exceptions for unnormalized input."""
@@ -169,8 +171,10 @@ class SlerpTest(test_case.TestCase):
   )
   def test_quaternion_weights_preset(self, test_inputs, test_outputs):
     """Tests the accuracy of quaternion_weights for problem cases."""
+    test_inputs = [np.array(test_input).astype(np.float32)
+                   for test_input in test_inputs]
     self.assert_output_is_correct(slerp.quaternion_weights, test_inputs,
-                                  test_outputs)
+                                  test_outputs, tile=False)
 
   @parameterized.parameters(
       ((3,), (3,), (1,)),
@@ -228,8 +232,10 @@ class SlerpTest(test_case.TestCase):
   )
   def test_vector_slerp_preset(self, test_inputs, test_outputs):
     """Tests the accuracy of vector slerp results."""
+    test_inputs = [np.array(test_input).astype(np.float32)
+                   for test_input in test_inputs]
     self.assert_output_is_correct(self._vector_slerp_helper, test_inputs,
-                                  test_outputs)
+                                  test_outputs, tile=False)
 
   def test_vector_weights_reduce_to_lerp_preset(self):
     """Tests if vector slerp reduces to lerp for identical vectors as input."""

@@ -56,7 +56,7 @@ class MathTest(test_case.TestCase):
         math_helpers.cartesian_to_spherical_coordinates, shape)
 
   @parameterized.parameters(
-      ("'point_cartesian' must have 3 dimensions.", (1,)),)
+      ("must have exactly 3 dimensions in axis -1", (1,)),)
   def test_cartesian_to_spherical_coordinates_raised(self, error_msg, *shape):
     """Tests that the shape exception is raised."""
     self.assert_exception_is_raised(
@@ -66,13 +66,11 @@ class MathTest(test_case.TestCase):
     """Test the Jacobian of the spherical_to_cartesian_coordinates function."""
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
-    # Initialization.
     point_init = np.random.uniform(-10.0, 10.0, size=tensor_shape + [3])
-    # Conversion to tensors.
     point = tf.convert_to_tensor(value=point_init)
-    # Setting up the op.
+
     y = math_helpers.cartesian_to_spherical_coordinates(point)
-    # Checks the correctness of the jacobians.
+
     self.assert_jacobian_is_correct(point, point_init, y)
 
   @parameterized.parameters(
@@ -112,7 +110,7 @@ class MathTest(test_case.TestCase):
         math_helpers.spherical_to_cartesian_coordinates, shape)
 
   @parameterized.parameters(
-      ("'point_spherical' must have 3 dimensions.", (1,)),)
+      ("must have exactly 3 dimensions in axis -1", (1,)),)
   def test_spherical_to_cartesian_coordinates_raised(self, error_msg, *shape):
     """Tests that the shape exception is raised."""
     self.assert_exception_is_raised(
@@ -122,19 +120,17 @@ class MathTest(test_case.TestCase):
     """Test the Jacobian of the spherical_to_cartesian_coordinates function."""
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
-    # Initialization.
     r_init = np.random.uniform(0.0, 10.0, size=tensor_shape + [1])
     theta_init = np.random.uniform(
         -np.pi / 2.0, np.pi / 2.0, size=tensor_shape + [1])
     phi_init = np.random.uniform(-np.pi, np.pi, size=tensor_shape + [1])
-    # Conversion to tensors.
     r = tf.convert_to_tensor(value=r_init)
     theta = tf.convert_to_tensor(value=theta_init)
     phi = tf.convert_to_tensor(value=phi_init)
     data = tf.stack((r, theta, phi), axis=-1)
-    # Setting up the op.
+
     y = math_helpers.spherical_to_cartesian_coordinates(data)
-    # Checks the correctness of the jacobians.
+
     self.assert_jacobian_is_correct(r, r_init, y)
     self.assert_jacobian_is_correct(theta, theta_init, y)
     self.assert_jacobian_is_correct(phi, phi_init, y)
@@ -158,7 +154,9 @@ class MathTest(test_case.TestCase):
         1.0 - asserts.select_eps_for_addition(tf.float32),
         size=(10, 2))
     point_2d = tf.convert_to_tensor(value=point_2d_init)
+
     y = math_helpers.square_to_spherical_coordinates(point_2d)
+
     self.assert_jacobian_is_correct(point_2d, point_2d_init, y, atol=1e-3)
 
   def test_square_to_spherical_coordinates_range_exception_raised(self):
@@ -166,9 +164,11 @@ class MathTest(test_case.TestCase):
     point_2d_below = np.random.uniform(-1.0, -sys.float_info.epsilon, size=(2,))
     point_2d_above = np.random.uniform(
         1.0 + asserts.select_eps_for_addition(tf.float32), 2.0, size=(2,))
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
       self.evaluate(
           math_helpers.square_to_spherical_coordinates(point_2d_below))
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
       self.evaluate(
           math_helpers.square_to_spherical_coordinates(point_2d_above))
@@ -184,8 +184,8 @@ class MathTest(test_case.TestCase):
         math_helpers.square_to_spherical_coordinates, shape)
 
   @parameterized.parameters(
-      ("'point_2d' must have 2 dimensions.", (1,)),
-      ("'point_2d' must have 2 dimensions.", (3,)),
+      ("must have exactly 2 dimensions in axis -1", (1,)),
+      ("must have exactly 2 dimensions in axis -1", (3,)),
   )
   def test_square_to_spherical_coordinates_shape_exception_raised(
       self, error_msg, *shape):

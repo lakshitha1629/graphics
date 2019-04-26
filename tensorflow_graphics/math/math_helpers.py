@@ -23,6 +23,7 @@ import tensorflow as tf
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def cartesian_to_spherical_coordinates(point_cartesian, name=None):
@@ -44,8 +45,12 @@ def cartesian_to_spherical_coordinates(point_cartesian, name=None):
   with tf.compat.v1.name_scope(name, "cartesian_to_spherical_coordinates",
                                [point_cartesian]):
     point_cartesian = tf.convert_to_tensor(value=point_cartesian)
-    if point_cartesian.shape.as_list()[-1] != 3:
-      raise ValueError("'point_cartesian' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=point_cartesian,
+        tensor_name="point_cartesian",
+        has_dim_equals=(-1, 3))
+
     x, y, z = tf.unstack(point_cartesian, axis=-1)
     radius = tf.norm(tensor=point_cartesian, axis=-1)
     theta = tf.acos(safe_ops.safe_signed_div(z, radius))
@@ -76,6 +81,7 @@ def double_factorial(n):
     A tensor of shape `[A1, ..., An]` containing the double factorial of `n`.
   """
   n = tf.convert_to_tensor(value=n)
+
   two = tf.ones_like(n) * 2
   result = tf.ones_like(n)
   _, result, _ = tf.while_loop(
@@ -98,6 +104,7 @@ def factorial(n):
     A tensor of shape `[A1, ..., An]`.
   """
   n = tf.convert_to_tensor(value=n)
+
   return tf.exp(tf.math.lgamma(n + 1))
 
 
@@ -124,8 +131,12 @@ def spherical_to_cartesian_coordinates(point_spherical, name=None):
   with tf.compat.v1.name_scope(name, "spherical_to_cartesian_coordinates",
                                [point_spherical]):
     point_spherical = tf.convert_to_tensor(value=point_spherical)
-    if point_spherical.shape.as_list()[-1] != 3:
-      raise ValueError("'point_spherical' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=point_spherical,
+        tensor_name="point_spherical",
+        has_dim_equals=(-1, 3))
+
     r, theta, phi = tf.unstack(point_spherical, axis=-1)
     r = asserts.assert_all_above(r, 0)
     tmp = r * tf.sin(theta)
@@ -159,10 +170,12 @@ def square_to_spherical_coordinates(point_2d, name=None):
   with tf.compat.v1.name_scope(name, "math_square_to_spherical_coordinates",
                                [point_2d]):
     point_2d = tf.convert_to_tensor(value=point_2d)
+
+    shape.check_static(
+        tensor=point_2d, tensor_name="point_2d", has_dim_equals=(-1, 2))
     point_2d = asserts.assert_all_in_range(
         point_2d, 0.0, 1.0, open_bounds=False)
-    if point_2d.shape.as_list()[-1] != 2:
-      raise ValueError("'point_2d' must have 2 dimensions.")
+
     x, y = tf.unstack(point_2d, axis=-1)
     theta = 2.0 * tf.acos(tf.sqrt(1.0 - x))
     phi = 2.0 * np.pi * y

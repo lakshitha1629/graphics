@@ -154,20 +154,20 @@ def minimize(residuals,
         sess.run(minimize_op)
     ```
   """
-  if not isinstance(residuals, (tuple, list)):
-    residuals = [residuals]
-  if isinstance(residuals, tuple):
-    residuals = list(residuals)
-  if not isinstance(variables, (tuple, list)):
-    variables = [variables]
-  if isinstance(variables, tuple):
-    variables = list(variables)
-  if max_iterations <= 0:
-    raise ValueError("'max_iterations' needs to be at least 1.")
-
   with tf.compat.v1.name_scope(name, 'levenberg_marquardt_minimize', variables):
+    if not isinstance(residuals, (tuple, list)):
+      residuals = [residuals]
+    if isinstance(residuals, tuple):
+      residuals = list(residuals)
+    if not isinstance(variables, (tuple, list)):
+      variables = [variables]
+    if isinstance(variables, tuple):
+      variables = list(variables)
     variables = [tf.convert_to_tensor(value=variable) for variable in variables]
     multiplier = tf.constant(regularizer_multiplier, dtype=variables[0].dtype)
+
+    if max_iterations <= 0:
+      raise ValueError("'max_iterations' needs to be at least 1.")
 
     def _cond(iteration, regularizer, objective_value, variables):
       """Returns whether any iteration still needs to be performed."""

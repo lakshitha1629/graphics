@@ -25,6 +25,7 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":normals",
+        ":utils",
         "//tensorflow_graphics/geometry/representation/mesh/convolution",
         "//tensorflow_graphics/util:export_api",
     ],
@@ -45,6 +46,15 @@ py_library(
     ],
 )
 
+py_library(
+    name = "utils",
+    srcs = ["utils.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        "//tensorflow_graphics/util:export_api",
+    ],
+)
+
 py_test(
     name = "normals_test",
     srcs = ["tests/normals_test.py"],
@@ -55,6 +65,17 @@ py_test(
 
         # google internal,
         "//tensorflow_graphics/math:vector",
+        "//tensorflow_graphics/util:test_case",
+    ],
+)
+
+py_test(
+    name = "utils_test",
+    srcs = ["tests/utils_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":utils",
+        # package dep
         "//tensorflow_graphics/util:test_case",
     ],
 )
