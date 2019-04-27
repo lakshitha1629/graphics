@@ -247,9 +247,10 @@ def _fix_axes(tensors, axes, allow_negative):
       ((allow_negative or
         (not allow_negative and axis >= 0)) and axis < tensor.shape.ndims)
       for tensor, axis in zip(tensors, axes)):
+    rank_axis_pairs = zip([tensor.shape.ndims for tensor in tensors], axes)
     raise ValueError(
         'Some axes are out of bounds. Given rank-axes pairs: {}'.format(
-            zip([tensor.shape.ndims for tensor in tensors], axes)))
+            [pair for pair in rank_axis_pairs]))
   return axes
 
 

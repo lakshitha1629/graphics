@@ -134,7 +134,7 @@ class OptimizerTest(test_case.TestCase):
 
   def test_minimize_linear_residuals_random(self):
     """Optimizing linear residuals should give the minimum in 1 step."""
-    tensor_size = np.random.randint(3)
+    tensor_size = np.random.randint(1, 3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     variables = np.random.uniform(low=-1.0, high=1.0, size=tensor_shape)
     objective_value, variables = levenberg_marquardt.minimize(

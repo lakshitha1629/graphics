@@ -45,6 +45,7 @@ py_library(
 
 py_test(
     name = "levenberg_marquardt_test",
+    timeout = "long",
     srcs = ["tests/levenberg_marquardt_test.py"],
     srcs_version = "PY2AND3",
     deps = [

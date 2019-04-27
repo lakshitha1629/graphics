@@ -154,13 +154,13 @@ def minimize(residuals,
         sess.run(minimize_op)
     ```
   """
+  if not isinstance(variables, (tuple, list)):
+    variables = [variables]
   with tf.compat.v1.name_scope(name, 'levenberg_marquardt_minimize', variables):
     if not isinstance(residuals, (tuple, list)):
       residuals = [residuals]
     if isinstance(residuals, tuple):
       residuals = list(residuals)
-    if not isinstance(variables, (tuple, list)):
-      variables = [variables]
     if isinstance(variables, tuple):
       variables = list(variables)
     variables = [tf.convert_to_tensor(value=variable) for variable in variables]

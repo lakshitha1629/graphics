@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from tensorflow_graphics.geometry import convolution
 from tensorflow_graphics.geometry import deformation_energy
 from tensorflow_graphics.geometry import representation
 from tensorflow_graphics.geometry import transformation

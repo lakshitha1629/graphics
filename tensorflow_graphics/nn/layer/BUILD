@@ -11,33 +11,48 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# Tensorflow-Graphics, a library for differentiable computer graphics and geometry.
+# Layers tf-graphics.
 
-# google internal
-# google internal
+# google internal)
 
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["LICENSE"])
-
 py_library(
-    name = "tensorflow_graphics",
+    name = "layer",
     srcs = [
         "__init__.py",
-        "version.py",
     ],
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [
-        "//tensorflow_graphics/geometry",
-        "//tensorflow_graphics/image",
-        "//tensorflow_graphics/math",
-        "//tensorflow_graphics/nn",
-        "//tensorflow_graphics/notebooks",
-        "//tensorflow_graphics/rendering",
-        "//tensorflow_graphics/util",
+        ":graph_convolution",
         "//tensorflow_graphics/util:export_api",
+    ],
+)
+
+py_library(
+    name = "graph_convolution",
+    srcs = ["graph_convolution.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        # google internal,
+        "//tensorflow_graphics/geometry/convolution:graph_convolution",
+        "//tensorflow_graphics/geometry/convolution:utils",
+        "//tensorflow_graphics/util:export_api",
+    ],
+)
+
+py_test(
+    name = "graph_convolution_test",
+    srcs = ["tests/graph_convolution_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":graph_convolution",
+        # package dep
+
+        # google internal,
+        "//tensorflow_graphics/util:test_case",
     ],
 )

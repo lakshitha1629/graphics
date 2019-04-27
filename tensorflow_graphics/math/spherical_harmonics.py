@@ -104,8 +104,8 @@ def generate_l_m_zonal(max_band, name=None):
     Two tensors of shape `[max_band+1]`, one for degree l and one for order m.
   """
   with tf.compat.v1.name_scope(name, "generate_l_m_zonal", [max_band]):
-    degree_l = np.linspace(0, max_band, num=max_band + 1)
-    order_m = np.zeros(max_band + 1)
+    degree_l = np.linspace(0, max_band, num=max_band + 1, dtype=np.int32)
+    order_m = np.zeros(max_band + 1, dtype=np.int32)
     return (tf.convert_to_tensor(value=degree_l),
             tf.convert_to_tensor(value=order_m))
 

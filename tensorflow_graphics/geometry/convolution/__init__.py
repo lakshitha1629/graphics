@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Mesh module."""
+"""Convolution module."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tensorflow_graphics.geometry.representation.mesh import normals
-from tensorflow_graphics.geometry.representation.mesh import utils
+from tensorflow_graphics.geometry.convolution import graph_convolution
+from tensorflow_graphics.geometry.convolution import utils
 from tensorflow_graphics.util import export_api as _export_api
 
-# API contains submodules of tensorflow_graphics.geometry.
+# API contains submodules of tensorflow_graphics.geometry.convolution.
 __all__ = _export_api.get_modules()

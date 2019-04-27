@@ -129,7 +129,7 @@ def reflect(vector, normal, axis=-1, name=None):
         tensors=(vector, normal), axes=axis, tensor_names=("vector", "normal"))
     shape.compare_batch_dimensions(
         tensors=(vector, normal), last_axes=-1, broadcast_compatible=True)
-    normal = asserts.assert_normalized(normal)
+    normal = asserts.assert_normalized(normal, axis=axis)
 
     dot_product = dot(vector, normal, axis=axis)
     return vector - 2.0 * dot_product * normal

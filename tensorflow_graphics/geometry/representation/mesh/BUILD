@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# Describe.
+# Mesh functionalities for tf-graphics.
 
 # google internal)
 
@@ -26,7 +26,6 @@ py_library(
     deps = [
         ":normals",
         ":utils",
-        "//tensorflow_graphics/geometry/representation/mesh/convolution",
         "//tensorflow_graphics/util:export_api",
     ],
 )

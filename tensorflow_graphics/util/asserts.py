@@ -182,15 +182,16 @@ def assert_nonzero_norm(vector, eps=None, name=None):
       return tf.identity(vector)
 
 
-def assert_normalized(vector, eps=None, name=None):
+def assert_normalized(vector, axis=-1, eps=None, name=None):
   """Checks whether vector/quaternion is normalized in its last dimension.
 
   Note:
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    vector: A tensor of shape [A1, ..., An, M], where the last dimension
-      contains M dimensional vectors.
+    vector: A tensor of shape [A1, ..., M, ..., An], where the axis
+      of dimension M contains the vectors.
+    axis: The axis containing the vectors.
     eps: A `float` describing the tolerance used to determine if the norm is
       equal to 1.0.
     name: A name for this op. Defaults to 'assert_normalized'.
@@ -204,9 +205,9 @@ def assert_normalized(vector, eps=None, name=None):
   if not FLAGS[tfg_flags.TFG_ADD_ASSERTS_TO_GRAPH].value:
     return vector
 
-  with tf.compat.v1.name_scope(name, 'assert_normalized', [vector, eps]):
+  with tf.compat.v1.name_scope(name, 'assert_normalized', [vector]):
     vector = tf.convert_to_tensor(value=vector)
-    norm = tf.norm(tensor=vector, axis=-1)
+    norm = tf.norm(tensor=vector, axis=axis)
     if eps is None:
       eps = select_eps_for_addition(norm.dtype)
     eps = tf.convert_to_tensor(value=eps, dtype=norm.dtype)

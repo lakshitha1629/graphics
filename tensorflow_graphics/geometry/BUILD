@@ -27,6 +27,7 @@ py_library(
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [
+        "//tensorflow_graphics/geometry/convolution",
         "//tensorflow_graphics/geometry/deformation_energy",
         "//tensorflow_graphics/geometry/representation",
         "//tensorflow_graphics/geometry/transformation",

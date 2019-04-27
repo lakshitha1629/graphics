@@ -285,12 +285,12 @@ class VectorTest(test_case.TestCase):
   def test_reflect_random(self):
     """Tests that calling reflect twice give an identity transform."""
     tensor_size = np.random.randint(2, 4)
-    tensor_shape = np.random.randint(1, 10, size=tensor_size).tolist()
+    tensor_shape = np.random.randint(2, 3, size=tensor_size).tolist()
     axis = np.random.randint(tensor_size)
     u = np.random.random(size=tensor_shape)
     v = np.random.random(size=tensor_shape)
-
     v /= np.linalg.norm(v, axis=axis, keepdims=True)
+
     u_new = vector.reflect(u, v, axis=axis)
     u_new = vector.reflect(u_new, v, axis=axis)
 

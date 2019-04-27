@@ -43,6 +43,7 @@ py_library(
 
 py_test(
     name = "pyramid_test",
+    timeout = "long",
     srcs = ["tests/pyramid_test.py"],
     srcs_version = "PY2AND3",
     deps = [

@@ -90,10 +90,11 @@ class LambertianTest(test_case.TestCase):
     direction_incoming_light[..., 1:3] = incoming_yz
     direction_outgoing_light[..., 1:3] = outgoing_yz
     direction_incoming_light = direction_incoming_light / np.linalg.norm(
-        direction_incoming_light, axis=-1)
+        direction_incoming_light, axis=-1, keepdims=True)
     direction_outgoing_light = direction_outgoing_light / np.linalg.norm(
-        direction_outgoing_light, axis=-1)
-    surface_normal = surface_normal / np.linalg.norm(surface_normal, axis=-1)
+        direction_outgoing_light, axis=-1, keepdims=True)
+    surface_normal = surface_normal / np.linalg.norm(
+        surface_normal, axis=-1, keepdims=True)
     gt = albedo * ratio
     pred = lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                            surface_normal, albedo)

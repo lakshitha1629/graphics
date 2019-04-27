@@ -33,7 +33,7 @@ class SphericalHarmonicsTest(test_case.TestCase):
 
   def test_evaluate_legendre_polynomial_preset(self):
     """Tests that evaluate_legendre_polynomial generates expected results."""
-    tensor_size = np.random.randint(3)
+    tensor_size = np.random.randint(1, 3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     x = np.random.uniform(size=tensor_shape)
 
@@ -164,7 +164,7 @@ class SphericalHarmonicsTest(test_case.TestCase):
 
   def test_evaluate_legendre_polynomial_jacobian_random(self):
     """Tests the Jacobian of evaluate_legendre_polynomial."""
-    tensor_size = np.random.randint(3)
+    tensor_size = np.random.randint(1, 3)
     tensor_shape = np.random.randint(1, 5, size=(tensor_size)).tolist()
     # Initialization.
     l_init = np.random.randint(5, 10, size=tensor_shape)
@@ -325,8 +325,13 @@ class SphericalHarmonicsTest(test_case.TestCase):
         value=np.random.uniform(size=tensor_shape + [3]))
     pt_3d = tf.math.l2_normalize(pt_3d, axis=-1)
     x, y, z = tf.unstack(pt_3d, axis=-1)
+    x = tf.expand_dims(x, axis=-1)
+    y = tf.expand_dims(y, axis=-1)
+    z = tf.expand_dims(z, axis=-1)
     pt_spherical = math_helpers.cartesian_to_spherical_coordinates(pt_3d)
     _, theta, phi = tf.unstack(pt_spherical, axis=-1)
+    theta = tf.expand_dims(theta, axis=-1)
+    phi = tf.expand_dims(phi, axis=-1)
     ones = tf.ones_like(z)
 
     with self.subTest(name="l_0_m_0"):
@@ -408,9 +413,13 @@ class SphericalHarmonicsTest(test_case.TestCase):
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 5, size=(tensor_size)).tolist()
     l_init = np.random.randint(5, 10, size=tensor_shape)
+    l_init = np.expand_dims(l_init, axis=-1)
     m_init = np.random.randint(0, 4, size=tensor_shape)
+    m_init = np.expand_dims(m_init, axis=-1)
     theta_init = np.random.uniform(0.0, np.pi, size=tensor_shape)
+    theta_init = np.expand_dims(theta_init, axis=-1)
     phi_init = np.random.uniform(0.0, 2.0 * np.pi, size=tensor_shape)
+    phi_init = np.expand_dims(phi_init, axis=-1)
     theta = tf.convert_to_tensor(value=theta_init)
     phi = tf.convert_to_tensor(value=phi_init)
 
