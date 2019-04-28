@@ -340,7 +340,7 @@ def rotate_zonal_harmonics(zonal_coeffs, theta, phi, name=None):
         broadcast_compatible=False)
 
     tiled_zonal_coeffs = tile_zonal_coefficients(zonal_coeffs)
-    max_band = tf.compat.dimension_value(zonal_coeffs.shape[-1])
+    max_band = zonal_coeffs.shape.as_list()[-1]
     l, m = generate_l_m_permutations(max_band - 1)
     broadcast_shape = theta.shape.as_list()[:-1] + l.shape.as_list()
     l_broadcasted = tf.broadcast_to(l, broadcast_shape)
