@@ -133,7 +133,11 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       dtypes: A list of input types.
       **kwargs: A dict of keyword arguments to be passed to the function.
     """
-    if tf.executing_eagerly():
+    if tf.executing_eagerly() and shapes:
+      # If a shape is given in eager mode, the tensor will be initialized with
+      # zeros, which can make some range checks fail for certain functions.
+      # But if only kwargs are passed and shapes is empty, this function
+      # still should run correctly.
       return
     placeholders = self._create_placeholders_from_shapes(shapes, dtypes)
     try:
