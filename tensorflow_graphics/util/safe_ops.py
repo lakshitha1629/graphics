@@ -35,6 +35,10 @@ from tensorflow_graphics.util import tfg_flags
 FLAGS = flags.FLAGS
 
 
+def _mod(x, y):
+  return x - tf.floor(x / y) * y
+
+
 def nonzero_sign(x, name=None):
   """Returns the sign of x with sign(0) defined as 1 instead of 0."""
   with tf.compat.v1.name_scope(name, 'nonzero_sign', [x]):
@@ -78,7 +82,7 @@ def safe_cospx_div_cosx(theta, factor, eps=None, name=None):
     # Therefore we multiply eps with min(1/factor, 1e10), which can handle
     # factors as small as 1e-10 correctly, while preventing a division by zero.
     eps *= tf.clip_by_value(1.0 / factor, 1.0, 1e10)
-    sign = nonzero_sign(0.5 * np.pi - tf.math.mod(theta - 0.5 * np.pi, np.pi))
+    sign = nonzero_sign(0.5 * np.pi - _mod(theta - 0.5 * np.pi, np.pi))
     theta += sign * eps
     div = tf.cos(factor * theta) / tf.cos(theta)
     if FLAGS[tfg_flags.TFG_ADD_ASSERTS_TO_GRAPH].value:
@@ -224,7 +228,7 @@ def safe_sinpx_div_sinx(theta, factor, eps=None, name=None):
     # Therefore we multiply eps with min(1/factor, 1e10), which can handle
     # factors as small as 1e-10 correctly, while preventing a division by zero.
     eps *= tf.clip_by_value(1.0 / factor, 1.0, 1e10)
-    sign = nonzero_sign(0.5 * np.pi - tf.math.mod(theta, np.pi))
+    sign = nonzero_sign(0.5 * np.pi - _mod(theta, np.pi))
     theta += sign * eps
     div = tf.sin(factor * theta) / tf.sin(theta)
     if FLAGS[tfg_flags.TFG_ADD_ASSERTS_TO_GRAPH].value:
