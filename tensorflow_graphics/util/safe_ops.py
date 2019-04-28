@@ -35,6 +35,7 @@ from tensorflow_graphics.util import tfg_flags
 FLAGS = flags.FLAGS
 
 
+# TODO: remove when TF API is compatible for modulo.
 def _mod(x, y):
   return x - tf.floor(x / y) * y
 

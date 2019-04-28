@@ -30,6 +30,11 @@ from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import shape
 
 
+# TODO: remove when TF API is
+def _mod(x, y):
+  return x - tf.cast((x // y) * y, dtype=x.dtype)
+
+
 class Degree(enum.IntEnum):
   """Defines valid degrees for B-spline interpolation."""
   CONSTANT = 0
@@ -193,7 +198,7 @@ def knot_weights(positions,
         shape=(-1,))
     ind_col = tf.reshape(ind_col, shape=(-1,)) + tiled_shifts
     if cyclical:
-      ind_col = tf.math.mod(ind_col, num_knots)
+      ind_col = _mod(ind_col, num_knots)
     indices = tf.stack((tf.reshape(ind_row, shape=(-1,)), ind_col), axis=-1)
     shape_indices = tf.concat((tf.reshape(
         num_positions, shape=(1,)), tf.constant(
