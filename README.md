@@ -1,5 +1,7 @@
 # Tensorflow graphics library.
 
+## The repository is currently in development. The library will be officially released the 7th of May, including the pip package.
+
 TensorFlow Graphics is a library of graphics related Tensorflow ops. As part of 
 the TensorFlow ecosystem, these graphics ops can also be used to build machine 
 learning models and are for the most part differentiable.
@@ -80,38 +82,9 @@ You can find our API documentation [here](https://github.com/tensorflow/graphics
 Coming soon...
 
 # Notebooks
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/6dof_alignment.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
-
-<a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb">
-<img src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/task.jpg" width="500" alt=""></img>
-</a>
+Coming soon...
 
 # Additional Information
 You may use this software under the Apache 2.0 License. See [LICENSE](https://github.com/tensorflow/graphics/blob/master/LICENSE).
 
-# Community
-We are in `#tf-graphics` on the tf-graphics slack channel ([join link](https://join.slack.com/t/tf-graphics/shared_invite/enQtNjE5NTQ1NTg5ODYwLWU3MzQ2YTEzZTdkN2RhMzgwMWM5MzdhMDRmMWRlM2E3MzhhMjAyYmZhNWM2OWQ2Y2ExNGUzNTE1Y2Y4MjZhOWU)). We would love to hear from you!
 
