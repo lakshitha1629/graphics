@@ -27,6 +27,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 
 def project(point_3d, name=None):
@@ -58,9 +59,10 @@ def project(point_3d, name=None):
   """
   with tf.compat.v1.name_scope(name, "orthographic_project", [point_3d]):
     point_3d = tf.convert_to_tensor(value=point_3d)
-    shape_point_3d = point_3d.shape.as_list()
-    if shape_point_3d[-1] != 3:
-      raise ValueError("'point_3d' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=point_3d, tensor_name="point_3d", has_dim_equals=(-1, 3))
+
     return point_3d[..., :2]
 
 
@@ -93,8 +95,10 @@ def ray(point_2d, name=None):
   """
   with tf.compat.v1.name_scope(name, "orthographic_ray", [point_2d]):
     point_2d = tf.convert_to_tensor(value=point_2d)
-    if point_2d.get_shape()[-1] != 2:
-      raise ValueError("'point_2d' must have 2 dimensions.")
+
+    shape.check_static(
+        tensor=point_2d, tensor_name="point_2d", has_dim_equals=(-1, 2))
+
     zeros = tf.zeros_like(point_2d)
     ones = tf.ones_like(point_2d[..., :1])
     zeros = tf.zeros_like(point_2d)
@@ -136,10 +140,17 @@ def unproject(point_2d, depth, name=None):
                                [point_2d, depth]):
     point_2d = tf.convert_to_tensor(value=point_2d)
     depth = tf.convert_to_tensor(value=depth)
-    if point_2d.get_shape()[-1] != 2:
-      raise ValueError("'point_2d' must have 2 dimensions.")
-    if depth.get_shape()[-1] != 1:
-      raise ValueError("'depth' must have 1 dimension.")
+
+    shape.check_static(
+        tensor=point_2d, tensor_name="point_2d", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=depth, tensor_name="depth", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(point_2d, depth),
+        tensor_names=("point_2d", "depth"),
+        last_axes=-2,
+        broadcast_compatible=False)
+
     return tf.concat((point_2d, depth), axis=-1)
 
 

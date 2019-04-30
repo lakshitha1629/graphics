@@ -42,8 +42,7 @@ def _downsample(image, kernel):
     and width of the downsampled image.
 
   """
-  return tf.nn.conv2d(
-      input=image, filters=kernel, strides=[1, 2, 2, 1], padding="SAME")
+  return tf.nn.conv2d(image, kernel, strides=[1, 2, 2, 1], padding="SAME")
 
 
 def _binomial_kernel(num_channels, dtype=tf.float32):
@@ -130,8 +129,8 @@ def _upsample(image, kernel, output_shape=None):
     output_shape = (output_shape[0], output_shape[1] * 2, output_shape[2] * 2,
                     output_shape[3])
   return tf.nn.conv2d_transpose(
-      input=image,
-      filters=kernel * 4.0,
+      image,
+      kernel * 4.0,
       output_shape=output_shape,
       strides=[1, 2, 2, 1],
       padding="SAME")

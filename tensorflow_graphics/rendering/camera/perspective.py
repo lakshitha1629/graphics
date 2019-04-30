@@ -44,11 +44,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import sys
-
 import tensorflow as tf
 
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def intrinsics_from_matrix(matrix, name=None):
@@ -85,9 +85,12 @@ def intrinsics_from_matrix(matrix, name=None):
   with tf.compat.v1.name_scope(name, "perspective_intrinsics_from_matrix",
                                [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape_matrix = matrix.shape.as_list()
-    if shape_matrix[-2:] != [3, 3]:
-      raise ValueError("'matrix' must have 3x3 dimensions.")
+
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-1, 3), (-2, 3)))
 
     fx = matrix[..., 0, 0]
     fy = matrix[..., 1, 1]
@@ -137,23 +140,27 @@ def matrix_from_intrinsics(focal, principal_point, name=None):
                                [focal, principal_point]):
     focal = tf.convert_to_tensor(value=focal)
     principal_point = tf.convert_to_tensor(value=principal_point)
-    shape_focal = focal.shape.as_list()
-    shape_principal_point = principal_point.shape.as_list()
-    if shape_focal[-1] != 2:
-      raise ValueError("'focal' must have 2 dimensions.")
-    if shape_principal_point[-1] != 2:
-      raise ValueError("'principal_point' must have 2 dimensions.")
+
+    shape.check_static(
+        tensor=focal, tensor_name="focal", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=principal_point,
+        tensor_name="principal_point",
+        has_dim_equals=(-1, 2))
+    shape.compare_batch_dimensions(
+        tensors=(focal, principal_point),
+        tensor_names=("focal", "principal_point"),
+        last_axes=-2,
+        broadcast_compatible=False)
 
     fx, fy = tf.unstack(focal, axis=-1)
     cx, cy = tf.unstack(principal_point, axis=-1)
     zero = tf.zeros_like(fx)
     one = tf.ones_like(fx)
-    # pyformat: disable
     matrix = tf.stack((fx, zero, cx,
                        zero, fy, cy,
                        zero, zero, one),
-                      axis=-1)
-    # pyformat: enable
+                      axis=-1)  # pyformat: disable
     matrix_shape = tf.shape(input=matrix)
     output_shape = tf.concat((matrix_shape[:-1], (3, 3)), axis=-1)
     return tf.reshape(matrix, shape=output_shape)
@@ -175,7 +182,8 @@ def project(point_3d, focal, principal_point, name=None):
   point.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions that must be
+    broadcast compatible.
 
   Args:
     point_3d: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
@@ -199,20 +207,23 @@ def project(point_3d, focal, principal_point, name=None):
     point_3d = tf.convert_to_tensor(value=point_3d)
     focal = tf.convert_to_tensor(value=focal)
     principal_point = tf.convert_to_tensor(value=principal_point)
-    shape_point_3d = point_3d.shape.as_list()
-    shape_focal = focal.shape.as_list()
-    shape_principal_point = principal_point.shape.as_list()
-    if shape_point_3d[-1] != 3:
-      raise ValueError("'point_3d' must have 3 dimensions.")
-    if shape_focal[-1] != 2:
-      raise ValueError("'focal' must have 2 dimensions.")
-    if shape_principal_point[-1] != 2:
-      raise ValueError("'principal_point' must have 2 dimensions.")
+
+    shape.check_static(
+        tensor=point_3d, tensor_name="point_3d", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=focal, tensor_name="focal", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=principal_point,
+        tensor_name="principal_point",
+        has_dim_equals=(-1, 2))
+    shape.compare_batch_dimensions(
+        tensors=(point_3d, focal, principal_point),
+        tensor_names=("point_3d", "focal", "principal_point"),
+        last_axes=-2,
+        broadcast_compatible=True)
 
     point_2d, depth = tf.split(point_3d, (2, 1), axis=-1)
-    eps = sys.float_info.epsilon
-    depth = tf.sign(depth) * tf.maximum(tf.abs(depth), eps)
-    point_2d *= focal / depth
+    point_2d *= safe_ops.safe_signed_div(focal, depth)
     point_2d += principal_point
   return point_2d
 
@@ -233,7 +244,8 @@ def ray(point_2d, focal, principal_point, name=None):
   point. The camera optical center is assumed to be at $$(0, 0, 0)$$.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions that must be
+    broadcast compatible.
 
   Args:
     point_2d: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
@@ -257,21 +269,24 @@ def ray(point_2d, focal, principal_point, name=None):
     point_2d = tf.convert_to_tensor(value=point_2d)
     focal = tf.convert_to_tensor(value=focal)
     principal_point = tf.convert_to_tensor(value=principal_point)
-    shape_point_2d = point_2d.shape.as_list()
-    shape_focal = focal.shape.as_list()
-    shape_principal_point = principal_point.shape.as_list()
-    if shape_point_2d[-1] != 2:
-      raise ValueError("'point_2d' must have 2 dimensions.")
-    if shape_focal[-1] != 2:
-      raise ValueError("'focal' must have 2 dimensions.")
-    if shape_principal_point[-1] != 2:
-      raise ValueError("'principal_point' must have 2 dimensions.")
+
+    shape.check_static(
+        tensor=point_2d, tensor_name="point_2d", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=focal, tensor_name="focal", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=principal_point,
+        tensor_name="principal_point",
+        has_dim_equals=(-1, 2))
+    shape.compare_batch_dimensions(
+        tensors=(point_2d, focal, principal_point),
+        tensor_names=("point_2d", "focal", "principal_point"),
+        last_axes=-2,
+        broadcast_compatible=True)
 
     point_2d -= principal_point
-    eps = sys.float_info.epsilon
-    focal = tf.sign(focal) * tf.maximum(tf.abs(focal), eps)
-    point_2d /= focal
-    padding = [[0, 0] for _ in shape_point_2d]
+    point_2d = safe_ops.safe_signed_div(point_2d, focal)
+    padding = [[0, 0] for _ in point_2d.shape]
     padding[-1][-1] = 1
     return tf.pad(
         tensor=point_2d, paddings=padding, mode="CONSTANT", constant_values=1.0)
@@ -320,23 +335,25 @@ def unproject(point_2d, depth, focal, principal_point, name=None):
     depth = tf.convert_to_tensor(value=depth)
     focal = tf.convert_to_tensor(value=focal)
     principal_point = tf.convert_to_tensor(value=principal_point)
-    shape_point_2d = point_2d.shape.as_list()
-    shape_depth = depth.shape.as_list()
-    shape_focal = focal.shape.as_list()
-    shape_principal_point = principal_point.shape.as_list()
-    if shape_point_2d[-1] != 2:
-      raise ValueError("'point_2d' must have 2 dimensions.")
-    if shape_depth[-1] != 1:
-      raise ValueError("'depth' must have 1 dimension.")
-    if shape_focal[-1] != 2:
-      raise ValueError("'focal' must have 2 dimensions.")
-    if shape_principal_point[-1] != 2:
-      raise ValueError("'principal_point' must have 2 dimensions.")
+
+    shape.check_static(
+        tensor=point_2d, tensor_name="point_2d", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=depth, tensor_name="depth", has_dim_equals=(-1, 1))
+    shape.check_static(
+        tensor=focal, tensor_name="focal", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=principal_point,
+        tensor_name="principal_point",
+        has_dim_equals=(-1, 2))
+    shape.compare_batch_dimensions(
+        tensors=(point_2d, depth, focal, principal_point),
+        tensor_names=("point_2d", "depth", "focal", "principal_point"),
+        last_axes=-2,
+        broadcast_compatible=False)
 
     point_2d -= principal_point
-    eps = sys.float_info.epsilon
-    focal = tf.sign(focal) * tf.maximum(tf.abs(focal), eps)
-    point_2d *= depth / focal
+    point_2d *= safe_ops.safe_signed_div(depth, focal)
     return tf.concat((point_2d, depth), axis=-1)
 
 

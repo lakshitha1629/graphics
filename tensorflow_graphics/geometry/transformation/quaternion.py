@@ -30,8 +30,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import math
-
 import tensorflow as tf
 
 from tensorflow_graphics.geometry.transformation import rotation_matrix_3d
@@ -481,16 +479,16 @@ def normalized_random_uniform(quaternion_shape, name=None):
       "quaternion_normalized_random_uniform".
 
   Returns:
+    A tensor of shape `[quaternion_shape[0],...,quaternion_shape[-1], 4]`
+    representing random normalized quaternions.
   """
-  with tf.compat.v1.name_scope(name, "quaternion_normalized_random_uniform"):
-    u1 = tf.random.uniform(quaternion_shape, minval=0.0, maxval=1.0)
-    u2 = tf.random.uniform(quaternion_shape, minval=0.0, maxval=2.0 * math.pi)
-    u3 = tf.random.uniform(quaternion_shape, minval=0.0, maxval=2.0 * math.pi)
-    a = tf.sqrt(1.0 - u1)
-    b = tf.sqrt(u1)
-    return tf.stack(
-        (a * tf.sin(u2), a * tf.cos(u2), b * tf.sin(u3), b * tf.cos(u3)),
-        axis=-1)
+  with tf.compat.v1.name_scope(name, "quaternion_normalized_random_uniform",
+                               [quaternion_shape]):
+    quaternion_shape = tf.convert_to_tensor(value=quaternion_shape,
+                                            dtype=tf.int32)
+    quaternion_shape = tf.concat((quaternion_shape, tf.constant([4])), axis=0)
+    random_normal = tf.random.normal(quaternion_shape)
+  return normalize(random_normal)
 
 
 def normalized_random_uniform_initializer():

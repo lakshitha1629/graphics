@@ -33,6 +33,24 @@ INSTALL_PACKAGES = [
     'six >= 1.11.0',
 ]
 
+if '--compute_platform' in sys.argv:
+  compute_platform_idx = sys.argv.index('--compute_platform')
+  compute_platform = sys.argv[compute_platform_idx + 1]
+  sys.argv.remove('--compute_platform')
+  sys.argv.pop(compute_platform_idx)
+else:
+  compute_platform = 'cpu'
+
+if compute_platform not in ('cpu', 'gpu'):
+  sys.exit('Supported compute platforms are cpu or gpu')
+
+if compute_platform == 'cpu':
+  INSTALL_PACKAGES.append('tensorflow >= 1.13.1')
+  package_name = 'tensorflow-graphics'
+else:
+  INSTALL_PACKAGES.append('tensorflow-gpu >= 1.13.1')
+  package_name = 'tensorflow-graphics-gpu'
+
 SETUP_PACKAGES = [
     'pytest-runner',
 ]
@@ -50,7 +68,7 @@ EXTRA_PACKAGES = {
 }
 
 setup(
-    name='tensorflow-graphics',
+    name=package_name,
     version=__version__,
     description=('A library that contains well defined, reusable and cleanly '
                  'written graphics related ops and utility functions for '

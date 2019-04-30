@@ -28,6 +28,7 @@ class PerspectiveTest(test_case.TestCase):
 
   @parameterized.parameters(
       ((3, 3),),
+      ((3, 3, 3),),
       ((None, 3, 3),),
   )
   def test_intrinsics_from_matrix_exception_not_raised(self, *shapes):
@@ -36,9 +37,9 @@ class PerspectiveTest(test_case.TestCase):
                                         shapes)
 
   @parameterized.parameters(
-      ("'matrix' must have 3x3 dimensions.", (3,)),
-      ("'matrix' must have 3x3 dimensions.", (None, 3)),
-      ("'matrix' must have 3x3 dimensions.", (3, None)),
+      ("must have a rank greater than 1", (3,)),
+      ("must have exactly 3 dimensions in axis -2", (None, 3)),
+      ("must have exactly 3 dimensions in axis -1", (3, None)),
   )
   def test_intrinsics_from_matrix_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -60,14 +61,17 @@ class PerspectiveTest(test_case.TestCase):
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     random_focal = np.random.normal(size=tensor_shape + [2])
     random_principal_point = np.random.normal(size=tensor_shape + [2])
+
     matrix = perspective.matrix_from_intrinsics(random_focal,
                                                 random_principal_point)
     focal, principal_point = perspective.intrinsics_from_matrix(matrix)
+
     self.assertAllClose(random_focal, focal, rtol=1e-3)
     self.assertAllClose(random_principal_point, principal_point, rtol=1e-3)
 
   @parameterized.parameters(
       ((2,), (2,)),
+      ((2, 2), (2, 2)),
       ((None, 2), (None, 2)),
   )
   def test_matrix_from_intrinsics_exception_not_raised(self, *shapes):
@@ -76,8 +80,9 @@ class PerspectiveTest(test_case.TestCase):
                                         shapes)
 
   @parameterized.parameters(
-      ("'focal' must have 2 dimensions.", (None,), (2,)),
-      ("'principal_point' must have 2 dimensions.", (2,), (None,)),
+      ("must have exactly 2 dimensions in axis -1", (None,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2,), (None,)),
+      ("Not all batch dimensions are identical.", (3, 2), (2, 2)),
   )
   def test_matrix_from_intrinsics_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -107,12 +112,16 @@ class PerspectiveTest(test_case.TestCase):
     one = np.ones_like(fx)
     random_matrix = np.stack((fx, zero, cx, zero, fy, cy, zero, zero, one),
                              axis=-1).reshape(tensor_shape + [3, 3])
+
     focal, principal_point = perspective.intrinsics_from_matrix(random_matrix)
     matrix = perspective.matrix_from_intrinsics(focal, principal_point)
+
     self.assertAllClose(random_matrix, matrix, rtol=1e-3)
 
   @parameterized.parameters(
       ((3,), (2,), (2,)),
+      ((2, 3), (2, 2), (2, 2)),
+      ((2, 3), (2,), (2,)),
       ((None, 3), (None, 2), (None, 2)),
   )
   def test_project_exception_not_exception_raised(self, *shapes):
@@ -120,9 +129,11 @@ class PerspectiveTest(test_case.TestCase):
     self.assert_exception_is_not_raised(perspective.project, shapes)
 
   @parameterized.parameters(
-      ("'point_3d' must have 3 dimensions.", (None,), (2,), (2,)),
-      ("'focal' must have 2 dimensions.", (3,), (None,), (2,)),
-      ("'principal_point' must have 2 dimensions.", (3,), (2,), (None,)),
+      ("must have exactly 3 dimensions in axis -1", (None,), (2,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (3,), (None,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (3,), (2,), (None,)),
+      ("Not all batch dimensions are broadcast-compatible.", (3, 3), (2, 2),
+       (2, 2)),
   )
   def test_project_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""
@@ -148,10 +159,12 @@ class PerspectiveTest(test_case.TestCase):
     random_focal = np.random.normal(size=tensor_shape + [2])
     random_principal_point = np.random.normal(size=tensor_shape + [2])
     random_depth = np.expand_dims(random_point_3d[..., 2], axis=-1)
+
     point_2d = perspective.project(random_point_3d, random_focal,
                                    random_principal_point)
     point_3d = perspective.unproject(point_2d, random_depth, random_focal,
                                      random_principal_point)
+
     self.assertAllClose(random_point_3d, point_3d, rtol=1e-3)
 
   def test_project_ray_random(self):
@@ -162,14 +175,18 @@ class PerspectiveTest(test_case.TestCase):
     random_focal = np.random.normal(size=tensor_shape + [2])
     random_principal_point = np.random.normal(size=tensor_shape + [2])
     random_depth = np.expand_dims(random_point_3d[..., 2], axis=-1)
+
     point_2d = perspective.project(random_point_3d, random_focal,
                                    random_principal_point)
     ray_3d = perspective.ray(point_2d, random_focal, random_principal_point)
     ray_3d = random_depth * ray_3d
+
     self.assertAllClose(random_point_3d, ray_3d, rtol=1e-3)
 
   @parameterized.parameters(
       ((2,), (2,), (2,)),
+      ((2, 2), (2, 2), (2, 2)),
+      ((3, 2), (1, 2), (2,)),
       ((None, 2), (None, 2), (None, 2)),
   )
   def test_ray_exception_exception_not_raised(self, *shapes):
@@ -177,9 +194,11 @@ class PerspectiveTest(test_case.TestCase):
     self.assert_exception_is_not_raised(perspective.ray, shapes)
 
   @parameterized.parameters(
-      ("'point_2d' must have 2 dimensions.", (None,), (2,), (2,)),
-      ("'focal' must have 2 dimensions.", (2,), (None,), (2,)),
-      ("'principal_point' must have 2 dimensions.", (2,), (2,), (None,)),
+      ("must have exactly 2 dimensions in axis -1", (None,), (2,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2,), (None,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2,), (2,), (None,)),
+      ("Not all batch dimensions are broadcast-compatible.", (3, 2), (1, 2),
+       (2, 2)),
   )
   def test_ray_exception_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -202,13 +221,16 @@ class PerspectiveTest(test_case.TestCase):
     random_point_2d = np.random.normal(size=tensor_shape + [2])
     random_focal = np.random.normal(size=tensor_shape + [2])
     random_principal_point = np.random.normal(size=tensor_shape + [2])
+
     ray_3d = perspective.ray(random_point_2d, random_focal,
                              random_principal_point)
     point_2d = perspective.project(ray_3d, random_focal, random_principal_point)
+
     self.assertAllClose(random_point_2d, point_2d, rtol=1e-3)
 
   @parameterized.parameters(
       ((2,), (1,), (2,), (2,)),
+      ((2, 2), (2, 1), (2, 2), (2, 2)),
       ((None, 2), (None, 1), (None, 2), (None, 2)),
   )
   def test_unproject_exception_not_raised(self, *shapes):
@@ -216,10 +238,12 @@ class PerspectiveTest(test_case.TestCase):
     self.assert_exception_is_not_raised(perspective.unproject, shapes)
 
   @parameterized.parameters(
-      ("'point_2d' must have 2 dimensions.", (None,), (1,), (2,), (2,)),
-      ("'depth' must have 1 dimension.", (2,), (None,), (2,), (2,)),
-      ("'focal' must have 2 dimensions.", (2,), (1,), (None,), (2,)),
-      ("'principal_point' must have 2 dimensions.", (2,), (1,), (2,), (None,)),
+      ("must have exactly 2 dimensions in axis -1", (None,), (1,), (2,), (2,)),
+      ("must have exactly 1 dimensions in axis -1", (2,), (None,), (2,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2,), (1,), (None,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2,), (1,), (2,), (None,)),
+      ("Not all batch dimensions are identical.", (1, 2), (2, 1), (2, 2),
+       (2, 2)),
   )
   def test_unproject_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -245,10 +269,12 @@ class PerspectiveTest(test_case.TestCase):
     random_focal = np.random.normal(size=tensor_shape + [2])
     random_principal_point = np.random.normal(size=tensor_shape + [2])
     random_depth = np.random.normal(size=tensor_shape + [1])
+
     point_3d = perspective.unproject(random_point_2d, random_depth,
                                      random_focal, random_principal_point)
     point_2d = perspective.project(point_3d, random_focal,
                                    random_principal_point)
+
     self.assertAllClose(random_point_2d, point_2d, rtol=1e-3)
 
   def test_unproject_ray_random(self):
@@ -259,11 +285,13 @@ class PerspectiveTest(test_case.TestCase):
     random_focal = np.random.normal(size=tensor_shape + [2])
     random_principal_point = np.random.normal(size=tensor_shape + [2])
     random_depth = np.random.normal(size=tensor_shape + [1])
+
     point_3d = perspective.unproject(random_point_2d, random_depth,
                                      random_focal, random_principal_point)
     ray_3d = perspective.ray(random_point_2d, random_focal,
                              random_principal_point)
     ray_3d = random_depth * ray_3d
+
     self.assertAllClose(point_3d, ray_3d, rtol=1e-3)
 
 

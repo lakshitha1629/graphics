@@ -36,9 +36,9 @@ class OrthographicTest(test_case.TestCase):
     self.assert_exception_is_not_raised(orthographic.project, shapes)
 
   @parameterized.parameters(
-      ("'point_3d' must have 3 dimensions.", (1,)),
-      ("'point_3d' must have 3 dimensions.", (2,)),
-      ("'point_3d' must have 3 dimensions.", (4,)),
+      ("must have exactly 3 dimensions in axis -1", (1,)),
+      ("must have exactly 3 dimensions in axis -1", (2,)),
+      ("must have exactly 3 dimensions in axis -1", (4,)),
   )
   def test_project_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""
@@ -50,13 +50,17 @@ class OrthographicTest(test_case.TestCase):
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     point_3d_init = np.random.uniform(size=tensor_shape + [3])
     point_3d = tf.convert_to_tensor(value=point_3d_init)
+
     y = orthographic.project(point_3d)
+
     self.assert_jacobian_is_correct(point_3d, point_3d_init, y)
 
   def test_project_random(self):
     """Test the project function using random 3d points."""
     point_3d = np.random.uniform(size=(100, 3))
+
     pred = orthographic.project(point_3d)
+
     self.assertAllEqual(pred, point_3d[:, 0:2])
 
   @parameterized.parameters(
@@ -68,8 +72,8 @@ class OrthographicTest(test_case.TestCase):
     self.assert_exception_is_not_raised(orthographic.ray, shapes)
 
   @parameterized.parameters(
-      ("'point_2d' must have 2 dimensions.", (1,)),
-      ("'point_2d' must have 2 dimensions.", (3,)),
+      ("must have exactly 2 dimensions in axis -1", (1,)),
+      ("must have exactly 2 dimensions in axis -1", (3,)),
   )
   def test_ray_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""
@@ -81,28 +85,34 @@ class OrthographicTest(test_case.TestCase):
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
     point_2d_init = np.random.uniform(size=tensor_shape + [2])
     point_2d = tf.convert_to_tensor(value=point_2d_init)
+
     y = orthographic.ray(point_2d)
+
     self.assert_jacobian_is_correct(point_2d, point_2d_init, y)
 
   def test_ray_random(self):
     """Test the ray function using random 2d points."""
     point_2d = np.random.uniform(size=(100, 2))
+
     pred = orthographic.ray(point_2d)
     gt = np.tile((0.0, 0.0, 1.0), (100, 1))
+
     self.assertAllEqual(pred, gt)
 
   @parameterized.parameters(
       ((2,), (1,)),
       ((None, 2), (None, 1)),
+      ((2, 2), (2, 1)),
   )
-  def test_unproject_exception_not_exception_raised(self, *shapes):
+  def test_unproject_exception_not_raised(self, *shapes):
     """Tests that the shape exceptions are not raised."""
     self.assert_exception_is_not_raised(orthographic.unproject, shapes)
 
   @parameterized.parameters(
-      ("'point_2d' must have 2 dimensions.", (1,), (1,)),
-      ("'point_2d' must have 2 dimensions.", (3,), (1,)),
-      ("'depth' must have 1 dimension.", (2,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (1,), (1,)),
+      ("must have exactly 2 dimensions in axis -1", (3,), (1,)),
+      ("must have exactly 1 dimensions in axis -1", (2,), (2,)),
+      ("Not all batch dimensions are identical.", (3, 2), (2, 1)),
   )
   def test_unproject_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""
@@ -116,7 +126,9 @@ class OrthographicTest(test_case.TestCase):
     depth_init = np.random.uniform(size=tensor_shape + [1])
     point_2d = tf.convert_to_tensor(value=point_2d_init)
     depth = tf.convert_to_tensor(value=depth_init)
+
     y = orthographic.unproject(point_2d, depth)
+
     self.assert_jacobian_is_correct(point_2d, point_2d_init, y)
     self.assert_jacobian_is_correct(depth, depth_init, y)
 
@@ -124,7 +136,9 @@ class OrthographicTest(test_case.TestCase):
     """Test the unproject function using random 2d points."""
     point_2d = np.random.uniform(size=(100, 2))
     depth = np.random.uniform(size=(100, 1))
+
     pred = orthographic.unproject(point_2d, depth)
+
     self.assertAllEqual(pred[:, 0:2], point_2d)
     self.assertAllEqual(pred[:, 2], np.squeeze(depth))
 
