@@ -37,6 +37,7 @@ import tensorflow as tf
 
 from tensorflow_graphics.geometry.transformation import rotation_matrix_common
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 
 def from_euler(angle, name=None):
@@ -60,7 +61,7 @@ def from_euler(angle, name=None):
 
   Args:
     angle: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-      represents an angle in radian.
+      represents an angle in radians.
     name: A name for this op that defaults to
       "rotation_matrix_2d_from_euler_angle".
 
@@ -74,17 +75,15 @@ def from_euler(angle, name=None):
   with tf.compat.v1.name_scope(name, "rotation_matrix_2d_from_euler_angle",
                                [angle]):
     angle = tf.convert_to_tensor(value=angle)
-    shape = angle.shape.as_list()
-    if shape[-1] != 1:
-      raise ValueError("'angle' must have 1 dimension.")
+
+    shape.check_static(
+        tensor=angle, tensor_name="angle", has_dim_equals=(-1, 1))
 
     cos_angle = tf.cos(angle)
     sin_angle = tf.sin(angle)
-    # pyformat: disable
     matrix = tf.stack((cos_angle, -sin_angle,
                        sin_angle, cos_angle),
-                      axis=-1)
-    # pyformat: enable
+                      axis=-1)  # pyformat: disable
     output_shape = tf.concat((tf.shape(input=angle)[:-1], (2, 2)), axis=-1)
     return tf.reshape(matrix, shape=output_shape)
 
@@ -130,17 +129,15 @@ def from_euler_with_small_angles_approximation(angles, name=None):
       name, "rotation_matrix_2d_from_euler_with_small_angles_approximation",
       [angles]):
     angles = tf.convert_to_tensor(value=angles)
-    shape = angles.shape.as_list()
-    if shape[-1] != 1:
-      raise ValueError("'angles' must have 1 dimension.")
+
+    shape.check_static(
+        tensor=angles, tensor_name="angles", has_dim_equals=(-1, 1))
 
     cos_angle = 1.0 - 0.5 * angles * angles
     sin_angle = angles
-    # pyformat: disable
     matrix = tf.stack((cos_angle, -sin_angle,
                        sin_angle, cos_angle),
-                      axis=-1)
-    # pyformat: enable
+                      axis=-1)  # pyformat: disable
     output_shape = tf.concat((tf.shape(input=angles)[:-1], (2, 2)), axis=-1)
     return tf.reshape(matrix, shape=output_shape)
 
@@ -152,8 +149,8 @@ def inverse(matrix, name=None):
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    matrix: A tensor of shape `[A1, ..., An, 2, 2]`, where the last dimension
-      represents a 2d rotation matrix.
+    matrix: A tensor of shape `[A1, ..., An, 2, 2]`, where the last two
+      dimensions represent a 2d rotation matrix.
     name: A name for this op that defaults to "rotation_matrix_2d_inverse".
 
   Returns:
@@ -165,11 +162,15 @@ def inverse(matrix, name=None):
   """
   with tf.compat.v1.name_scope(name, "rotation_matrix_2d_inverse", [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape_matrix = matrix.shape.as_list()
-    if shape_matrix[-2:] != [2, 2]:
-      raise ValueError("'matrix' must have 2x2 dimensions.")
-    input_len = len(shape_matrix)
-    perm = list(range(input_len - 2)) + [input_len - 1, input_len - 2]
+
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 2), (-1, 2)))
+
+    ndims = matrix.shape.ndims
+    perm = list(range(ndims - 2)) + [ndims - 1, ndims - 2]
     return tf.transpose(a=matrix, perm=perm)
 
 
@@ -183,8 +184,8 @@ def is_valid(matrix, atol=1e-3, name=None):
     In the following, A1 to An are optional batch dimensions.
 
   Args:
-    matrix: A tensor of shape `[A1, ..., An, 2, 2]`, where the last dimension
-      represents a 2d rotation matrix.
+    matrix: A tensor of shape `[A1, ..., An, 2, 2]`, where the last two
+      dimensions represent a 2d rotation matrix.
     atol: The absolute tolerance parameter.
     name: A name for this op that defaults to "rotation_matrix_2d_is_valid".
 
@@ -194,10 +195,13 @@ def is_valid(matrix, atol=1e-3, name=None):
   """
   with tf.compat.v1.name_scope(name, "rotation_matrix_2d_is_valid", [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape = matrix.shape.as_list()
-    shape_length = len(shape)
-    if shape_length < 2 or shape[-1] != 2 or shape[-2] != 2:
-      raise ValueError("'matrix' must have 2x2 dimensions.")
+
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 2), (-1, 2)))
+
     return rotation_matrix_common.is_valid(matrix, atol)
 
 
@@ -205,13 +209,14 @@ def rotate(point, matrix, name=None):
   """Rotates a 2d point using a 2d rotation matrix.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which must be
+    identical.
 
   Args:
     point: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
       represents a 2d point.
-    matrix: A tensor of shape `[A1, ..., An, 2, 2]`, where the last dimension
-      represents a 2d rotation matrix.
+    matrix: A tensor of shape `[A1, ..., An, 2, 2]`, where the last two
+      dimensions represent a 2d rotation matrix.
     name: A name for this op that defaults to "rotation_matrix_2d_rotate".
 
   Returns:
@@ -225,15 +230,28 @@ def rotate(point, matrix, name=None):
                                [point, matrix]):
     point = tf.convert_to_tensor(value=point)
     matrix = tf.convert_to_tensor(value=matrix)
-    shape_point = point.shape.as_list()
-    shape_matrix = matrix.shape.as_list()
-    if shape_point[-1] != 2:
-      raise ValueError("'point' must have 2 dimensions.")
-    if shape_matrix[-2:] != [2, 2]:
-      raise ValueError("'matrix' must have 2x2 dimensions.")
-    point = tf.convert_to_tensor(value=point)
-    matrix = tf.convert_to_tensor(value=matrix)
+
+    shape.check_static(
+        tensor=point, tensor_name="point", has_dim_equals=(-1, 2))
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 2), (-1, 2)))
+    shape.compare_batch_dimensions(
+        tensors=(point, matrix),
+        tensor_names=("point", "matrix"),
+        last_axes=(-2, -3),
+        broadcast_compatible=True)
+
     point = tf.expand_dims(point, axis=-1)
+    common_batch_shape = shape.get_broadcasted_shape(
+        point.shape[:-2], matrix.shape[:-2])
+    def dim_value(dim):
+      return 1 if dim is None else tf.compat.v1.dimension_value(dim)
+    common_batch_shape = [dim_value(dim) for dim in common_batch_shape]
+    point = tf.broadcast_to(point, common_batch_shape + [2, 1])
+    matrix = tf.broadcast_to(matrix, common_batch_shape + [2, 2])
     rotated_point = tf.matmul(matrix, point)
     return tf.squeeze(rotated_point, axis=-1)
 

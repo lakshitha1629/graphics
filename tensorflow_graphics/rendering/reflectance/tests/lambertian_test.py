@@ -36,40 +36,40 @@ class LambertianTest(test_case.TestCase):
     """Tests the Jacobian of brdf."""
     tensor_size = np.random.randint(3)
     tensor_shape = np.random.randint(1, 10, size=(tensor_size)).tolist()
-    # Initialization.
     direction_incoming_light_init = np.random.uniform(
         1.0, 1.0, size=tensor_shape + [3])
     direction_outgoing_light_init = np.random.uniform(
         1.0, 1.0, size=tensor_shape + [3])
     surface_normal_init = np.random.uniform(1.0, 1.0, size=tensor_shape + [3])
     albedo_init = np.random.random(tensor_shape + [3])
-    # Conversion to tensors.
     direction_incoming_light = tf.convert_to_tensor(
         value=direction_incoming_light_init)
     direction_outgoing_light = tf.convert_to_tensor(
         value=direction_outgoing_light_init)
     surface_normal = tf.convert_to_tensor(value=surface_normal_init)
     albedo = tf.convert_to_tensor(value=albedo_init)
+
     y = lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                         surface_normal, albedo)
+
     self.assert_jacobian_is_correct(albedo, albedo_init, y)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_brdf_jacobian_preset(self):
-    # Initialization.
     direction_incoming_light_init = np.array((0.0, 1.0, 0.0))
     direction_outgoing_light_init = np.array((0.0, 1.0, 0.0))
     surface_normal_init = np.array((1.0, 0.0, 0.0))
     albedo_init = np.array((1.0, 1.0, 1.0))
-    # Conversion to tensors.
     direction_incoming_light = tf.convert_to_tensor(
         value=direction_incoming_light_init)
     direction_outgoing_light = tf.convert_to_tensor(
         value=direction_outgoing_light_init)
     surface_normal = tf.convert_to_tensor(value=surface_normal_init)
     albedo = tf.convert_to_tensor(value=albedo_init)
+
     y = lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                         surface_normal, albedo)
+
     self.assert_jacobian_is_correct(albedo, albedo_init, y)
 
   @parameterized.parameters(
@@ -95,9 +95,11 @@ class LambertianTest(test_case.TestCase):
         direction_outgoing_light, axis=-1, keepdims=True)
     surface_normal = surface_normal / np.linalg.norm(
         surface_normal, axis=-1, keepdims=True)
+
     gt = albedo * ratio
     pred = lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                            surface_normal, albedo)
+
     self.assertAllClose(gt, pred)
 
   def test_brdf_exceptions_raised(self):
@@ -106,11 +108,13 @@ class LambertianTest(test_case.TestCase):
     direction_outgoing_light = np.random.uniform(-1.0, 1.0, size=(3,))
     surface_normal = np.random.uniform(-1.0, 1.0, size=(3,))
     albedo = np.random.uniform(0.0, 1.0, (3,))
+
     with self.subTest(name="assert_on_direction_incoming_light_not_normalized"):
       with self.assertRaises(tf.errors.InvalidArgumentError):
         self.evaluate(
             lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                             surface_normal, albedo))
+
     direction_incoming_light /= np.linalg.norm(
         direction_incoming_light, axis=-1)
     with self.subTest(name="assert_on_direction_outgoing_light_not_normalized"):
@@ -118,6 +122,7 @@ class LambertianTest(test_case.TestCase):
         self.evaluate(
             lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                             surface_normal, albedo))
+
     direction_outgoing_light /= np.linalg.norm(
         direction_outgoing_light, axis=-1)
     with self.subTest(name="assert_on_surface_normal_not_normalized"):
@@ -125,13 +130,16 @@ class LambertianTest(test_case.TestCase):
         self.evaluate(
             lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                             surface_normal, albedo))
+
     surface_normal /= np.linalg.norm(surface_normal, axis=-1)
     with self.subTest(name="assert_on_albedo_not_normalized"):
       albedo = np.random.uniform(-10.0, -sys.float_info.epsilon, (3,))
+
       with self.assertRaises(tf.errors.InvalidArgumentError):
         self.evaluate(
             lambertian.brdf(direction_incoming_light, direction_outgoing_light,
                             surface_normal, albedo))
+
       albedo = np.random.uniform(sys.float_info.epsilon, 10.0, (3,))
       with self.assertRaises(tf.errors.InvalidArgumentError):
         self.evaluate(
@@ -141,30 +149,31 @@ class LambertianTest(test_case.TestCase):
   @parameterized.parameters(
       ((3,), (3,), (3,), (3,)),
       ((None, 3), (None, 3), (None, 3), (None, 3)),
+      ((1, 3), (1, 3), (1, 3), (1, 3)),
+      ((2, 3), (2, 3), (2, 3), (2, 3)),
+      ((3,), (1, 3), (1, 2, 3), (1, 3)),
+      ((3,), (1, 3), (1, 2, 3), (1, 2, 2, 3)),
+      ((1, 2, 2, 3), (1, 2, 3), (1, 3), (3,)),
   )
   def test_brdf_shape_exception_not_raised(self, *shape):
     """Tests that the shape exceptions are not raised."""
     self.assert_exception_is_not_raised(lambertian.brdf, shape)
 
   @parameterized.parameters(
-      ("'direction_incoming_light' must have 3 dimensions.", (1,), (3,), (3,),
-       (3,)),
-      ("'direction_incoming_light' must have 3 dimensions.", (2,), (3,), (3,),
-       (3,)),
-      ("'direction_incoming_light' must have 3 dimensions.", (4,), (3,), (3,),
-       (3,)),
-      ("'direction_outgoing_light' must have 3 dimensions.", (3,), (1,), (3,),
-       (3,)),
-      ("'direction_outgoing_light' must have 3 dimensions.", (3,), (2,), (3,),
-       (3,)),
-      ("'direction_outgoing_light' must have 3 dimensions.", (3,), (4,), (3,),
-       (3,)),
-      ("'surface_normal' must have 3 dimensions.", (3,), (3,), (1,), (3,)),
-      ("'surface_normal' must have 3 dimensions.", (3,), (3,), (2,), (3,)),
-      ("'surface_normal' must have 3 dimensions.", (3,), (3,), (4,), (3,)),
-      ("'albedo' must have 3 dimensions.", (3,), (3,), (3,), (4,)),
-      ("'albedo' must have 3 dimensions.", (3,), (3,), (3,), (2,)),
-      ("'albedo' must have 3 dimensions.", (3,), (3,), (3,), (1,)),
+      ("must have exactly 3 dimensions in axis -1", (1,), (3,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (2,), (3,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (4,), (3,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (1,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (2,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (4,), (3,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (1,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (2,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (4,), (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (3,), (4,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (3,), (2,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (3,), (3,), (1,)),
+      ("Not all batch dimensions are broadcast-compatible.", (2, 3), (3, 3),
+       (3,), (3,)),
   )
   def test_brdf_shape_exception_raised(self, error_msg, *shape):
     """Tests that the shape exception is raised."""

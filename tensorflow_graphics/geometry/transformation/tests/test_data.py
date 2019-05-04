@@ -39,10 +39,8 @@ def _rotation_2d_x(angle):
     The 2d rotation matrix.
   """
   angle = np.asscalar(angle)
-  # pyformat: disable
   return np.array(((np.cos(angle), -np.sin(angle)),
-                   (np.sin(angle), np.cos(angle))))
-  # pyformat: enable
+                   (np.sin(angle), np.cos(angle))))  # pyformat: disable
 
 
 MAT_2D_ID = np.eye(2)
@@ -94,11 +92,9 @@ def _rotation_3d_x(angle):
     The 3d rotation matrix.
   """
   angle = np.asscalar(angle)
-  # pyformat: disable
   return np.array(((1., 0., 0.),
                    (0., np.cos(angle), -np.sin(angle)),
-                   (0., np.sin(angle), np.cos(angle))))
-  # pyformat: enable
+                   (0., np.sin(angle), np.cos(angle))))  # pyformat: disable
 
 
 def _rotation_3d_y(angle):
@@ -111,11 +107,9 @@ def _rotation_3d_y(angle):
     The 3d rotation matrix.
   """
   angle = np.asscalar(angle)
-  # pyformat: disable
   return np.array(((np.cos(angle), 0., np.sin(angle)),
                    (0., 1., 0.),
-                   (-np.sin(angle), 0., np.cos(angle))))
-  # pyformat: enable
+                   (-np.sin(angle), 0., np.cos(angle))))  # pyformat: disable
 
 
 def _rotation_3d_z(angle):
@@ -128,11 +122,9 @@ def _rotation_3d_z(angle):
     The 3d rotation matrix.
   """
   angle = np.asscalar(angle)
-  # pyformat: disable
   return np.array(((np.cos(angle), -np.sin(angle), 0.),
                    (np.sin(angle), np.cos(angle), 0.),
-                   (0., 0., 1.)))
-  # pyformat: enable
+                   (0., 0., 1.)))  # pyformat: disable
 
 
 MAT_3D_ID = np.eye(3)

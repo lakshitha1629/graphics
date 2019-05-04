@@ -20,6 +20,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 
 def is_valid(matrix, atol=1e-3, name=None):
@@ -43,17 +44,21 @@ def is_valid(matrix, atol=1e-3, name=None):
   with tf.compat.v1.name_scope(name, "rotation_matrix_common_is_valid",
                                [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape = matrix.shape.as_list()
-    shape_length = len(shape)
-    if shape_length < 2 or shape[-1] != shape[-2]:
-      raise ValueError("'matrix' must have KxK dimensions.")
-    # Computes the determinants
+
+    shape.check_static(
+        tensor=matrix, tensor_name="matrix", has_rank_greater_than=1)
+    shape.compare_dimensions(
+        tensors=(matrix, matrix),
+        tensor_names=("matrix", "matrix"),
+        axes=(-1, -2))
+
     distance_to_unit_determinant = tf.abs(tf.linalg.det(matrix) - 1.)
     # Computes how far the product of the transposed rotation matrix with itself
     # is from the identity matrix.
-    permutation = list(
-        range(shape_length - 2)) + [shape_length - 1, shape_length - 2]
-    identity = tf.eye(shape[-1], dtype=matrix.dtype)
+    ndims = matrix.shape.ndims
+    permutation = list(range(ndims - 2)) + [ndims - 1, ndims - 2]
+    identity = tf.eye(
+        tf.compat.v1.dimension_value(matrix.shape[-1]), dtype=matrix.dtype)
     difference_to_identity = tf.matmul(
         tf.transpose(a=matrix, perm=permutation), matrix) - identity
     norm_diff = tf.norm(tensor=difference_to_identity, axis=(-2, -1))

@@ -39,7 +39,7 @@ class RotationMatrix2dTest(test_case.TestCase):
     self.assert_exception_is_not_raised(rotation_matrix_2d.from_euler, shapes)
 
   @parameterized.parameters(
-      ("'angle' must have 1 dimension.", (None,)),)
+      ("must have exactly 1 dimensions in axis -1", (None,)),)
   def test_from_euler_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
     self.assert_exception_is_raised(rotation_matrix_2d.from_euler, error_msg,
@@ -50,7 +50,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     """Test the Jacobian of the from_euler function."""
     x_init = test_helpers.generate_preset_test_euler_angles(dimensions=1)
     x = tf.convert_to_tensor(value=x_init)
+
     y = rotation_matrix_2d.from_euler(x)
+
     self.assert_jacobian_is_correct(x, x_init, y)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
@@ -58,13 +60,17 @@ class RotationMatrix2dTest(test_case.TestCase):
     """Test the Jacobian of the from_euler function."""
     x_init = test_helpers.generate_random_test_euler_angles(dimensions=1)
     x = tf.convert_to_tensor(value=x_init)
+
     y = rotation_matrix_2d.from_euler(x)
+
     self.assert_jacobian_is_correct(x, x_init, y)
 
   def test_from_euler_normalized_preset(self):
     """Tests that an angle maps to correct matrix."""
     euler_angles = test_helpers.generate_preset_test_euler_angles(dimensions=1)
+
     matrix = rotation_matrix_2d.from_euler(euler_angles)
+
     self.assertAllEqual(
         rotation_matrix_2d.is_valid(matrix),
         np.ones(euler_angles.shape[0:-1] + (1,), dtype=bool))
@@ -91,7 +97,7 @@ class RotationMatrix2dTest(test_case.TestCase):
         rotation_matrix_2d.from_euler_with_small_angles_approximation, shapes)
 
   @parameterized.parameters(
-      ("'angles' must have 1 dimension.", (None,)),)
+      ("must have exactly 1 dimensions in axis -1", (None,)),)
   def test_from_euler_with_small_angles_approximation_exception_raised(
       self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -105,10 +111,12 @@ class RotationMatrix2dTest(test_case.TestCase):
     # empirically to be the range where the small angle approximation works.
     random_euler_angles = test_helpers.generate_random_test_euler_angles(
         min_angle=-0.17, max_angle=0.17, dimensions=1)
+
     exact_matrix = rotation_matrix_2d.from_euler(random_euler_angles)
     approximate_matrix = (
         rotation_matrix_2d.from_euler_with_small_angles_approximation(
             random_euler_angles))
+
     self.assertAllClose(exact_matrix, approximate_matrix, atol=1e-3)
 
   @parameterized.parameters(
@@ -120,9 +128,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     self.assert_exception_is_not_raised(rotation_matrix_2d.inverse, shapes)
 
   @parameterized.parameters(
-      ("'matrix' must have 2x2 dimensions.", (2,)),
-      ("'matrix' must have 2x2 dimensions.", (2, None)),
-      ("'matrix' must have 2x2 dimensions.", (None, 2)),
+      ("must have a rank greater than 1", (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2, None)),
+      ("must have exactly 2 dimensions in axis -2", (None, 2)),
   )
   def test_inverse_exception_raised(self, error_msg, *shapes):
     """Checks the inputs of the inverse function."""
@@ -134,7 +142,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     """Test the Jacobian of the inverse function."""
     x_init = test_helpers.generate_preset_test_rotation_matrices_2d()
     x = tf.convert_to_tensor(value=x_init)
+
     y = rotation_matrix_2d.inverse(x)
+
     self.assert_jacobian_is_correct(x, x_init, y)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
@@ -142,7 +152,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     """Test the Jacobian of the inverse function."""
     x_init = test_helpers.generate_random_test_rotation_matrix_2d()
     x = tf.convert_to_tensor(value=x_init)
+
     y = rotation_matrix_2d.inverse(x)
+
     self.assert_jacobian_is_correct(x, x_init, y)
 
   def test_inverse_random(self):
@@ -150,14 +162,15 @@ class RotationMatrix2dTest(test_case.TestCase):
     random_euler_angles = test_helpers.generate_random_test_euler_angles(
         dimensions=1)
     tensor_shape = random_euler_angles.shape[:-1]
+
     random_matrix = rotation_matrix_2d.from_euler(random_euler_angles)
     random_point = np.random.normal(size=tensor_shape + (2,))
-
     rotated_random_points = rotation_matrix_2d.rotate(random_point,
                                                       random_matrix)
     predicted_invert_random_matrix = rotation_matrix_2d.inverse(random_matrix)
     predicted_invert_rotated_random_points = rotation_matrix_2d.rotate(
         rotated_random_points, predicted_invert_random_matrix)
+
     self.assertAllClose(
         random_point, predicted_invert_rotated_random_points, rtol=1e-6)
 
@@ -170,9 +183,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     self.assert_exception_is_not_raised(rotation_matrix_2d.inverse, shapes)
 
   @parameterized.parameters(
-      ("'matrix' must have 2x2 dimensions.", (2,)),
-      ("'matrix' must have 2x2 dimensions.", (None, 2)),
-      ("'matrix' must have 2x2 dimensions.", (2, None)),
+      ("must have a rank greater than 1", (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2, None)),
+      ("must have exactly 2 dimensions in axis -2", (None, 2)),
   )
   def test_is_valid_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -182,16 +195,20 @@ class RotationMatrix2dTest(test_case.TestCase):
   @parameterized.parameters(
       ((2,), (2, 2)),
       ((None, 2), (None, 2, 2)),
+      ((1, 2), (1, 2, 2)),
+      ((2, 2), (2, 2, 2)),
+      ((2,), (1, 2, 2)),
+      ((1, 2), (2, 2)),
   )
   def test_rotate_exception_not_raised(self, *shapes):
     """Tests that the shape exceptions are not raised."""
     self.assert_exception_is_not_raised(rotation_matrix_2d.rotate, shapes)
 
   @parameterized.parameters(
-      ("'point' must have 2 dimensions.", (None,), (2, 2)),
-      ("'matrix' must have 2x2 dimensions.", (2,), (2,)),
-      ("'matrix' must have 2x2 dimensions.", (2,), (None, 2)),
-      ("'matrix' must have 2x2 dimensions.", (2,), (2, None)),
+      ("must have exactly 2 dimensions in axis -1", (None,), (2, 2)),
+      ("must have a rank greater than 1", (2,), (2,)),
+      ("must have exactly 2 dimensions in axis -1", (2,), (2, None)),
+      ("must have exactly 2 dimensions in axis -2", (2,), (None, 2)),
   )
   def test_rotate_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are properly raised."""
@@ -205,7 +222,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     tensor_shape = x_matrix_init.shape[:-2] + (2,)
     x_point_init = np.random.uniform(size=tensor_shape)
     x_point = tf.convert_to_tensor(value=x_point_init)
+
     y = rotation_matrix_2d.rotate(x_point, x_matrix)
+
     self.assert_jacobian_is_correct(x_matrix, x_matrix_init, y)
     self.assert_jacobian_is_correct(x_point, x_point_init, y)
 
@@ -217,7 +236,9 @@ class RotationMatrix2dTest(test_case.TestCase):
     tensor_shape = x_matrix_init.shape[:-2] + (2,)
     x_point_init = np.random.uniform(size=tensor_shape)
     x_point = tf.convert_to_tensor(value=x_point_init)
+
     y = rotation_matrix_2d.rotate(x_point, x_matrix)
+
     self.assert_jacobian_is_correct(x_matrix, x_matrix_init, y)
     self.assert_jacobian_is_correct(x_point, x_point_init, y)
 

@@ -26,6 +26,7 @@ from absl import flags
 from absl.testing import parameterized
 import numpy as np
 import tensorflow as tf
+
 from tensorflow_graphics.util import tfg_flags
 
 FLAGS = flags.FLAGS
@@ -37,10 +38,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
   def setUp(self):
     """Sets the seed for tensorflow and numpy."""
     super(TestCase, self).setUp()
-    try:
-      seed = flags.FLAGS.test_random_seed
-    except flags.UnparsedFlagAccessError:
-      seed = 301  # Default seed in case test_random_seed is not defined.
+    seed = flags.FLAGS.test_random_seed
     tf.compat.v1.set_random_seed(seed)
     np.random.seed(seed)
     FLAGS[tfg_flags.TFG_ADD_ASSERTS_TO_GRAPH].value = True
@@ -48,7 +46,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
   def _remove_dynamic_shapes(self, shapes):
     for s in shapes:
       if None in s:
-        return []
+        return None
     return shapes
 
   def _compute_gradient_error(self, x, y, x_init_value, delta=1e-6):
@@ -161,8 +159,10 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       **kwargs: A dict of keyword arguments to be passed to the function.
     """
     if tf.executing_eagerly():
+      # If shapes is an empty list, we can continue with the test. If shapes
+      # has None values, we shoud return.
       shapes = self._remove_dynamic_shapes(shapes)
-      if not shapes:
+      if shapes is None:
         return
     placeholders = self._create_placeholders_from_shapes(shapes, dtypes)
     with self.assertRaisesRegexp(ValueError, error_msg):

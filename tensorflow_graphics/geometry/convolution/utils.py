@@ -20,6 +20,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 
 
 def check_valid_graph_convolution_input(data, neighbors, sizes):
@@ -30,30 +31,43 @@ def check_valid_graph_convolution_input(data, neighbors, sizes):
 
   Args:
     data: A `float` tensor with shape `[A1, ..., An, V1, V2]`.
-    neighbors: A SparseTensor with the same type as `data` and with
-      shape `[A1, ..., An, V1, V1]`.
+    neighbors: A SparseTensor with the same type as `data` and with shape `[A1,
+      ..., An, V1, V1]`.
     sizes: An `int` tensor of shape `[A1, ..., An]`. Optional, can be `None`.
 
   Raises:
     TypeError: if the input types are invalid.
     ValueError: if the input dimensions are invalid.
   """
-  # We expect the inputs to be Tensors so we skip convert_to_tensor().
   if not data.dtype.is_floating:
     raise TypeError("'data' must have a float type.")
   if neighbors.dtype != data.dtype:
     raise TypeError("'neighbors' and 'data' must have the same type.")
+  if sizes is not None and not sizes.dtype.is_integer:
+    raise TypeError("'sizes' must have an integer type.")
+
   data_ndims = data.shape.ndims
-  if data_ndims != neighbors.shape.ndims:
-    raise ValueError("'data' and 'neighbors' must have the same rank.")
-  if data_ndims < 2:
-    raise ValueError("'data' and 'neighbors' must have rank >= 2.")
-  if sizes is not None:
-    if not sizes.dtype.is_integer:
-      raise TypeError("'sizes' must have an integer type.")
-    if data_ndims != sizes.shape.ndims + 2:
-      raise ValueError(
-          "'sizes' shape and the batch shape of 'data' must be equal.")
+  shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=1)
+  shape.check_static(
+      tensor=neighbors, tensor_name="neighbors", has_rank=data_ndims)
+  shape.compare_dimensions(
+      tensors=(data, neighbors, neighbors),
+      tensor_names=("data", "neighbors", "neighbors"),
+      axes=(-2, -2, -1))
+  if sizes is None:
+    shape.compare_batch_dimensions(
+        tensors=(data, neighbors),
+        tensor_names=("data", "neighbors"),
+        last_axes=-3,
+        broadcast_compatible=False)
+  else:
+    shape.check_static(
+        tensor=sizes, tensor_name="sizes", has_rank=data_ndims - 2)
+    shape.compare_batch_dimensions(
+        tensors=(data, neighbors, sizes),
+        tensor_names=("data", "neighbors", "sizes"),
+        last_axes=(-3, -3, -1),
+        broadcast_compatible=False)
 
 
 def flatten_batch_to_2d(data, sizes=None, name=None):
@@ -86,19 +100,18 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
       output = [[1., 2.], [5., 6.], [7., 8.], [9., 10.]]
       unflatten(output) = data
 
-
   Args:
     data: A tensor with shape `[A1, ..., An, D1, D2]`.
-    sizes: An `int` tensor with shape `[A1, ..., An]`. Can be `None`.
-      `sizes[i] <= D1`.
+    sizes: An `int` tensor with shape `[A1, ..., An]`. Can be `None`. `sizes[i]
+      <= D1`.
     name: A name for this op. Defaults to `utils_flatten_batch_to_2d`.
 
   Returns:
-    A tensor with shape `[A1*...*An*D1, D2]` if `sizes==None`, otherwise a
+    A tensor with shape `[A1*...*An*D1, D2]` if `sizes == None`, otherwise a
       tensor  with shape `[sum(sizes), D2]`.
     A function that reshapes a tensor with shape `[A1*...*An*D1, D3]` to a
-      tensor with shape `[A1, ..., An, D1, D3]` if `sizes==None`, otherwise it
-      reshapes a tensor with shape `[sum(sizes), D3]` to one with shape
+      tensor with shape `[A1, ..., An, D1, D3]` if `sizes == None`, otherwise
+      it reshapes a tensor with shape `[sum(sizes), D3]` to one with shape
       `[A1, ..., An, ..., D1, D3]`.
 
   Raises:
@@ -107,24 +120,32 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
   with tf.compat.v1.name_scope(name, "utils_flatten_batch_to_2d",
                                [data, sizes]):
     data = tf.convert_to_tensor(value=data)
-    data_ndims = data.shape.ndims
-    if data_ndims < 3:
-      raise ValueError("'data' must have rank > 2.")
     if sizes is not None:
       sizes = tf.convert_to_tensor(value=sizes)
-      if sizes.shape.ndims != data_ndims - 2:
-        raise ValueError(
-            "'sizes' shape must match the batch shape of 'data'.")
+
+    if sizes is not None and not sizes.dtype.is_integer:
+      raise TypeError("'sizes' must have an integer type.")
+    shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=2)
+    if sizes is not None:
+      shape.check_static(
+          tensor=sizes, tensor_name="sizes", has_rank=data.shape.ndims - 2)
+      shape.compare_batch_dimensions(
+          tensors=(data, sizes),
+          tensor_names=("data", "sizes"),
+          last_axes=(-3, -1),
+          broadcast_compatible=False)
 
     data_shape = tf.shape(input=data)
     if sizes is None:
-      flat = tf.reshape(data, [-1, data_shape[-1]])
-      def unflatten(flat):
+      flat = tf.reshape(data, shape=(-1, data_shape[-1]))
+
+      def unflatten(flat, name=None):
         """Invert flatten_batch_to_2d."""
-        flat = tf.convert_to_tensor(value=flat)
-        output_shape = tf.concat(
-            [data_shape[:-1], tf.shape(input=flat)[-1:]], axis=0)
-        return tf.reshape(flat, output_shape)
+        with tf.compat.v1.name_scope(name, "utils_unflatten", [flat]):
+          flat = tf.convert_to_tensor(value=flat)
+          output_shape = tf.concat((data_shape[:-1], tf.shape(input=flat)[-1:]),
+                                   axis=0)
+          return tf.reshape(flat, output_shape)
     else:
       # Create a mask for the desired rows in `data` to select for flattening:
       # `mask` has shape `[A1, ..., An, D1]` and
@@ -133,25 +154,29 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
       mask = tf.sequence_mask(sizes, data_shape[-2])
       mask_indices = tf.cast(tf.where(mask), tf.int32)
       flat = tf.gather_nd(params=data, indices=mask_indices)
-      def unflatten(flat):
+
+      def unflatten(flat, name=None):
         """Invert flatten_batch_to_2d."""
-        flat = tf.convert_to_tensor(value=flat)
-        output_shape = tf.concat(
-            [data_shape[:-1], tf.shape(input=flat)[-1:]], axis=0)
-        return tf.scatter_nd(
-            indices=mask_indices, updates=flat, shape=output_shape)
+        with tf.compat.v1.name_scope(name, "utils_unflatten", [flat]):
+          flat = tf.convert_to_tensor(value=flat)
+          output_shape = tf.concat((data_shape[:-1], tf.shape(input=flat)[-1:]),
+                                   axis=0)
+          return tf.scatter_nd(
+              indices=mask_indices, updates=flat, shape=output_shape)
 
     return flat, unflatten
 
 
-def convert_to_block_diag_2d(
-    data, sizes=None, validate_indices=False, name=None):
+def convert_to_block_diag_2d(data,
+                             sizes=None,
+                             validate_indices=False,
+                             name=None):
   """Convert a batch of 2d SparseTensors to a 2d block diagonal SparseTensor.
 
   Note:
     In the following, A1 to An are optional batch dimensions.
 
-  A SparseTensor with dense shape `[A1, ..., An, D1, D2]` will be reshaped
+  A `SparseTensor` with dense shape `[A1, ..., An, D1, D2]` will be reshaped
   to one with shape `[A1*...*An*D1, A1*...*An*D2]`.
 
   Padded inputs in dims D1 and D2 are allowed. `sizes` indicates the un-padded
@@ -163,13 +188,13 @@ def convert_to_block_diag_2d(
   explicitly filter any invalid sparse indices before block diagonalization.
 
   Args:
-    data: A SparseTensor with dense shape `[A1, ..., An, D1, D2]`.
-    sizes: A tensor with shape `[A1, ..., An, 2]`. Can be `None` (indicates
-      no padding). If not `None`, `sizes` indicates the true sizes (before
-      padding) of the inner dimensions of `data`.
+    data: A `SparseTensor` with dense shape `[A1, ..., An, D1, D2]`.
+    sizes: A tensor with shape `[A1, ..., An, 2]`. Can be `None` (indicates no
+      padding). If not `None`, `sizes` indicates the true sizes (before padding)
+      of the inner dimensions of `data`.
     validate_indices: A boolean. Ignored if `sizes==None`. If True,
       out-of-bounds indices in `data` are explicitly ignored, otherwise
-      out-of-bounds indices will cause undefined behaviour.
+      out-of-bounds indices will cause undefined behavior.
     name: A name for this op. Defaults to `utils_convert_to_block_diag_2d`.
 
   Returns:
@@ -179,32 +204,38 @@ def convert_to_block_diag_2d(
     TypeError: if the input types are invalid.
     ValueError: if the input dimensions are invalid.
   """
-  with tf.compat.v1.name_scope(
-      name, "utils_convert_to_block_diag_2d",
-      [data, sizes, validate_indices]):
+  with tf.compat.v1.name_scope(name, "utils_convert_to_block_diag_2d",
+                               [data, sizes, validate_indices]):
     data = tf.compat.v1.convert_to_tensor_or_sparse_tensor(value=data)
-    if not isinstance(data, tf.SparseTensor):
-      raise TypeError("'data' must be a 'SparseTensor'.")
-    data_ndims = data.shape.ndims
-    if data_ndims < 3:
-      raise ValueError("'data' must have rank > 2.")
     if sizes is not None:
       sizes = tf.convert_to_tensor(value=sizes)
-      if sizes.shape.ndims != data_ndims - 1:
-        raise ValueError("'sizes' has an unexpected shape.")
-      if sizes.shape[-1] != 2:
-        raise ValueError("innermost dimension of 'sizes' must be 2.")
+
+    if not isinstance(data, tf.SparseTensor):
+      raise TypeError("'data' must be a 'SparseTensor'.")
+    if sizes is not None and not sizes.dtype.is_integer:
+      raise TypeError("'sizes' must have an integer type.")
+    shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=2)
+    if sizes is not None:
+      shape.check_static(
+          tensor=sizes,
+          tensor_name="sizes",
+          has_rank=data.shape.ndims - 1,
+          has_dim_equals=(-1, 2))
+      shape.compare_batch_dimensions(
+          tensors=(data, sizes),
+          tensor_names=("data", "sizes"),
+          last_axes=(-3, -2),
+          broadcast_compatible=False)
 
     data_shape = tf.shape(input=data)
-    data = tf.sparse.reshape(
-        data, [-1, data_shape[-2], data_shape[-1]])
+    data = tf.sparse.reshape(data, [-1, data_shape[-2], data_shape[-1]])
     indices = data.indices
     if sizes is not None:
-      sizes = tf.cast(tf.reshape(sizes, [-1, 2]), tf.int64)
+      sizes = tf.cast(tf.reshape(sizes, shape=(-1, 2)), tf.int64)
       if validate_indices:
         in_bounds = ~tf.reduce_any(
-            input_tensor=indices[:, 1:] >= tf.gather(
-                sizes, indices[:, 0]), axis=-1)
+            input_tensor=indices[:, 1:] >= tf.gather(sizes, indices[:, 0]),
+            axis=-1)
         indices = tf.boolean_mask(tensor=indices, mask=in_bounds)
         values = tf.boolean_mask(tensor=data.values, mask=in_bounds)
       else:
@@ -212,14 +243,14 @@ def convert_to_block_diag_2d(
       cumsum = tf.cumsum(sizes, axis=0, exclusive=True)
       index_shift = tf.gather(cumsum, indices[:, 0])
       indices = indices[:, 1:] + index_shift
-      block_diag = tf.SparseTensor(
-          indices, values, tf.reduce_sum(input_tensor=sizes, axis=0))
+      block_diag = tf.SparseTensor(indices, values,
+                                   tf.reduce_sum(input_tensor=sizes, axis=0))
     else:
       data_shape = tf.shape(input=data, out_type=tf.int64)
       index_shift = tf.expand_dims(indices[:, 0], -1) * data_shape[1:]
       indices = indices[:, 1:] + index_shift
-      block_diag = tf.SparseTensor(
-          indices, data.values, data_shape[0] * data_shape[1:])
+      block_diag = tf.SparseTensor(indices, data.values,
+                                   data_shape[0] * data_shape[1:])
     return block_diag
 
 
@@ -240,8 +271,8 @@ def partition_sums_2d(data, group_ids, row_weights=None, name=None):
   Raises:
     ValueError: if the inputs have invalid dimensions or types.
   """
-  with tf.compat.v1.name_scope(
-      name, "utils_partition_sums_2d", [data, group_ids, row_weights]):
+  with tf.compat.v1.name_scope(name, "utils_partition_sums_2d",
+                               [data, group_ids, row_weights]):
     data = tf.convert_to_tensor(value=data)
     group_ids = tf.convert_to_tensor(value=group_ids)
     if not group_ids.dtype.is_integer:
@@ -252,19 +283,24 @@ def partition_sums_2d(data, group_ids, row_weights=None, name=None):
       row_weights = tf.ones_like(group_ids, dtype=data.dtype)
     else:
       row_weights = tf.convert_to_tensor(value=row_weights)
+
     if row_weights.dtype != data.dtype:
       raise TypeError("'data' and 'row_weights' must have the same type.")
-    if len(data.shape) != 2:
-      raise ValueError("'data' must be a 2-D tensor.")
-    if len(group_ids.shape) != 1:
-      raise ValueError("'group_ids' must be a 1-D tensor.")
-    if len(row_weights.shape) != 1:
-      raise ValueError("'row_weights' must be a 1-D tensor.")
+    shape.check_static(tensor=data, tensor_name="data", has_rank=2)
+    shape.check_static(tensor=group_ids, tensor_name="group_ids", has_rank=1)
+    shape.check_static(
+        tensor=row_weights, tensor_name="row_weights", has_rank=1)
+    shape.compare_dimensions(
+        tensors=(data, group_ids, row_weights),
+        tensor_names=("data", "group_ids", "row_weights"),
+        axes=0)
+
     num_rows = tf.size(input=group_ids, out_type=tf.int64)
-    sparse_indices = tf.stack([group_ids, tf.range(num_rows)], axis=1)
-    shape = [tf.reduce_max(input_tensor=group_ids) + 1, num_rows]
-    sparse = tf.SparseTensor(sparse_indices, row_weights, dense_shape=shape)
+    sparse_indices = tf.stack((group_ids, tf.range(num_rows)), axis=1)
+    out_shape = (tf.reduce_max(input_tensor=group_ids) + 1, num_rows)
+    sparse = tf.SparseTensor(sparse_indices, row_weights, dense_shape=out_shape)
     return tf.sparse.sparse_dense_matmul(sparse, data)
+
 
 # API contains all public functions and classes.
 __all__ = export_api.get_functions_and_classes()

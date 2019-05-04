@@ -14,7 +14,7 @@
 """This module implements the Blinn-Phong specular reflectance.
 
 For a derivation of the normalization factor ensuring energy conservation, we
-refer the interested reader to
+refer the interested reader to:
 Fabian Giesen.
 "Derivation of Phong and Blinn-Phong BRDF normalization factors". 2009
 """
@@ -30,6 +30,8 @@ import tensorflow as tf
 from tensorflow_graphics.math import vector
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def _brdf_normalization_factor(shininess):
@@ -38,7 +40,7 @@ def _brdf_normalization_factor(shininess):
   denominator = 8.0 * math.pi * (
       tf.pow(tf.constant(2.0, dtype=shininess.dtype), -shininess / 2.0) +
       shininess)
-  return numerator / denominator
+  return safe_ops.safe_signed_div(numerator, denominator)
 
 
 def brdf(direction_incoming_light,
@@ -51,8 +53,8 @@ def brdf(direction_incoming_light,
   """Evaluates the specular brdf of the Blinn-Phong model.
 
   Note:
-    In the following, A1 to An are optional batch
-    dimensions.
+    In the following, A1 to An are optional batch dimensions, which must be
+    broadcast compatible.
 
   Note:
     The gradient of this function is not smooth when the dot product of the
@@ -66,7 +68,7 @@ def brdf(direction_incoming_light,
     surface_normal: A tensor of shape `[A1, ..., An, 3]`, where the last
       dimension represents a normalized surface normal.
     shininess: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-      represents a shininess coefficient.
+      represents a non-negative shininess coefficient.
     albedo: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
       represents albedo with values in [0,1].
     brdf_normalization: A `bool` indicating whether normalization should be
@@ -83,14 +85,13 @@ def brdf(direction_incoming_light,
     ValueError: if the shape of `direction_incoming_light`,
     `direction_outgoing_light`, `surface_normal`, `shininess` or `albedo` is not
     supported.
-    InvalidArgumentError: if at least an element of `albedo` is outside of
-    [0,1].
+    InvalidArgumentError: if not all of shininess values are non-negative, or if
+    at least one element of `albedo` is outside of [0,1].
   """
   with tf.compat.v1.name_scope(name, "blinn_phong_brdf", [
       direction_incoming_light, direction_outgoing_light, surface_normal,
-      shininess, albedo, brdf_normalization
+      shininess, albedo
   ]):
-    # Conversion to tensors.
     direction_incoming_light = tf.convert_to_tensor(
         value=direction_incoming_light)
     direction_outgoing_light = tf.convert_to_tensor(
@@ -98,24 +99,38 @@ def brdf(direction_incoming_light,
     surface_normal = tf.convert_to_tensor(value=surface_normal)
     shininess = tf.convert_to_tensor(value=shininess)
     albedo = tf.convert_to_tensor(value=albedo)
-    # Check that the shape of inputs are supported.
-    if direction_incoming_light.shape.as_list()[-1] != 3:
-      raise ValueError("'direction_incoming_light' must have 3 dimensions.")
-    if direction_outgoing_light.shape.as_list()[-1] != 3:
-      raise ValueError("'direction_outgoing_light' must have 3 dimensions.")
-    if surface_normal.shape.as_list()[-1] != 3:
-      raise ValueError("'surface_normal' must have 3 dimensions.")
-    if shininess.shape.as_list()[-1] != 1:
-      raise ValueError("'shininess' must have 1 dimension.")
-    if albedo.shape.as_list()[-1] != 3:
-      raise ValueError("'albedo' must have 3 dimensions.")
-    # Check that tensors contain appropriate data.
+
+    shape.check_static(
+        tensor=direction_incoming_light,
+        tensor_name="direction_incoming_light",
+        has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=direction_outgoing_light,
+        tensor_name="direction_outgoing_light",
+        has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=surface_normal,
+        tensor_name="surface_normal",
+        has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=shininess, tensor_name="shininess", has_dim_equals=(-1, 1))
+    shape.check_static(
+        tensor=albedo, tensor_name="albedo", has_dim_equals=(-1, 3))
+    shape.compare_batch_dimensions(
+        tensors=(direction_incoming_light, direction_outgoing_light,
+                 surface_normal, shininess, albedo),
+        tensor_names=("direction_incoming_light", "direction_outgoing_light",
+                      "surface_normal", "shininess", "albedo"),
+        last_axes=-2,
+        broadcast_compatible=True)
     direction_incoming_light = asserts.assert_normalized(
         direction_incoming_light)
     direction_outgoing_light = asserts.assert_normalized(
         direction_outgoing_light)
     surface_normal = asserts.assert_normalized(surface_normal)
     albedo = asserts.assert_all_in_range(albedo, 0.0, 1.0, open_bounds=False)
+    shininess = asserts.assert_all_above(shininess, 0.0, open_bound=False)
+
     # Checks whether the incoming or outgoing light point behind the surface.
     dot_incoming_light_surface_normal = vector.dot(-direction_incoming_light,
                                                    surface_normal)
@@ -123,8 +138,8 @@ def brdf(direction_incoming_light,
                                                    surface_normal)
     min_dot = tf.minimum(dot_incoming_light_surface_normal,
                          dot_outgoing_light_surface_normal)
-    # BRDF evaluation.
-    difference_outgoing_incoming = direction_outgoing_light - direction_incoming_light
+    difference_outgoing_incoming = (
+        direction_outgoing_light - direction_incoming_light)
     difference_outgoing_incoming = tf.math.l2_normalize(
         difference_outgoing_incoming, axis=-1)
     cos_alpha = vector.dot(
@@ -132,10 +147,13 @@ def brdf(direction_incoming_light,
     cos_alpha = tf.maximum(cos_alpha, tf.zeros_like(cos_alpha))
     blinn_phong_model = albedo * tf.pow(cos_alpha, shininess)
     if brdf_normalization:
-      blinn_phong_model = blinn_phong_model * _brdf_normalization_factor(
-          shininess)
-    condition = tf.broadcast_to(
-        tf.greater_equal(min_dot, 0.0), tf.shape(input=blinn_phong_model))
+      blinn_phong_model *= _brdf_normalization_factor(shininess)
+    common_shape = shape.get_broadcasted_shape(min_dot.shape,
+                                               blinn_phong_model.shape)
+    d_val = lambda dim: 1 if dim is None else tf.compat.v1.dimension_value(dim)
+    common_shape = [d_val(dim) for dim in common_shape]
+    condition = tf.broadcast_to(tf.greater_equal(min_dot, 0.0), common_shape)
+    blinn_phong_model = tf.broadcast_to(blinn_phong_model, common_shape)
     return tf.where(condition, blinn_phong_model,
                     tf.zeros_like(blinn_phong_model))
 

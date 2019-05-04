@@ -196,7 +196,7 @@ class MeshViewer extends THREE.EventDispatcher {
     const default_config = {
       camera: {cls: 'PerspectiveCamera', fov: 75, near: 0.1, far: 1000},
       lights: [
-        {cls: 'AmbientLight', color: '#ffffff', intensity: 1.}, {
+        {cls: 'AmbientLight', color: '#ffffff', intensity: 0.75}, {
           cls: 'DirectionalLight',
           color: '#ffffff',
           intensity: 0.75,
@@ -256,12 +256,21 @@ class MeshViewer extends THREE.EventDispatcher {
    */
   _createPointCloud(currentStep, config) {
     const points = currentStep.vertices;
-    const pc_config = this._applyDefaults(
-        config, {material: {cls: 'PointsMaterial', color: 0x00ff00}});
+    const colors = currentStep.colors;
+    let defaultConfig = {
+      material: {
+        cls: 'PointsMaterial', size: 0.005
+      }
+    };
+    // Determine what colors will be used.
+    if (colors && colors.length == points.length) {
+      defaultConfig.material['vertexColors'] = THREE.VertexColors;
+    } else {
+      defaultConfig.material['color'] = this._runColor;
+    }
+    const pc_config = this._applyDefaults(config, defaultConfig);
 
-    // TODO: use BufferGeometry for performance reasons!
     var geometry = new THREE.Geometry();
-    // TODO: refactor out points pre-processing.
     points.forEach(function(point) {
       var p = new THREE.Vector3(point[0], point[1], point[2]);
 
@@ -271,6 +280,12 @@ class MeshViewer extends THREE.EventDispatcher {
       p.z = point[2] * scale;
 
       geometry.vertices.push(p);
+    });
+
+    colors.forEach(function (color) {
+      const c = new THREE.Color(
+          color[0] / 255., color[1] / 255., color[2] / 255.);
+      geometry.colors.push(c);
     });
 
     var material = new THREE[pc_config.material.cls](pc_config.material);

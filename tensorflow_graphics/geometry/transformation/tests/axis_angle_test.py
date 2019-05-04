@@ -40,7 +40,7 @@ class AxisAngleTest(test_case.TestCase):
     self.assert_exception_is_not_raised(axis_angle.from_euler, shapes)
 
   @parameterized.parameters(
-      ("must have exactly 3 dimensions", (None,)),)
+      ("must have exactly 3 dimensions in axis -1", (None,)),)
   def test_from_euler_exception_raised(self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
     self.assert_exception_is_raised(axis_angle.from_euler, error_msg, shapes)
@@ -54,7 +54,9 @@ class AxisAngleTest(test_case.TestCase):
     """
     x_init = test_helpers.generate_random_test_euler_angles()
     x = tf.convert_to_tensor(value=x_init)
+
     y_axis, y_angle = axis_angle.from_euler(x)
+
     self.assert_jacobian_is_finite(x, x_init, y_axis)
     self.assert_jacobian_is_finite(x, x_init, y_angle)
 
@@ -62,17 +64,20 @@ class AxisAngleTest(test_case.TestCase):
     """Tests that from_euler allows to perform the expect rotation of points."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
     tensor_shape = random_euler_angles.shape[:-1]
+    random_point = np.random.normal(size=tensor_shape + (3,))
+
     random_matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     random_axis, random_angle = axis_angle.from_euler(random_euler_angles)
-    random_point = np.random.normal(size=tensor_shape + (3,))
     rotated_with_matrix = rotation_matrix_3d.rotate(random_point, random_matrix)
     rotated_with_axis_angle = axis_angle.rotate(random_point, random_axis,
                                                 random_angle)
+
     self.assertAllClose(rotated_with_matrix, rotated_with_axis_angle)
 
   @parameterized.parameters(
       ((3,),),
       ((None, 3),),
+      ((2, 3),),
   )
   def test_from_euler_with_small_angles_approximation_exception_not_raised(
       self, *shapes):
@@ -81,7 +86,7 @@ class AxisAngleTest(test_case.TestCase):
         axis_angle.from_euler_with_small_angles_approximation, shapes)
 
   @parameterized.parameters(
-      ("must have exactly 3 dimensions", (None,)),)
+      ("must have exactly 3 dimensions in axis -1", (None,)),)
   def test_from_euler_with_small_angles_approximation_exception_raised(
       self, error_msg, *shapes):
     """Tests that the shape exceptions are properly raised."""
@@ -92,14 +97,18 @@ class AxisAngleTest(test_case.TestCase):
   def test_from_euler_normalized_preset(self):
     """Tests that from_euler allows build normalized axis-angles."""
     euler_angles = test_helpers.generate_preset_test_euler_angles()
+
     axis, angle = axis_angle.from_euler(euler_angles)
+
     self.assertAllEqual(
         axis_angle.is_normalized(axis, angle), np.ones(angle.shape, dtype=bool))
 
   def test_from_euler_normalized_random(self):
     """Tests that from_euler allows build normalized axis-angles."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
+
     random_axis, random_angle = axis_angle.from_euler(random_euler_angles)
+
     self.assertAllEqual(
         axis_angle.is_normalized(random_axis, random_angle),
         np.ones(shape=random_angle.shape))
@@ -109,22 +118,25 @@ class AxisAngleTest(test_case.TestCase):
     # empirically to be the range where the small angle approximation works.
     random_euler_angles = test_helpers.generate_random_test_euler_angles(
         min_angle=-0.24, max_angle=0.24)
+
     exact_axis_angle = axis_angle.from_euler(random_euler_angles)
     approximate_axis_angle = (
         axis_angle.from_euler_with_small_angles_approximation(
             random_euler_angles))
+
     self.assertAllClose(exact_axis_angle, approximate_axis_angle, atol=1e-3)
 
   @parameterized.parameters(
       ((4,),),
       ((None, 4),),
+      ((2, 4),),
   )
   def test_from_quaternion_exception_not_raised(self, *shape):
     """Tests that the shape exceptions are not raised."""
     self.assert_exception_is_not_raised(axis_angle.from_quaternion, shape)
 
   @parameterized.parameters(
-      ("'quaternion' must have 4 dimensions.", (None,)),)
+      ("must have exactly 4 dimensions in axis -1", (None,)),)
   def test_from_quaternion_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
     self.assert_exception_is_raised(axis_angle.from_quaternion, error_msg,
@@ -139,22 +151,28 @@ class AxisAngleTest(test_case.TestCase):
     """
     x_init = test_helpers.generate_random_test_quaternions()
     x = tf.convert_to_tensor(value=x_init)
+
     y_axis, y_angle = axis_angle.from_quaternion(x)
+
     self.assert_jacobian_is_finite(x, x_init, y_axis)
     self.assert_jacobian_is_finite(x, x_init, y_angle)
 
   def test_from_quaternion_normalized_preset(self):
     """Tests that from_quaternion returns normalized axis-angles."""
     euler_angles = test_helpers.generate_preset_test_euler_angles()
+
     quat = quaternion.from_euler(euler_angles)
     axis, angle = axis_angle.from_quaternion(quat)
+
     self.assertAllEqual(
         axis_angle.is_normalized(axis, angle), np.ones(angle.shape, dtype=bool))
 
   def test_from_quaternion_normalized_random(self):
     """Tests that from_quaternion returns normalized axis-angles."""
     random_quaternions = test_helpers.generate_random_test_quaternions()
+
     random_axis, random_angle = axis_angle.from_quaternion(random_quaternions)
+
     self.assertAllEqual(
         axis_angle.is_normalized(random_axis, random_angle),
         np.ones(random_angle.shape))
@@ -162,8 +180,10 @@ class AxisAngleTest(test_case.TestCase):
   def test_from_quaternion_preset(self):
     """Tests that axis_angle.from_quaternion produces the expected result."""
     preset_euler_angles = test_helpers.generate_preset_test_euler_angles()
+
     preset_quaternions = quaternion.from_euler(preset_euler_angles)
     preset_axis_angle = axis_angle.from_euler(preset_euler_angles)
+
     self.assertAllClose(
         preset_axis_angle,
         axis_angle.from_quaternion(preset_quaternions),
@@ -172,8 +192,10 @@ class AxisAngleTest(test_case.TestCase):
   def test_from_quaternion_random(self):
     """Tests that axis_angle.from_quaternion produces the expected result."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
+
     random_quaternions = quaternion.from_euler(random_euler_angles)
     random_axis_angle = axis_angle.from_euler(random_euler_angles)
+
     self.assertAllClose(
         random_axis_angle,
         axis_angle.from_quaternion(random_quaternions),
@@ -188,9 +210,9 @@ class AxisAngleTest(test_case.TestCase):
     self.assert_exception_is_not_raised(axis_angle.from_rotation_matrix, shapes)
 
   @parameterized.parameters(
-      ("'rotation_matrix' must have 3x3 dimensions.", (3,)),
-      ("'rotation_matrix' must have 3x3 dimensions.", (None, 3)),
-      ("'rotation_matrix' must have 3x3 dimensions.", (3, None)),
+      ("must have a rank greater than 1", (3,)),
+      ("must have exactly 3 dimensions in axis -1", (3, None)),
+      ("must have exactly 3 dimensions in axis -2", (None, 3)),
   )
   def test_from_rotation_matrix_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -206,23 +228,29 @@ class AxisAngleTest(test_case.TestCase):
     """
     x_init = test_helpers.generate_random_test_rotation_matrix_3d()
     x = tf.convert_to_tensor(value=x_init)
+
     y_axis, y_angle = axis_angle.from_rotation_matrix(x)
+
     self.assert_jacobian_is_finite(x, x_init, y_axis)
     self.assert_jacobian_is_finite(x, x_init, y_angle)
 
   def test_from_rotation_matrix_normalized_preset(self):
     """Tests that from_rotation_matrix returns normalized axis-angles."""
-    random_euler_angles = test_helpers.generate_preset_test_euler_angles()
-    matrix = rotation_matrix_3d.from_euler(random_euler_angles)
+    preset_euler_angles = test_helpers.generate_preset_test_euler_angles()
+
+    matrix = rotation_matrix_3d.from_euler(preset_euler_angles)
     axis, angle = axis_angle.from_rotation_matrix(matrix)
+
     self.assertAllEqual(
         axis_angle.is_normalized(axis, angle), np.ones(angle.shape, dtype=bool))
 
   def test_from_rotation_matrix_normalized_random(self):
     """Tests that from_rotation_matrix returns normalized axis-angles."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
+
     matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     axis, angle = axis_angle.from_rotation_matrix(matrix)
+
     self.assertAllEqual(
         axis_angle.is_normalized(axis, angle), np.ones(angle.shape, dtype=bool))
 
@@ -253,6 +281,7 @@ class AxisAngleTest(test_case.TestCase):
       # Remember that q=-q for any quaternion.
       pos = np.allclose(quat_gt, quat)
       neg = np.allclose(quat_gt, -quat)
+
       self.assertTrue(pos or neg)
 
   @parameterized.parameters(
@@ -264,7 +293,7 @@ class AxisAngleTest(test_case.TestCase):
     self.assert_exception_is_not_raised(axis_angle.from_rotation_vector, shape)
 
   @parameterized.parameters(
-      ("'rotation_vector' must have 3 dimensions.", (None,)),)
+      ("must have exactly 3 dimensions in axis -1", (None,)),)
   def test_from_rotation_vector_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
     self.assert_exception_is_raised(axis_angle.from_rotation_vector, error_msg,
@@ -276,7 +305,9 @@ class AxisAngleTest(test_case.TestCase):
     x_axis_init, x_angle_init = test_helpers.generate_random_test_axis_angle()
     x_init = x_axis_init * np.absolute(x_angle_init)
     x = tf.convert_to_tensor(value=x_init)
+
     y_axis, y_angle = axis_angle.from_rotation_vector(x)
+
     self.assert_jacobian_is_correct(x, x_init, y_axis, atol=1e-4)
     self.assert_jacobian_is_correct(x, x_init, y_angle)
 
@@ -290,14 +321,17 @@ class AxisAngleTest(test_case.TestCase):
   @parameterized.parameters(
       ((3,), (1,)),
       ((None, 3), (None, 1)),
+      ((2, 3), (2, 1)),
+      ((1, 3), (1,)),
+      ((3,), (1, 1)),
   )
   def test_inverse_exception_not_raised(self, *shape):
     """Tests that the shape exceptions are not raised."""
     self.assert_exception_is_not_raised(axis_angle.inverse, shape)
 
   @parameterized.parameters(
-      ("'axis' must have 3 dimensions.", (None,), (1,)),
-      ("'angle' must have 1 dimension.", (3,), (None,)),
+      ("must have exactly 3 dimensions in axis -1", (None,), (1,)),
+      ("must have exactly 1 dimensions in axis -1", (3,), (None,)),
   )
   def test_inverse_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -309,7 +343,9 @@ class AxisAngleTest(test_case.TestCase):
     x_axis_init, x_angle_init = test_helpers.generate_preset_test_axis_angle()
     x_axis = tf.convert_to_tensor(value=x_axis_init)
     x_angle = tf.convert_to_tensor(value=x_angle_init)
+
     y_axis, y_angle = axis_angle.inverse(x_axis, x_angle)
+
     self.assert_jacobian_is_correct(x_axis, x_axis_init, y_axis)
     self.assert_jacobian_is_correct(x_angle, x_angle_init, y_angle)
 
@@ -319,14 +355,18 @@ class AxisAngleTest(test_case.TestCase):
     x_axis_init, x_angle_init = test_helpers.generate_random_test_axis_angle()
     x_axis = tf.convert_to_tensor(value=x_axis_init)
     x_angle = tf.convert_to_tensor(value=x_angle_init)
+
     y_axis, y_angle = axis_angle.inverse(x_axis, x_angle)
+
     self.assert_jacobian_is_correct(x_axis, x_axis_init, y_axis)
     self.assert_jacobian_is_correct(x_angle, x_angle_init, y_angle)
 
   def test_inverse_normalized_random(self):
     """Tests that axis-angle inversion return a normalized axis-angle."""
     random_axis, random_angle = test_helpers.generate_random_test_axis_angle()
+
     inverse_axis, inverse_angle = axis_angle.inverse(random_axis, random_angle)
+
     self.assertAllEqual(
         axis_angle.is_normalized(inverse_axis, inverse_angle),
         np.ones(random_angle.shape))
@@ -334,13 +374,15 @@ class AxisAngleTest(test_case.TestCase):
   def test_inverse_random(self):
     """Tests axis-angle inversion."""
     random_axis, random_angle = test_helpers.generate_random_test_axis_angle()
+
     inverse_axis, inverse_angle = axis_angle.inverse(random_axis, random_angle)
+
     self.assertAllClose(inverse_axis, random_axis, rtol=1e-3)
     self.assertAllClose(inverse_angle, -random_angle, rtol=1e-3)
 
   @parameterized.parameters(
-      ("'axis' must have 3 dimensions.", (None,), (1,)),
-      ("'angle' must have 1 dimension.", (3,), (None,)),
+      ("must have exactly 3 dimensions in axis -1", (None,), (1,)),
+      ("must have exactly 1 dimensions in axis -1", (3,), (None,)),
   )
   def test_is_normalized_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -350,26 +392,35 @@ class AxisAngleTest(test_case.TestCase):
     """Tests that is_normalized works as intended."""
     # Samples normalized axis-angles.
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
-    random_axis, random_angle = axis_angle.from_euler(random_euler_angles)
-    pred = axis_angle.is_normalized(random_axis, random_angle)
-    self.assertAllEqual(np.ones(shape=random_angle.shape, dtype=bool), pred)
-    # Small perturbation that changes the norm of the axis.
-    random_axis *= 1.01
-    pred = axis_angle.is_normalized(random_axis, random_angle)
-    self.assertAllEqual(np.zeros(shape=random_angle.shape, dtype=bool), pred)
+
+    with self.subTest(name=("is_normalized")):
+      random_axis, random_angle = axis_angle.from_euler(random_euler_angles)
+      pred = axis_angle.is_normalized(random_axis, random_angle)
+
+      self.assertAllEqual(np.ones(shape=random_angle.shape, dtype=bool), pred)
+
+    with self.subTest(name=("is_not_normalized")):
+      random_axis *= 1.01
+      pred = axis_angle.is_normalized(random_axis, random_angle)
+
+      self.assertAllEqual(np.zeros(shape=random_angle.shape, dtype=bool), pred)
 
   @parameterized.parameters(
       ((3,), (3,), (1,)),
       ((None, 3), (None, 3), (None, 1)),
+      ((2, 3), (2, 3), (2, 1)),
+      ((3,), (1, 3), (1, 2, 1)),
+      ((1, 2, 3), (1, 3), (1,)),
+      ((3,), (1, 3), (1,)),
   )
   def test_rotate_exception_not_raised(self, *shapes):
     """Tests that the shape exceptions are not raised."""
     self.assert_exception_is_not_raised(axis_angle.rotate, shapes)
 
   @parameterized.parameters(
-      ("'point' must have 3 dimensions.", (2,), (3,), (1,)),
-      ("'axis' must have 3 dimensions.", (3,), (2,), (1,)),
-      ("'angle' must have 1 dimensions.", (3,), (3,), (2,)),
+      ("must have exactly 3 dimensions in axis -1", (2,), (3,), (1,)),
+      ("must have exactly 3 dimensions in axis -1", (3,), (2,), (1,)),
+      ("must have exactly 1 dimensions in axis -1", (3,), (3,), (2,)),
   )
   def test_rotate_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""
@@ -383,7 +434,9 @@ class AxisAngleTest(test_case.TestCase):
     x_angle = tf.convert_to_tensor(value=x_angle_init)
     x_point_init = np.random.uniform(size=x_axis.shape)
     x_point = tf.convert_to_tensor(value=x_point_init)
+
     y = axis_angle.rotate(x_point, x_axis, x_angle)
+
     self.assert_jacobian_is_correct(x_axis, x_axis_init, y)
     self.assert_jacobian_is_correct(x_angle, x_angle_init, y)
     self.assert_jacobian_is_correct(x_point, x_point_init, y)
@@ -396,7 +449,9 @@ class AxisAngleTest(test_case.TestCase):
     x_angle = tf.convert_to_tensor(value=x_angle_init)
     x_point_init = np.random.uniform(size=x_axis.shape)
     x_point = tf.convert_to_tensor(value=x_point_init)
+
     y = axis_angle.rotate(x_point, x_axis, x_angle)
+
     self.assert_jacobian_is_correct(x_axis, x_axis_init, y)
     self.assert_jacobian_is_correct(x_angle, x_angle_init, y)
     self.assert_jacobian_is_correct(x_point, x_point_init, y)
@@ -405,10 +460,12 @@ class AxisAngleTest(test_case.TestCase):
     """Tests that the rotate provide the same results as quaternion.rotate."""
     random_axis, random_angle = test_helpers.generate_random_test_axis_angle()
     tensor_shape = random_angle.shape[:-1]
-    random_quaternion = quaternion.from_axis_angle(random_axis, random_angle)
     random_point = np.random.normal(size=tensor_shape + (3,))
+
+    random_quaternion = quaternion.from_axis_angle(random_axis, random_angle)
     ground_truth = quaternion.rotate(random_point, random_quaternion)
     prediction = axis_angle.rotate(random_point, random_axis, random_angle)
+
     self.assertAllClose(ground_truth, prediction, rtol=1e-6)
 
 

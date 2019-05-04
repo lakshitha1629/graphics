@@ -38,12 +38,9 @@ class RotationMatrixCommonTest(test_case.TestCase):
     self.assert_exception_is_not_raised(rotation_matrix_common.is_valid, shape)
 
   @parameterized.parameters(
-      ("'matrix' must have KxK dimensions.", (2,)),
-      ("'matrix' must have KxK dimensions.", (3,)),
-      ("'matrix' must have KxK dimensions.", (2, None)),
-      ("'matrix' must have KxK dimensions.", (3, None)),
-      ("'matrix' must have KxK dimensions.", (2, None)),
-      ("'matrix' must have KxK dimensions.", (3, None)),
+      ("must have a rank greater than 1", (2,)),
+      ("must have the same number of dimensions in axes", (1, 2)),
+      ("must have the same number of dimensions in axes", (None, 2)),
   )
   def test_is_valid_exception_raised(self, error_msg, *shape):
     """Tests that the shape exceptions are raised."""

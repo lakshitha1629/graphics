@@ -27,6 +27,7 @@ import tensorflow as tf
 from tensorflow_graphics.geometry.transformation import rotation_matrix_common
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import shape
 from tensorflow_graphics.util import tfg_flags
 
 FLAGS = flags.FLAGS
@@ -49,6 +50,7 @@ def _build_matrix_from_sines_and_cosines(sin_angles, cos_angles):
     represent a 3d rotation matrix.
   """
   sin_angles.shape.assert_is_compatible_with(cos_angles.shape)
+
   sx, sy, sz = tf.unstack(sin_angles, axis=-1)
   cx, cy, cz = tf.unstack(cos_angles, axis=-1)
   m00 = cy * cz
@@ -60,17 +62,15 @@ def _build_matrix_from_sines_and_cosines(sin_angles, cos_angles):
   m20 = -sy
   m21 = sx * cy
   m22 = cx * cy
-  # pyformat: disable
   matrix = tf.stack((m00, m01, m02,
                      m10, m11, m12,
                      m20, m21, m22),
-                    axis=-1)
-  # pyformat: enable
+                    axis=-1)  # pyformat: disable
   output_shape = tf.concat((tf.shape(input=sin_angles)[:-1], (3, 3)), axis=-1)
   return tf.reshape(matrix, shape=output_shape)
 
 
-def assert_rotation_matrix_normalized(matrix, eps=None, name=None):
+def assert_rotation_matrix_normalized(matrix, eps=1e-3, name=None):
   """Checks whether a matrix is a rotation matrix.
 
   Note:
@@ -93,13 +93,16 @@ def assert_rotation_matrix_normalized(matrix, eps=None, name=None):
     return matrix
 
   with tf.compat.v1.name_scope(name, "assert_rotation_matrix_normalized",
-                               [matrix, eps]):
+                               [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape = matrix.shape.as_list()
-    shape_length = len(shape)
-    if shape_length < 2 or shape[-1] != 3 or shape[-2] != 3:
-      raise ValueError("'rotation_matrix_3d' must have 3x3 dimensions.")
-    is_matrix_normalized = is_valid(matrix)
+
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 3), (-1, 3)))
+
+    is_matrix_normalized = is_valid(matrix, atol=eps)
     with tf.control_dependencies([
         tf.compat.v1.assert_equal(
             is_matrix_normalized,
@@ -112,7 +115,8 @@ def from_axis_angle(axis, angle, name=None):
   """Convert an axis-angle representation to a rotation matrix.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which must be
+    broadcast compatible.
 
   Args:
     axis: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
@@ -133,17 +137,20 @@ def from_axis_angle(axis, angle, name=None):
                                [axis, angle]):
     axis = tf.convert_to_tensor(value=axis)
     angle = tf.convert_to_tensor(value=angle)
-    shape_axis = axis.shape.as_list()
-    shape_angle = angle.shape.as_list()
-    if shape_axis[-1] != 3:
-      raise ValueError("'axis' must have 3 dimensions.")
-    if shape_angle[-1] != 1:
-      raise ValueError("'angle' must have 1 dimension.")
 
+    shape.check_static(tensor=axis, tensor_name="axis", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=angle, tensor_name="angle", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(axis, angle),
+        tensor_names=("axis", "angle"),
+        last_axes=-2,
+        broadcast_compatible=True)
     axis = asserts.assert_normalized(axis)
+
     sin_axis = tf.sin(angle) * axis
-    c = tf.cos(angle)
-    cos1_axis = (1.0 - c) * axis
+    cos_angle = tf.cos(angle)
+    cos1_axis = (1.0 - cos_angle) * axis
     _, axis_y, axis_z = tf.unstack(axis, axis=-1)
     cos1_axis_x, cos1_axis_y, _ = tf.unstack(cos1_axis, axis=-1)
     sin_axis_x, sin_axis_y, sin_axis_z = tf.unstack(sin_axis, axis=-1)
@@ -156,14 +163,12 @@ def from_axis_angle(axis, angle, name=None):
     tmp = cos1_axis_y * axis_z
     m12 = tmp - sin_axis_x
     m21 = tmp + sin_axis_x
-    diag = cos1_axis * axis + c
+    diag = cos1_axis * axis + cos_angle
     diag_x, diag_y, diag_z = tf.unstack(diag, axis=-1)
-    # pyformat: disable
     matrix = tf.stack((diag_x, m01, m02,
                        m10, diag_y, m12,
                        m20, m21, diag_z),
-                      axis=-1)
-    # pyformat: enable
+                      axis=-1)  # pyformat: disable
     output_shape = tf.concat((tf.shape(input=axis)[:-1], (3, 3)), axis=-1)
     return tf.reshape(matrix, shape=output_shape)
 
@@ -192,9 +197,9 @@ def from_euler(angles, name=None):
   """
   with tf.compat.v1.name_scope(name, "rotation_matrix_3d_from_euler", [angles]):
     angles = tf.convert_to_tensor(value=angles)
-    shape_angles = angles.shape.as_list()
-    if shape_angles[-1] != 3:
-      raise ValueError("'angles' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=angles, tensor_name="angles", has_dim_equals=(-1, 3))
 
     sin_angles = tf.sin(angles)
     cos_angles = tf.cos(angles)
@@ -230,12 +235,12 @@ def from_euler_with_small_angles_approximation(angles, name=None):
   with tf.compat.v1.name_scope(
       name, "rotation_matrix_3d_from_euler_with_small_angles", [angles]):
     angles = tf.convert_to_tensor(value=angles)
-    shape_angles = angles.shape.as_list()
-    if shape_angles[-1] != 3:
-      raise ValueError("'angles' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=angles, tensor_name="angles", has_dim_equals=(-1, 3))
 
     sin_angles = angles
-    cos_angles = 1.0 - 0.5 * angles * angles
+    cos_angles = 1.0 - 0.5 * tf.square(angles)
     return _build_matrix_from_sines_and_cosines(sin_angles, cos_angles)
 
 
@@ -261,11 +266,11 @@ def from_quaternion(quaternion, name=None):
   with tf.compat.v1.name_scope(name, "rotation_matrix_3d_from_quaternion",
                                [quaternion]):
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape = quaternion.shape.as_list()
-    if shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
 
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
     quaternion = asserts.assert_normalized(quaternion)
+
     x, y, z, w = tf.unstack(quaternion, axis=-1)
     tx = 2.0 * x
     ty = 2.0 * y
@@ -279,12 +284,10 @@ def from_quaternion(quaternion, name=None):
     tyy = ty * y
     tyz = tz * y
     tzz = tz * z
-    # pyformat: disable
     matrix = tf.stack((1.0 - (tyy + tzz), txy - twz, txz + twy,
                        txy + twz, 1.0 - (txx + tzz), tyz - twx,
                        txz - twy, tyz + twx, 1.0 - (txx + tyy)),
-                      axis=-1)
-    # pyformat: enable
+                      axis=-1)  # pyformat: disable
     output_shape = tf.concat((tf.shape(input=quaternion)[:-1], (3, 3)), axis=-1)
     return tf.reshape(matrix, shape=output_shape)
 
@@ -309,13 +312,16 @@ def inverse(matrix, name=None):
   """
   with tf.compat.v1.name_scope(name, "rotation_matrix_3d_inverse", [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape_matrix = matrix.shape.as_list()
-    if shape_matrix[-2:] != [3, 3]:
-      raise ValueError("'matrix' must have 3x3 dimensions.")
 
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 3), (-1, 3)))
     matrix = assert_rotation_matrix_normalized(matrix)
-    input_len = len(shape_matrix)
-    perm = list(range(input_len - 2)) + [input_len - 1, input_len - 2]
+
+    ndims = matrix.shape.ndims
+    perm = list(range(ndims - 2)) + [ndims - 1, ndims - 2]
     return tf.transpose(a=matrix, perm=perm)
 
 
@@ -337,10 +343,13 @@ def is_valid(matrix, atol=1e-3, name=None):
   """
   with tf.compat.v1.name_scope(name, "rotation_matrix_3d_is_valid", [matrix]):
     matrix = tf.convert_to_tensor(value=matrix)
-    shape = matrix.shape.as_list()
-    shape_length = len(shape)
-    if shape_length < 2 or shape[-1] != 3 or shape[-2] != 3:
-      raise ValueError("'matrix' must have 3x3 dimensions.")
+
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 3), (-1, 3)))
+
     return rotation_matrix_common.is_valid(matrix, atol)
 
 
@@ -348,7 +357,8 @@ def rotate(point, matrix, name=None):
   """Rotate a point using a rotation matrix 3d.
 
   Note:
-    In the following, A1 to An are optional batch dimensions.
+    In the following, A1 to An are optional batch dimensions, which must be
+    broadcast compatible.
 
   Args:
     point: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
@@ -369,15 +379,29 @@ def rotate(point, matrix, name=None):
                                [point, matrix]):
     point = tf.convert_to_tensor(value=point)
     matrix = tf.convert_to_tensor(value=matrix)
-    shape_point = point.shape.as_list()
-    shape_matrix = matrix.shape.as_list()
-    if shape_point[-1] != 3:
-      raise ValueError("'point' must have 3 dimensions.")
-    if shape_matrix[-2:] != [3, 3]:
-      raise ValueError("'matrix' must have 3x3 dimensions.")
 
+    shape.check_static(
+        tensor=point, tensor_name="point", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=matrix,
+        tensor_name="matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 3), (-1, 3)))
+    shape.compare_batch_dimensions(
+        tensors=(point, matrix),
+        tensor_names=("point", "matrix"),
+        last_axes=(-2, -3),
+        broadcast_compatible=True)
     matrix = assert_rotation_matrix_normalized(matrix)
+
     point = tf.expand_dims(point, axis=-1)
+    common_batch_shape = shape.get_broadcasted_shape(
+        point.shape[:-2], matrix.shape[:-2])
+    def dim_value(dim):
+      return 1 if dim is None else tf.compat.v1.dimension_value(dim)
+    common_batch_shape = [dim_value(dim) for dim in common_batch_shape]
+    point = tf.broadcast_to(point, common_batch_shape + [3, 1])
+    matrix = tf.broadcast_to(matrix, common_batch_shape + [3, 3])
     rotated_point = tf.matmul(matrix, point)
     return tf.squeeze(rotated_point, axis=-1)
 

@@ -67,8 +67,6 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":asserts",
-        ":tfg_flags",
-        # package dep,
 
         # google internal,
     ],

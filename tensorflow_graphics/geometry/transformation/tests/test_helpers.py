@@ -84,8 +84,7 @@ def generate_random_test_euler_angles(dimensions=3,
   """Generates random test random Euler angles."""
   tensor_dimensions = np.random.randint(3)
   tensor_tile = np.random.randint(1, 10, tensor_dimensions).tolist()
-  angles = np.random.uniform(min_angle, max_angle, tensor_tile + [dimensions])
-  return angles
+  return np.random.uniform(min_angle, max_angle, tensor_tile + [dimensions])
 
 
 def generate_random_test_quaternions(tensor_shape=None):
@@ -98,13 +97,11 @@ def generate_random_test_quaternions(tensor_shape=None):
   u3 = np.random.uniform(0.0, 2.0 * math.pi, tensor_shape)
   a = np.sqrt(1.0 - u1)
   b = np.sqrt(u1)
-  # pyformat: disable
   return np.stack((a * np.sin(u2),
                    a * np.cos(u2),
                    b * np.sin(u3),
                    b * np.cos(u3)),
-                  axis=-1)
-  # pyformat: enable
+                  axis=-1)  # pyformat: disable
 
 
 def generate_random_test_axis_angle():
@@ -121,13 +118,11 @@ def generate_random_test_rotation_matrix_3d():
   """Generates random test 3d rotation matrices."""
   random_matrix = np.array(
       [stats.special_ortho_group.rvs(3) for _ in range(20)])
-  random_matrix = np.reshape(random_matrix, [5, 4, 3, 3])
-  return random_matrix
+  return np.reshape(random_matrix, [5, 4, 3, 3])
 
 
 def generate_random_test_rotation_matrix_2d():
   """Generates random test 2d rotation matrices."""
   random_matrix = np.array(
       [stats.special_ortho_group.rvs(2) for _ in range(20)])
-  random_matrix = np.reshape(random_matrix, [5, 4, 2, 2])
-  return random_matrix
+  return np.reshape(random_matrix, [5, 4, 2, 2])

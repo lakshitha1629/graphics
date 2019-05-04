@@ -33,7 +33,7 @@ except ImportError:
 # pylint: enable=g-import-not-at-top
 
 
-def _triangular_mesh_to_three_geometry(vertices, faces):
+def _triangular_mesh_to_three_geometry(vertices, faces, vertex_colors=None):
   """Converts a triangular mesh to a Three.js BufferGeometry object.
 
   Args:
@@ -43,6 +43,9 @@ def _triangular_mesh_to_three_geometry(vertices, faces):
     faces: a [F,3] numpy array describing the vertices contained in each face of
       the mesh. F denotes the number of faces. The values of that array are
       expected to be positive integer values.
+    vertex_colors: a [V, 3] numpy array describing the RGB color of each vertex
+      in the mesh. V denotes the number of vertices. Each channel in vertex
+      colors is expected to be floating values in range [0, 1].
 
   Returns:
     A BufferGeometry object describing the geometry of the mesh and which can
@@ -56,6 +59,12 @@ def _triangular_mesh_to_three_geometry(vertices, faces):
                         context.THREE.BufferAttribute.new_object(vertices, 3))
   geometry.setIndex(context.THREE.BufferAttribute.new_object(faces, 1))
   geometry.computeVertexNormals()
+  if vertex_colors is not None:
+    vertex_colors = context.Float32Array.new_object(
+        vertex_colors.ravel().tolist())
+    geometry.addAttribute(
+        'color', context.THREE.BufferAttribute.new_object(vertex_colors, 3))
+
   return geometry
 
 
@@ -105,11 +114,14 @@ def triangular_mesh_renderer(meshes,
   """Function for simple mesh visualization using Three.js.
 
   Args:
-    meshes: a list or tuple of dictionaries, each containing two keys:
+    meshes: a list or tuple of dictionaries, each containing two required keys:
       'vertices', a [V,3] numpy ndarray of vertices, and 'faces' a [F,3] numpy
       ndarray of vertex indices that belong to each face of the mesh. V and F
       respectively correspond to the number of vertices and faces in any given
-      mesh.
+      mesh. In addition, following optional keys may be provided for each mesh:
+      'vertex_colors', a [V, 3] numpy ndarray of vertex colors, and
+      'material', a Three.js Material object. If a material is not provided,
+      then a default Lambertian material is used.
     lights: a list of Three.js lights to add to the scene. If no light is
       provided, a point light is added to the scene at the position (0., 0.,
       5.).
@@ -158,10 +170,17 @@ def triangular_mesh_renderer(meshes,
   })
   geometries = []
   for mesh in meshes:
+    if 'vertex_colors' in mesh.keys() and mesh['vertex_colors'] is not None:
+      vertex_colors = mesh['vertex_colors']
+      default_material['vertexColors'] = context.THREE.VertexColors
+    else:
+      vertex_colors = None
+      default_material['vertexColors'] = context.THREE.NoColors
     geometry = _triangular_mesh_to_three_geometry(mesh['vertices'],
-                                                  mesh['faces'])
+                                                  mesh['faces'],
+                                                  vertex_colors)
     geometries.append(geometry)
-    if 'material' in mesh.keys():
+    if 'material' in mesh.keys() and mesh['material'] is not None:
       scene.add(context.THREE.Mesh.new_object(geometry, mesh['material']))
     else:
       scene.add(context.THREE.Mesh.new_object(geometry, default_material))

@@ -35,207 +35,330 @@ def _pick_random_vector():
 
 class AssertsTest(test_case.TestCase):
 
-  @parameterized.parameters((tf.float16,), (tf.float32,), (tf.float64,))
-  def test_assert_normalized(self, dtype):
-    """Checks that assert_normalized function works as expected."""
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_normalized_exception_not_raised(self, dtype):
+    """Checks that assert_normalized raises no exceptions for valid input."""
     vector = _pick_random_vector()
     vector = tf.convert_to_tensor(value=vector, dtype=dtype)
     norm_vector = vector / tf.norm(tensor=vector, axis=-1, keepdims=True)
-    norm_vector = asserts.assert_normalized(norm_vector)
-    self.evaluate(norm_vector)
+
+    self.assert_exception_is_not_raised(
+        asserts.assert_normalized, shapes=[], vector=norm_vector)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_normalized_exception_raised(self, dtype):
+    """Checks that assert_normalized raises exceptions for invalid input."""
+    vector = _pick_random_vector() + 10.0
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+    vector = tf.abs(vector)
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
-      vector = asserts.assert_normalized(vector)
-      self.evaluate(vector)
+      self.evaluate(asserts.assert_normalized(vector))
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_assert_normalized_passthrough(self):
     """Checks that the assert is a passthrough when the flag is False."""
     vector_input = _pick_random_vector()
+
     vector_output = asserts.assert_normalized(vector_input)
-    self.assertTrue(vector_input is vector_output)
+
+    self.assertIs(vector_input, vector_output)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_assert_at_least_k_non_zero_entries_passthrough(self):
     """Checks that the assert is a passthrough when the flag is False."""
     vector_input = _pick_random_vector()
+
     vector_output = asserts.assert_at_least_k_non_zero_entries(vector_input)
+
     self.assertIs(vector_input, vector_output)
 
-  def test_assert_nonzero_norm(self):
-    """Checks whether assert_nonzero_norm works for almost zero vectors."""
-    vector = _pick_random_vector()
-    zero_vector = tf.zeros_like(vector)
-    vector = asserts.assert_nonzero_norm(vector)
-    self.evaluate(vector)
-    self.evaluate(asserts.assert_nonzero_norm(tf.constant([4e-4], tf.float16)))
-    self.evaluate(asserts.assert_nonzero_norm(tf.constant([4e-19], tf.float32)))
-    self.evaluate(
-        asserts.assert_nonzero_norm(tf.constant([4e-154], tf.float64)))
+  @parameterized.parameters(
+      (None, None),
+      (1e-3, tf.float16),
+      (4e-19, tf.float32),
+      (4e-154, tf.float64),
+  )
+  def test_assert_nonzero_norm_exception_not_raised(self, value, dtype):
+    """Checks that assert_nonzero_norm works for values above eps."""
+    if value is None:
+      vector = _pick_random_vector() + 10.0
+      vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+      vector = tf.abs(vector)
+    else:
+      vector = tf.constant((value,), dtype=dtype)
+
+    self.assert_exception_is_not_raised(
+        asserts.assert_nonzero_norm, shapes=[], vector=vector)
+
+  @parameterized.parameters(
+      (1e-4, tf.float16),
+      (1e-38, tf.float32),
+      (1e-308, tf.float64),
+  )
+  def test_assert_nonzero_norm_exception_raised(self, value, dtype):
+    """Checks that assert_nonzero_norm fails for values below eps."""
+    vector = tf.constant((value,), dtype=dtype)
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
-      zero_vector = asserts.assert_nonzero_norm(zero_vector)
-      self.evaluate(zero_vector)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      self.evaluate(
-          asserts.assert_nonzero_norm(tf.constant([1e-4], tf.float16)))
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      self.evaluate(
-          asserts.assert_nonzero_norm(tf.constant([1e-38], tf.float32)))
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      self.evaluate(
-          asserts.assert_nonzero_norm(tf.constant([1e-308], tf.float64)))
+      self.evaluate(asserts.assert_nonzero_norm(vector))
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_assert_nonzero_norm_passthrough(self):
     """Checks that the assert is a passthrough when the flag is False."""
     vector_input = _pick_random_vector()
-    vector_output = asserts.assert_nonzero_norm(vector_input)
-    self.assertTrue(vector_input is vector_output)
 
-  @parameterized.parameters((tf.float16,), (tf.float32,), (tf.float64,))
-  def test_assert_all_above(self, dtype):
-    """Checks whether assert_all_above works as intended."""
-    vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
+    vector_output = asserts.assert_nonzero_norm(vector_input)
+
+    self.assertIs(vector_input, vector_output)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_all_above_exception_not_raised(self, dtype):
+    """Checks that assert_all_above raises no exceptions for valid input."""
+    vector = _pick_random_vector()
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+
     vector = vector * vector
     vector /= -tf.reduce_max(input_tensor=vector, axis=-1, keepdims=True)
     eps = asserts.select_eps_for_addition(dtype)
     inside_vector = vector + eps
+    ones_vector = -tf.ones_like(vector)
+
+    with self.subTest(name="inside_and_open_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_above,
+          shapes=[],
+          vector=inside_vector,
+          minval=-1.0,
+          open_bound=True)
+
+    with self.subTest(name="inside_and_close_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_above,
+          shapes=[],
+          vector=inside_vector,
+          minval=-1.0,
+          open_bound=False)
+
+    with self.subTest(name="exact_and_close_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_above,
+          shapes=[],
+          vector=ones_vector,
+          minval=-1.0,
+          open_bound=False)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_all_above_exception_raised(self, dtype):
+    """Checks that assert_all_above raises exceptions for invalid input."""
+    vector = _pick_random_vector()
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+
+    vector = vector * vector
+    vector /= -tf.reduce_max(input_tensor=vector, axis=-1, keepdims=True)
+    eps = asserts.select_eps_for_addition(dtype)
     outside_vector = vector - eps
     ones_vector = -tf.ones_like(vector)
-    inside_vector_open = asserts.assert_all_above(
-        inside_vector, -1.0, open_bound=True)
-    inside_vector_closed = asserts.assert_all_above(
-        inside_vector, -1.0, open_bound=False)
-    ones_vector_closed = asserts.assert_all_above(
-        ones_vector, -1.0, open_bound=False)
-    self.evaluate(inside_vector_open)
-    self.evaluate(inside_vector_closed)
-    self.evaluate(ones_vector_closed)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      outside_vector_open = asserts.assert_all_above(
-          outside_vector, -1.0, open_bound=True)
-      self.evaluate(outside_vector_open)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      outside_vector_closed = asserts.assert_all_above(
-          outside_vector, -1.0, open_bound=False)
-      self.evaluate(outside_vector_closed)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      ones_vector_open = asserts.assert_all_above(
-          ones_vector, -1.0, open_bound=True)
-      self.evaluate(ones_vector_open)
+
+    with self.subTest(name="outside_and_open_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_above(outside_vector, -1.0, open_bound=True))
+
+    with self.subTest(name="outside_and_close_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_above(outside_vector, -1.0, open_bound=False))
+
+    with self.subTest(name="exact_and_open_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_above(ones_vector, -1.0, open_bound=True))
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_assert_all_above_passthrough(self):
     """Checks that the assert is a passthrough when the flag is False."""
     vector_input = _pick_random_vector()
-    vector_output = asserts.assert_all_above(vector_input, 1.0)
-    self.assertTrue(vector_input is vector_output)
 
-  @parameterized.parameters((tf.float16,), (tf.float32,), (tf.float64,))
-  def test_assert_all_below(self, dtype):
-    """Checks whether assert_all_below works as intended."""
-    vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
+    vector_output = asserts.assert_all_above(vector_input, 1.0)
+
+    self.assertIs(vector_input, vector_output)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_all_below_exception_not_raised(self, dtype):
+    """Checks that assert_all_below raises no exceptions for valid input."""
+    vector = _pick_random_vector()
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+
     vector = vector * vector
     vector /= tf.reduce_max(input_tensor=vector, axis=-1, keepdims=True)
     eps = asserts.select_eps_for_addition(dtype)
     inside_vector = vector - eps
+    ones_vector = tf.ones_like(vector)
+
+    with self.subTest(name="inside_and_open_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_below,
+          shapes=[],
+          vector=inside_vector,
+          maxval=1.0,
+          open_bound=True)
+
+    with self.subTest(name="inside_and_close_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_below,
+          shapes=[],
+          vector=inside_vector,
+          maxval=1.0,
+          open_bound=False)
+
+    with self.subTest(name="exact_and_close_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_below,
+          shapes=[],
+          vector=ones_vector,
+          maxval=1.0,
+          open_bound=False)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_all_below_exception_raised(self, dtype):
+    """Checks that assert_all_below raises exceptions for invalid input."""
+    vector = _pick_random_vector()
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+
+    vector = vector * vector
+    vector /= tf.reduce_max(input_tensor=vector, axis=-1, keepdims=True)
+    eps = asserts.select_eps_for_addition(dtype)
     outside_vector = vector + eps
     ones_vector = tf.ones_like(vector)
-    inside_vector_open = asserts.assert_all_below(
-        inside_vector, 1.0, open_bound=True)
-    inside_vector_closed = asserts.assert_all_below(
-        inside_vector, 1.0, open_bound=False)
-    ones_vector_closed = asserts.assert_all_below(
-        ones_vector, 1.0, open_bound=False)
-    self.evaluate(inside_vector_open)
-    self.evaluate(inside_vector_closed)
-    self.evaluate(ones_vector_closed)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      outside_vector_open = asserts.assert_all_below(
-          outside_vector, 1.0, open_bound=True)
-      self.evaluate(outside_vector_open)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      outside_vector_closed = asserts.assert_all_below(
-          outside_vector, 1.0, open_bound=False)
-      self.evaluate(outside_vector_closed)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      ones_vector_open = asserts.assert_all_below(
-          ones_vector, 1.0, open_bound=True)
-      self.evaluate(ones_vector_open)
+
+    with self.subTest(name="outside_and_open_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_below(outside_vector, 1.0, open_bound=True))
+
+    with self.subTest(name="outside_and_close_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_below(outside_vector, 1.0, open_bound=False))
+
+    with self.subTest(name="exact_and_open_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_below(ones_vector, 1.0, open_bound=True))
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_assert_all_below_passthrough(self):
     """Checks that the assert is a passthrough when the flag is False."""
     vector_input = _pick_random_vector()
     vector_output = asserts.assert_all_below(vector_input, 0.0)
-    self.assertTrue(vector_input is vector_output)
 
-  @parameterized.parameters((tf.float16,), (tf.float32,), (tf.float64,))
-  def test_assert_all_in_range(self, dtype):
-    """Checks whether assert_all_in_range works as intended."""
-    vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
+    self.assertIs(vector_input, vector_output)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_all_in_range_exception_not_raised(self, dtype):
+    """Checks that assert_all_in_range raises no exceptions for valid input."""
+    vector = _pick_random_vector()
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+
     vector = vector * vector
     vector /= tf.reduce_max(input_tensor=vector, axis=-1, keepdims=True)
     eps = asserts.select_eps_for_addition(dtype)
     inside_vector = vector - eps
+    ones_vector = tf.ones_like(vector)
+
+    with self.subTest(name="inside_and_open_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_in_range,
+          shapes=[],
+          vector=inside_vector,
+          minval=-1.0,
+          maxval=1.0,
+          open_bounds=True)
+
+    with self.subTest(name="inside_and_close_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_in_range,
+          shapes=[],
+          vector=inside_vector,
+          minval=-1.0,
+          maxval=1.0,
+          open_bounds=False)
+
+    with self.subTest(name="exact_and_close_bounds"):
+      self.assert_exception_is_not_raised(
+          asserts.assert_all_in_range,
+          shapes=[],
+          vector=ones_vector,
+          minval=-1.0,
+          maxval=1.0,
+          open_bounds=False)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_assert_all_in_range_exception_raised(self, dtype):
+    """Checks that assert_all_in_range raises exceptions for invalid input."""
+    vector = _pick_random_vector()
+    vector = tf.convert_to_tensor(value=vector, dtype=dtype)
+
+    vector = vector * vector
+    vector /= tf.reduce_max(input_tensor=vector, axis=-1, keepdims=True)
+    eps = asserts.select_eps_for_addition(dtype)
     outside_vector = vector + eps
     ones_vector = tf.ones_like(vector)
-    inside_vector_open = asserts.assert_all_in_range(
-        inside_vector, -1.0, 1.0, open_bounds=True)
-    inside_vector_closed = asserts.assert_all_in_range(
-        inside_vector, -1.0, 1.0, open_bounds=False)
-    ones_vector_closed = asserts.assert_all_in_range(
-        ones_vector, -1.0, 1.0, open_bounds=False)
-    self.evaluate(inside_vector_open)
-    self.evaluate(inside_vector_closed)
-    self.evaluate(ones_vector_closed)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      outside_vector_open = asserts.assert_all_in_range(
-          outside_vector, -1.0, 1.0, open_bounds=True)
-      self.evaluate(outside_vector_open)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      outside_vector_closed = asserts.assert_all_in_range(
-          outside_vector, -1.0, 1.0, open_bounds=False)
-      self.evaluate(outside_vector_closed)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      ones_vector_open = asserts.assert_all_in_range(
-          ones_vector, -1.0, 1.0, open_bounds=True)
-      self.evaluate(ones_vector_open)
+
+    with self.subTest(name="outside_and_open_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_in_range(
+                outside_vector, -1.0, 1.0, open_bounds=True))
+
+    with self.subTest(name="outside_and_close_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_in_range(
+                outside_vector, -1.0, 1.0, open_bounds=False))
+
+    with self.subTest(name="exact_and_open_bounds"):
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        self.evaluate(
+            asserts.assert_all_in_range(
+                ones_vector, -1.0, 1.0, open_bounds=True))
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_assert_all_in_range_passthrough(self):
     """Checks that the assert is a passthrough when the flag is False."""
     vector_input = _pick_random_vector()
+
     vector_output = asserts.assert_all_in_range(vector_input, -1.0, 1.0)
-    self.assertTrue(vector_input is vector_output)
 
-  def test_select_eps_for_division_arguments(self):
-    """Checks if select_eps_for_division raises ValueError for non-floats."""
-    some_int = tf.constant([1], tf.int32)
-    with self.assertRaises(ValueError):
-      asserts.select_eps_for_division(some_int.dtype)
+    self.assertIs(vector_input, vector_output)
 
-  def test_select_eps_for_addition_arguments(self):
-    """Checks if select_eps_for_addition raises ValueError for non-floats."""
-    some_int = tf.constant([1], tf.int32)
-    with self.assertRaises(ValueError):
-      asserts.select_eps_for_addition(some_int.dtype)
-
-  @parameterized.parameters((tf.float16,), (tf.float32,), (tf.float64,))
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
   def test_select_eps_for_division(self, dtype):
-    """Checks whether select_eps_for_division causes Inf values."""
+    """Checks that select_eps_for_division does not cause Inf values."""
     a = tf.constant(1.0, dtype=dtype)
     eps = asserts.select_eps_for_division(dtype)
-    eps = tf.convert_to_tensor(value=eps, dtype=dtype)
-    self.evaluate(tf.debugging.check_numerics(a / eps, "Inf detected."))
 
-  @parameterized.parameters((tf.float16,), (tf.float32,), (tf.float64,))
+    self.assert_exception_is_not_raised(
+        asserts.assert_no_infs_or_nans, shapes=[], tensor=a / eps)
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
   def test_select_eps_for_addition(self, dtype):
-    """Checks whether select_eps_for_addition returns large enough eps."""
+    """Checks that select_eps_for_addition returns large enough eps."""
     a = tf.constant(1.0, dtype=dtype)
     eps = asserts.select_eps_for_addition(dtype)
-    eps = tf.convert_to_tensor(value=eps, dtype=dtype)
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
-      self.evaluate(tf.compat.v1.assert_equal(a, eps))
+      self.evaluate(tf.compat.v1.assert_equal(a, a + eps))
+
+  @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
+  def test_assert_no_infs_or_nans_passthrough(self):
+    """Checks that the assert is a passthrough when the flag is False."""
+    vector_input = _pick_random_vector()
+
+    vector_output = asserts.assert_no_infs_or_nans(vector_input)
+
+    self.assertIs(vector_input, vector_output)
 
 
 if __name__ == "__main__":

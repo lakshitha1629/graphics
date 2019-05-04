@@ -43,6 +43,7 @@ from tensorflow_graphics.math import vector
 from tensorflow_graphics.util import asserts
 from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import safe_ops
+from tensorflow_graphics.util import shape
 
 
 def from_euler(angles, name=None):
@@ -129,28 +130,17 @@ def from_quaternion(quaternion, name=None):
   with tf.compat.v1.name_scope(name, "axis_angle_from_quaternion",
                                [quaternion]):
     quaternion = tf.convert_to_tensor(value=quaternion)
-    shape = quaternion.shape.as_list()
-    if shape[-1] != 4:
-      raise ValueError("'quaternion' must have 4 dimensions.")
 
+    shape.check_static(
+        tensor=quaternion, tensor_name="quaternion", has_dim_equals=(-1, 4))
     quaternion = asserts.assert_normalized(quaternion)
+
+    # This prevents zero norm xyz and zero w, and is differentiable.
+    quaternion += asserts.select_eps_for_addition(quaternion.dtype)
     xyz, w = tf.split(quaternion, (3, 1), axis=-1)
     norm = tf.norm(tensor=xyz, axis=-1, keepdims=True)
-    angle = 2.0 * tf.atan2(
-        norm,
-        tf.abs(w) + asserts.select_eps_for_addition(quaternion.dtype))
-    axis_general_case = safe_ops.safe_unsigned_div(
-        safe_ops.nonzero_sign(w) * xyz, norm)
-    to_tile = tf.constant((1., 0., 0.), dtype=axis_general_case.dtype)
-    norm_flat = tf.reshape(norm, [-1])
-    axis_shape = tf.shape(input=axis_general_case)
-    axis_general_case_flat = tf.reshape(axis_general_case, [-1, 3])
-    axis_small_norm_flat = tf.tile(to_tile, [tf.size(input=norm_flat)])
-    axis_small_norm_flat = tf.reshape(axis_small_norm_flat,
-                                      tf.shape(input=axis_general_case_flat))
-    axis = tf.where(norm_flat < 1e-6, axis_small_norm_flat,
-                    axis_general_case_flat)
-    axis = tf.reshape(axis, axis_shape)
+    angle = 2.0 * tf.atan2(norm, tf.abs(w))
+    axis = safe_ops.safe_unsigned_div(safe_ops.nonzero_sign(w) * xyz, norm)
     return axis, angle
 
 
@@ -183,12 +173,15 @@ def from_rotation_matrix(rotation_matrix, name=None):
   with tf.compat.v1.name_scope(name, "axis_angle_from_rotation_matrix",
                                [rotation_matrix]):
     rotation_matrix = tf.convert_to_tensor(value=rotation_matrix)
-    shape = rotation_matrix.shape.as_list()
-    if shape[-2:] != [3, 3]:
-      raise ValueError("'rotation_matrix' must have 3x3 dimensions.")
 
+    shape.check_static(
+        tensor=rotation_matrix,
+        tensor_name="rotation_matrix",
+        has_rank_greater_than=1,
+        has_dim_equals=((-2, 3), (-1, 3)))
     rotation_matrix = rotation_matrix_3d.assert_rotation_matrix_normalized(
         rotation_matrix)
+
     quaternion = quaternion_lib.from_rotation_matrix(rotation_matrix)
     return from_quaternion(quaternion)
 
@@ -219,9 +212,11 @@ def from_rotation_vector(rotation_vector, name=None):
   with tf.compat.v1.name_scope(name, "axis_angle_from_rotation_vector",
                                [rotation_vector]):
     rotation_vector = tf.convert_to_tensor(value=rotation_vector)
-    shape = rotation_vector.shape.as_list()
-    if shape[-1] != 3:
-      raise ValueError("'rotation_vector' must have 3 dimensions.")
+
+    shape.check_static(
+        tensor=rotation_vector,
+        tensor_name="rotation_vector",
+        has_dim_equals=(-1, 3))
 
     angle = tf.norm(tensor=rotation_vector, axis=-1, keepdims=True)
     axis = safe_ops.safe_unsigned_div(rotation_vector, angle)
@@ -252,12 +247,15 @@ def inverse(axis, angle, name=None):
   with tf.compat.v1.name_scope(name, "axis_angle_inverse", [axis, angle]):
     axis = tf.convert_to_tensor(value=axis)
     angle = tf.convert_to_tensor(value=angle)
-    shape_axis = axis.shape.as_list()
-    shape_angle = angle.shape.as_list()
-    if shape_axis[-1] != 3:
-      raise ValueError("'axis' must have 3 dimensions.")
-    if shape_angle[-1] != 1:
-      raise ValueError("'angle' must have 1 dimension.")
+
+    shape.check_static(tensor=axis, tensor_name="axis", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=angle, tensor_name="angle", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(axis, angle),
+        tensor_names=("axis", "angle"),
+        last_axes=-2,
+        broadcast_compatible=True)
 
     axis = asserts.assert_normalized(axis)
     return axis, -angle
@@ -284,12 +282,16 @@ def is_normalized(axis, angle, atol=1e-3, name=None):
   with tf.compat.v1.name_scope(name, "axis_angle_is_normalized", [axis, angle]):
     axis = tf.convert_to_tensor(value=axis)
     angle = tf.convert_to_tensor(value=angle)
-    shape_axis = axis.shape.as_list()
-    shape_angle = angle.shape.as_list()
-    if shape_axis[-1] != 3:
-      raise ValueError("'axis' must have 3 dimensions.")
-    if shape_angle[-1] != 1:
-      raise ValueError("'angle' must have 1 dimension.")
+
+    shape.check_static(tensor=axis, tensor_name="axis", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=angle, tensor_name="angle", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(axis, angle),
+        tensor_names=("axis", "angle"),
+        last_axes=-2,
+        broadcast_compatible=True)
+
     norms = tf.norm(tensor=axis, axis=-1, keepdims=True)
     return tf.abs(norms - 1.) < atol
 
@@ -327,22 +329,23 @@ def rotate(point, axis, angle, name=None):
     point = tf.convert_to_tensor(value=point)
     axis = tf.convert_to_tensor(value=axis)
     angle = tf.convert_to_tensor(value=angle)
-    shape_point = point.shape.as_list()
-    shape_axis = axis.shape.as_list()
-    shape_angle = angle.shape.as_list()
-    if shape_point[-1] != 3:
-      raise ValueError("'point' must have 3 dimensions.")
-    if shape_axis[-1] != 3:
-      raise ValueError("'axis' must have 3 dimensions.")
-    if shape_angle[-1] != 1:
-      raise ValueError("'angle' must have 1 dimensions.")
 
+    shape.check_static(
+        tensor=point, tensor_name="point", has_dim_equals=(-1, 3))
+    shape.check_static(tensor=axis, tensor_name="axis", has_dim_equals=(-1, 3))
+    shape.check_static(
+        tensor=angle, tensor_name="angle", has_dim_equals=(-1, 1))
+    shape.compare_batch_dimensions(
+        tensors=(point, axis, angle),
+        tensor_names=("point", "axis", "angle"),
+        last_axes=-2,
+        broadcast_compatible=True)
     axis = asserts.assert_normalized(axis)
+
     cos_angle = tf.cos(angle)
     axis_dot_point = vector.dot(axis, point)
-    res = point * cos_angle + vector.cross(
+    return point * cos_angle + vector.cross(
         axis, point) * tf.sin(angle) + axis * axis_dot_point * (1.0 - cos_angle)
-    return res
 
 
 # API contains all public functions and classes.

@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from absl.testing import parameterized
 import tensorflow as tf
 
 from tensorflow_graphics.util import test_case
@@ -29,15 +30,42 @@ class TestCaseTest(test_case.TestCase):
     data = tf.convert_to_tensor(value=data)
     return 2.0 * data
 
-  def test_assert_tf_lite_convertible(self):
+  def _dummy_tf_lite_incompatible_function(self, data):
+    """Executes a simple unsupported function to test TFLite conversion."""
+    del data  # Unused
+    return 2.0 * tf.ones(shape=[2] * 10)
+
+  @parameterized.parameters(None, (((1.0,),),))
+  def test_assert_tf_lite_convertible_exception_not_raised(self, test_inputs):
     """Tests that assert_tf_lite_convertible succeeds with a simple function."""
     tc = test_case.TestCase(methodName="assert_tf_lite_convertible")
-    tc.assert_tf_lite_convertible(
-        func=self._dummy_tf_lite_compatible_function, shapes=((1,),))
-    tc.assert_tf_lite_convertible(
-        func=self._dummy_tf_lite_compatible_function,
-        shapes=[[1]],
-        test_inputs=((1.0,),))
+
+    # We can't use self.assert_exception_is_not_raised here because we need to
+    # use `shapes` as both a named argument and a kwarg.
+    try:
+      tc.assert_tf_lite_convertible(
+          func=self._dummy_tf_lite_compatible_function,
+          shapes=((1,),),
+          test_inputs=test_inputs)
+    except Exception as e:  # pylint: disable=broad-except
+      self.fail("Exception raised: %s" % str(e))
+
+  @parameterized.parameters(None, (((1.0,),),))
+  def test_assert_tf_lite_convertible_exception_raised(self, test_inputs):
+    """Tests that assert_tf_lite_convertible succeeds with a simple function."""
+    # TODO: TFLite conversion throws SIGABRT instead of Exception.
+    return
+    # pylint: disable=unreachable
+    # This code should be able to catch exceptions correctly once TFLite bug
+    # is fixed.
+    tc = test_case.TestCase(methodName="assert_tf_lite_convertible")
+
+    with self.assertRaises(Exception):
+      tc.assert_tf_lite_convertible(
+          func=self._dummy_tf_lite_incompatible_function,
+          shapes=((1,),),
+          test_inputs=test_inputs)
+    # pylint: enable=unreachable
 
   def _dummy_failing_function(self, data):
     """Fails instantly."""
@@ -52,6 +80,7 @@ class TestCaseTest(test_case.TestCase):
       # mode.
       return
     tc = test_case.TestCase(methodName="assert_exception_is_not_raised")
+
     with self.assertRaises(AssertionError):
       tc.assert_exception_is_not_raised(
           self._dummy_failing_function, shapes=((1,),))

@@ -37,6 +37,7 @@ py_library(
     deps = [
         # google internal,
         "//tensorflow_graphics/util:export_api",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 
@@ -48,6 +49,7 @@ py_library(
         ":utils",
         # google internal,
         "//tensorflow_graphics/util:export_api",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 

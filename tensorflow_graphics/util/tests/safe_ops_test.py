@@ -35,33 +35,54 @@ def _pick_random_vector():
 
 class SafeOpsTest(test_case.TestCase):
 
-  @parameterized.parameters((tf.float16), (tf.float32), (tf.float64))
-  def test_safe_unsigned_div(self, dtype):
-    """Checks if unsigned division can cause Inf values."""
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_safe_unsigned_div_exception_not_raised(self, dtype):
+    """Checks that unsigned division does not cause Inf values."""
     vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
     zero_vector = tf.zeros_like(vector)
-    div = safe_ops.safe_unsigned_div(
-        tf.norm(tensor=vector), tf.norm(tensor=zero_vector))
-    self.evaluate(div)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      unsafe_div = safe_ops.safe_unsigned_div(
-          tf.norm(tensor=vector), tf.norm(tensor=zero_vector), eps=0.0)
-      self.evaluate(unsafe_div)
 
-  @parameterized.parameters((tf.float16), (tf.float32), (tf.float64))
-  def test_safe_signed_div(self, dtype):
-    """Checks if safe signed divisions can cause Inf values."""
+    self.assert_exception_is_not_raised(
+        safe_ops.safe_unsigned_div,
+        shapes=[],
+        a=tf.norm(tensor=vector),
+        b=tf.norm(tensor=zero_vector))
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_safe_unsigned_div_exception_raised(self, dtype):
+    """Checks that unsigned division causes Inf values for zero eps."""
     vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
     zero_vector = tf.zeros_like(vector)
-    div = safe_ops.safe_signed_div(tf.norm(tensor=vector), tf.sin(zero_vector))
-    self.evaluate(div)
-    with self.assertRaises(tf.errors.InvalidArgumentError):
-      unsafe_div = safe_ops.safe_unsigned_div(
-          tf.norm(tensor=vector), tf.sin(zero_vector), eps=0.0)
-      self.evaluate(unsafe_div)
 
-  @parameterized.parameters((tf.float32), (tf.float64))
-  def test_safe_shrink(self, dtype):
+    with self.assertRaises(tf.errors.InvalidArgumentError):
+      self.evaluate(
+          safe_ops.safe_unsigned_div(
+              tf.norm(tensor=vector), tf.norm(tensor=zero_vector), eps=0.0))
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_safe_signed_div_exception_not_raised(self, dtype):
+    """Checks that signed division does not cause Inf values."""
+    vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
+    zero_vector = tf.zeros_like(vector)
+
+    self.assert_exception_is_not_raised(
+        safe_ops.safe_signed_div,
+        shapes=[],
+        a=tf.norm(tensor=vector),
+        b=tf.sin(zero_vector))
+
+  @parameterized.parameters(tf.float16, tf.float32, tf.float64)
+  def test_safe_signed_div_exception_raised(self, dtype):
+    """Checks that signed division causes Inf values for zero eps."""
+    vector = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
+    zero_vector = tf.zeros_like(vector)
+
+    with self.assertRaises(tf.errors.InvalidArgumentError):
+      self.evaluate(
+          safe_ops.safe_unsigned_div(
+              tf.norm(tensor=vector), tf.sin(zero_vector), eps=0.0))
+
+  @parameterized.parameters(tf.float32, tf.float64)
+  def test_safe_shrink_exception_not_raised(self, dtype):
     """Checks whether safe shrinking makes tensor safe for tf.acos(x)."""
     tensor = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
     tensor = tensor * tensor
@@ -69,76 +90,100 @@ class SafeOpsTest(test_case.TestCase):
         input_tensor=tensor, axis=-1, keepdims=True)
     eps = asserts.select_eps_for_addition(dtype)
     norm_tensor += eps
-    with self.assertRaises(ValueError):
-      safe_ops.safe_shrink(norm_tensor, eps=0.0)
+
     safe_tensor = safe_ops.safe_shrink(norm_tensor, -1.0, 1.0)
-    self.evaluate(tf.acos(safe_tensor))
+    self.assert_exception_is_not_raised(tf.acos, shapes=[], x=safe_tensor)
+
+  @parameterized.parameters(tf.float32, tf.float64)
+  def test_safe_shrink_exception_raised(self, dtype):
+    """Checks whether safe shrinking fails when eps is zero."""
+    tensor = tf.convert_to_tensor(value=_pick_random_vector(), dtype=dtype)
+    tensor = tensor * tensor
+    norm_tensor = tensor / tf.reduce_max(
+        input_tensor=tensor, axis=-1, keepdims=True)
+    eps = asserts.select_eps_for_addition(dtype)
+    norm_tensor += eps
+
     with self.assertRaises(tf.errors.InvalidArgumentError):
-      unsafe_tensor = safe_ops.safe_shrink(norm_tensor, -1.0, 1.0, eps=0.0)
-      self.evaluate(tf.acos(unsafe_tensor))
+      self.evaluate(safe_ops.safe_shrink(norm_tensor, -1.0, 1.0, eps=0.0))
 
   def test_safe_sinpx_div_sinx(self):
     """Tests for edge cases and continuity for sin(px)/sin(x)."""
-    # Continuity tests for various angles.
     angle_step = np.pi / 16.0
-    theta = tf.range(-2.0 * np.pi, 2.0 * np.pi + angle_step / 2.0, angle_step)
-    p = np.random.uniform(size=[1])
-    division = safe_ops.safe_sinpx_div_sinx(theta, p)
-    division_l = safe_ops.safe_sinpx_div_sinx(theta + 1e-10, p)
-    division_r = safe_ops.safe_sinpx_div_sinx(theta - 1e-10, p)
-    self.assertAllClose(division, division_l, rtol=1e-9)
-    self.assertAllClose(division, division_r, rtol=1e-9)
 
-    # Tests for theta = 0, which causes zero / zero.
-    theta = 0.0
-    p = tf.range(0.0, 1.0, 0.001)
-    division = safe_ops.safe_sinpx_div_sinx(theta, p)
-    division_l = safe_ops.safe_sinpx_div_sinx(theta + 1e-10, p)
-    division_r = safe_ops.safe_sinpx_div_sinx(theta - 1e-10, p)
-    self.assertAllClose(division, division_l, atol=1e-9)
-    self.assertAllClose(division, division_r, atol=1e-9)
-    # According to l'Hopital rule, limit should be p
-    self.assertAllClose(division, p, atol=1e-9)
+    with self.subTest(name="all_angles"):
+      theta = tf.range(-2.0 * np.pi, 2.0 * np.pi + angle_step / 2.0, angle_step)
+      factor = np.random.uniform(size=(1,))
 
-    # Tests for theta = pi, which causes division by zero.
-    theta = np.pi
-    p = tf.range(0.0, 1.001, 0.001)
-    division = safe_ops.safe_sinpx_div_sinx(theta, p)
-    division_l = safe_ops.safe_sinpx_div_sinx(theta + 1e-10, p)
-    division_r = safe_ops.safe_sinpx_div_sinx(theta - 1e-10, p)
-    self.assertAllClose(division, division_l, atol=1e-9)
-    self.assertAllClose(division, division_r, atol=1e-9)
+      division = safe_ops.safe_sinpx_div_sinx(theta, factor)
+      division_l = safe_ops.safe_sinpx_div_sinx(theta + 1e-10, factor)
+      division_r = safe_ops.safe_sinpx_div_sinx(theta - 1e-10, factor)
+
+      self.assertAllClose(division, division_l, rtol=1e-9)
+      self.assertAllClose(division, division_r, rtol=1e-9)
+
+    with self.subTest(name="theta_is_zero"):
+      theta = 0.0
+      factor = tf.range(0.0, 1.0, 0.001)
+
+      division = safe_ops.safe_sinpx_div_sinx(theta, factor)
+      division_l = safe_ops.safe_sinpx_div_sinx(theta + 1e-10, factor)
+      division_r = safe_ops.safe_sinpx_div_sinx(theta - 1e-10, factor)
+
+      self.assertAllClose(division, division_l, atol=1e-9)
+      self.assertAllClose(division, division_r, atol=1e-9)
+      # According to l'Hopital rule, limit should be factor
+      self.assertAllClose(division, factor, atol=1e-9)
+
+    with self.subTest(name="theta_is_pi"):
+      theta = np.pi
+      factor = tf.range(0.0, 1.001, 0.001)
+
+      division = safe_ops.safe_sinpx_div_sinx(theta, factor)
+      division_l = safe_ops.safe_sinpx_div_sinx(theta + 1e-10, factor)
+      division_r = safe_ops.safe_sinpx_div_sinx(theta - 1e-10, factor)
+
+      self.assertAllClose(division, division_l, atol=1e-9)
+      self.assertAllClose(division, division_r, atol=1e-9)
 
   def test_safe_cospx_div_cosx(self):
     """Tests for edge cases and continuity for cos(px)/cos(x)."""
-    # Continuity tests for various angles.
     angle_step = np.pi / 16.0
-    theta = tf.range(-2.0 * np.pi, 2.0 * np.pi + angle_step / 2.0, angle_step)
-    p = np.random.uniform(size=[1])
-    division = safe_ops.safe_cospx_div_cosx(theta, p)
-    division_l = safe_ops.safe_cospx_div_cosx(theta + 1e-10, p)
-    division_r = safe_ops.safe_cospx_div_cosx(theta - 1e-10, p)
-    self.assertAllClose(division, division_l, rtol=1e-9)
-    self.assertAllClose(division, division_r, rtol=1e-9)
 
-    # The case with 0 / 0 - should return 1.0
-    theta = np.pi / 2.0
-    p = tf.constant(1.0)
-    division = safe_ops.safe_cospx_div_cosx(theta, p)
-    division_l = safe_ops.safe_cospx_div_cosx(theta + 1e-10, p)
-    division_r = safe_ops.safe_cospx_div_cosx(theta - 1e-10, p)
-    self.assertAllClose(division, division_l, atol=1e-9)
-    self.assertAllClose(division, division_r, atol=1e-9)
-    self.assertAllClose(division, 1.0, atol=1e-9)
+    with self.subTest(name="all_angles"):
+      theta = tf.range(-2.0 * np.pi, 2.0 * np.pi + angle_step / 2.0, angle_step)
+      factor = np.random.uniform(size=(1,))
 
-    # Tests for theta = 3/2 pi, which causes division by zero.
-    theta = np.pi * 3.0 / 2.0
-    p = tf.range(0.0, 1.001, 0.001)
-    division = safe_ops.safe_cospx_div_cosx(theta, p)
-    division_l = safe_ops.safe_cospx_div_cosx(theta + 1e-10, p)
-    division_r = safe_ops.safe_cospx_div_cosx(theta - 1e-10, p)
-    self.assertAllClose(division, division_l, atol=1e-9)
-    self.assertAllClose(division, division_r, atol=1e-9)
+      division = safe_ops.safe_cospx_div_cosx(theta, factor)
+      division_l = safe_ops.safe_cospx_div_cosx(theta + 1e-10, factor)
+      division_r = safe_ops.safe_cospx_div_cosx(theta - 1e-10, factor)
+
+      self.assertAllClose(division, division_l, rtol=1e-9)
+      self.assertAllClose(division, division_r, rtol=1e-9)
+
+    with self.subTest(name="theta_is_pi_over_two"):
+      theta = np.pi / 2.0
+      factor = tf.constant(1.0)
+
+      division = safe_ops.safe_cospx_div_cosx(theta, factor)
+      division_l = safe_ops.safe_cospx_div_cosx(theta + 1e-10, factor)
+      division_r = safe_ops.safe_cospx_div_cosx(theta - 1e-10, factor)
+
+      self.assertAllClose(division, division_l, atol=1e-9)
+      self.assertAllClose(division, division_r, atol=1e-9)
+      # According to l'Hopital rule, limit should be 1.0
+      self.assertAllClose(division, 1.0, atol=1e-9)
+
+    with self.subTest(name="theta_is_three_pi_over_two"):
+      theta = np.pi * 3.0 / 2.0
+      factor = tf.range(0.0, 1.001, 0.001)
+
+      division = safe_ops.safe_cospx_div_cosx(theta, factor)
+      division_l = safe_ops.safe_cospx_div_cosx(theta + 1e-10, factor)
+      division_r = safe_ops.safe_cospx_div_cosx(theta - 1e-10, factor)
+
+      self.assertAllClose(division, division_l, atol=1e-9)
+      self.assertAllClose(division, division_r, atol=1e-9)
 
 
 if __name__ == "__main__":
