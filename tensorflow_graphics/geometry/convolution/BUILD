@@ -53,6 +53,17 @@ py_library(
     ],
 )
 
+py_library(
+    name = "graph_pooling",
+    srcs = ["graph_pooling.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":utils",
+        # google internal,
+        "//tensorflow_graphics/util:export_api",
+    ],
+)
+
 py_test(
     name = "utils_test",
     srcs = ["tests/utils_test.py"],
@@ -72,6 +83,21 @@ py_test(
         ":graph_convolution",
         # package dep
 
+        # google internal,
+        "//tensorflow_graphics/util:test_case",
+    ],
+)
+
+py_test(
+    name = "graph_pooling_test",
+    srcs = [
+        "tests/graph_pooling_test.py",
+        "tests/utils_test.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":graph_pooling",
+        ":utils",
         # google internal,
         "//tensorflow_graphics/util:test_case",
     ],

@@ -61,7 +61,7 @@ class UtilsCheckValidGraphConvolutionInputTests(test_case.TestCase):
   )
   def test_check_valid_graph_convolution_input_exception_not_raised_types(
       self, data_type, neighbors_type, sizes_type):
-    """Check there are no exceptions for valid input types."""
+    """Check that no exceptions are raised for valid input types."""
     data = tf.convert_to_tensor(
         value=np.random.uniform(size=(2, 2, 2)).astype(data_type))
     neighbors = _dense_to_sparse(np.ones(shape=(2, 2, 2), dtype=neighbors_type))
@@ -132,11 +132,96 @@ class UtilsCheckValidGraphConvolutionInputTests(test_case.TestCase):
         sizes=sizes)
 
 
+class UtilsCheckValidGraphPoolingInputTests(test_case.TestCase):
+
+  @parameterized.parameters(
+      ("'sizes' must have an integer type.", np.float32, np.float32,
+       np.float32),
+      ("'data' must have a float type.", np.int32, np.float32, np.int32),
+      ("'pool_map' and 'data' must have the same type.", np.float32,
+       np.float64, np.int32),
+  )
+  def test_check_valid_graph_pooling_exception_raised_types(
+      self, err_msg, data_type, pool_map_type, sizes_type):
+    """Check the type errors for invalid input types."""
+    data = tf.convert_to_tensor(value=np.ones((2, 3, 3), dtype=data_type))
+    pool_map = _dense_to_sparse(np.ones((2, 3, 3), dtype=pool_map_type))
+    sizes = tf.convert_to_tensor(value=np.array(((1, 2), (2, 3)),
+                                                dtype=sizes_type))
+
+    with self.assertRaisesRegexp(TypeError, err_msg):
+      utils.check_valid_graph_pooling_input(data, pool_map, sizes)
+
+  @parameterized.parameters(
+      (np.float32, np.float32, np.int32),
+      (np.float64, np.float64, np.int32),
+      (np.float32, np.float32, np.int64),
+      (np.float64, np.float64, np.int64),
+  )
+  def test_check_valid_graph_pooling_exception_not_raised_types(
+      self, data_type, pool_map_type, sizes_type):
+    """Check there are no exceptions for valid input types."""
+    data = tf.convert_to_tensor(value=np.ones((2, 3, 3), dtype=data_type))
+    pool_map = _dense_to_sparse(np.ones((2, 3, 3), dtype=pool_map_type))
+    sizes = tf.convert_to_tensor(value=np.array(((1, 2), (2, 3)),
+                                                dtype=sizes_type))
+
+    self.assert_exception_is_not_raised(
+        utils.check_valid_graph_pooling_input,
+        shapes=[],
+        data=data,
+        pool_map=pool_map,
+        sizes=sizes)
+
+  @parameterized.parameters(
+      ((2, 3), (4, 2), None),
+      ((1, 2, 3), (1, 5, 2), None),
+      ((2, 2, 3), (2, 5, 2), ((3, 2), (2, 5))),
+  )
+  def test_check_valid_graph_pooling_exception_not_raised_shapes(
+      self, data_shape, pool_map_shape, sizes):
+    """Check that valid input shapes do not trigger any exceptions."""
+    data = tf.convert_to_tensor(value=np.ones(data_shape, dtype=np.float32))
+    pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
+    sizes = sizes if sizes is None else tf.convert_to_tensor(value=sizes)
+
+    self.assert_exception_is_not_raised(
+        utils.check_valid_graph_pooling_input,
+        shapes=[],
+        data=data,
+        pool_map=pool_map,
+        sizes=sizes)
+
+  @parameterized.parameters(
+      ("must have a rank greater than 1", (5,), (5, 5), None),
+      ("must have a rank of 2", (5, 2), (5,), None),
+      ("must have the same number of dimensions in axes", (3, 2), (3, 2), None),
+      ("Not all batch dimensions are identical.", (3, 5, 2), (1, 5, 5), None),
+      ("must have a rank of 2", (2, 5, 2), (2, 3, 5), (3, 5)),
+      ("Not all batch dimensions are identical.",
+       (3, 5, 2), (3, 3, 5), ((3, 5), (2, 4))),
+  )
+  def test_check_valid_graph_pooling_exception_raised_shapes(
+      self, err_msg, data_shape, pool_map_shape, sizes):
+    """Check that invalid input shapes trigger the right exceptions."""
+    data = tf.convert_to_tensor(value=np.ones(data_shape, dtype=np.float32))
+    pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
+    sizes = sizes if sizes is None else tf.convert_to_tensor(value=sizes)
+
+    self.assert_exception_is_raised(
+        utils.check_valid_graph_pooling_input,
+        err_msg,
+        shapes=[],
+        data=data,
+        pool_map=pool_map,
+        sizes=sizes)
+
+
 class UtilsFlattenBatchTo2dTests(test_case.TestCase):
 
   @parameterized.parameters(((5, 3),), ((3,),))
   def test_input_rank_exception_raised(self, *shapes):
-    """Check that invalid input data rank triggers the right exception."""
+    """Check that invalid input data rank triggers the right exceptions."""
     self.assert_exception_is_raised(utils.flatten_batch_to_2d,
                                     "must have a rank greater than 2", shapes)
 
@@ -237,6 +322,88 @@ class UtilsFlattenBatchTo2dTests(test_case.TestCase):
 
     self.assertEqual(data.dtype, data_unflattened.dtype.as_numpy_dtype)
     self.assertAllEqual(data_unflattened, desired_unflattened)
+
+
+class UtilsUnflatten2dToBatch(test_case.TestCase):
+
+  @parameterized.parameters(((3, 2, 4), (3,)), ((5,), (4, 2)))
+  def test_input_rank_exception_raised(self, *shapes):
+    """Check that invalid inputs trigger the right exception."""
+    self.assert_exception_is_raised(utils.unflatten_2d_to_batch,
+                                    "data must have a rank of 2", shapes)
+
+  def test_input_type_exception_raised(self):
+    """Check that invalid input types trigger the right exception."""
+    with self.assertRaisesRegexp(TypeError,
+                                 "'sizes' must have an integer type."):
+      utils.unflatten_2d_to_batch(np.ones((3, 4)), np.ones((3,)))
+
+  @parameterized.parameters(
+      ((3, 2, 1), None, 5),
+      ((3, 2, 1, 2), 4, 2),
+      (((3, 2), (1, 2)), None, 2),
+  )
+  def test_unflatten_batch_to_2d_random(self, sizes, max_rows, num_features):
+    """Test unflattening with random inputs."""
+    max_rows = np.max(sizes) if max_rows is None else max_rows
+    output_shape = np.concatenate(
+        (np.shape(sizes), (max_rows,), (num_features,)))
+    total_rows = np.sum(sizes)
+    data = 0.1 + np.random.uniform(size=(total_rows, num_features))
+
+    unflattened = utils.unflatten_2d_to_batch(data, sizes, max_rows)
+    flattened = tf.reshape(unflattened, (-1, num_features))
+    nonzero_rows = tf.where(tf.norm(tensor=flattened, axis=-1))
+    flattened_unpadded = tf.gather(
+        params=flattened, indices=tf.squeeze(input=nonzero_rows, axis=-1))
+
+    self.assertAllEqual(tf.shape(input=unflattened), output_shape)
+    self.assertAllEqual(flattened_unpadded, data)
+
+  def test_unflatten_batch_to_2d_preset(self):
+    """Test unflattening with a preset input."""
+    data = 1. + np.reshape(np.arange(12, dtype=np.float32), (6, 2))
+    sizes = (2, 3, 1)
+    output_true = np.array((((1., 2.), (3., 4.), (0., 0.)),
+                            ((5., 6.), (7., 8.), (9., 10.)),
+                            ((11., 12.), (0., 0.), (0., 0.))), dtype=np.float32)
+    output_true_padded = np.pad(output_true, ((0, 0), (0, 2), (0, 0)),
+                                mode="constant")
+
+    output = utils.unflatten_2d_to_batch(data, sizes, max_rows=None)
+    output_padded = utils.unflatten_2d_to_batch(data, sizes, max_rows=5)
+
+    self.assertAllEqual(output, output_true)
+    self.assertAllEqual(output_padded, output_true_padded)
+
+  @parameterized.parameters(
+      ((3, 2, 1), None, 5),
+      ((3, 2, 1, 2), 4, 2),
+      (((3, 2), (1, 2)), None, 2),
+  )
+  def test_unflatten_batch_to_2d_jacobian_random(
+      self, sizes, max_rows, num_features):
+    """Test that the jacobian is correct."""
+    max_rows = np.max(sizes) if max_rows is None else max_rows
+    total_rows = np.sum(sizes)
+    data_init = 0.1 + np.random.uniform(size=(total_rows, num_features))
+    data = tf.convert_to_tensor(value=data_init)
+
+    unflattened = utils.unflatten_2d_to_batch(data, sizes, max_rows)
+
+    self.assert_jacobian_is_correct(data, data_init, unflattened)
+
+  @parameterized.parameters((np.int32), (np.float32), (np.uint16))
+  def test_unflatten_batch_to_2d_types(self, dtype):
+    """Test unflattening with int and float types."""
+    data = np.ones(shape=(6, 2), dtype=dtype)
+    sizes = (2, 2, 2)
+    unflattened_true = np.ones(shape=(3, 2, 2), dtype=dtype)
+
+    unflattened = utils.unflatten_2d_to_batch(data, sizes)
+
+    self.assertEqual(data.dtype, unflattened.dtype.as_numpy_dtype)
+    self.assertAllEqual(unflattened, unflattened_true)
 
 
 class UtilsConvertToBlockDiag2dTests(test_case.TestCase):

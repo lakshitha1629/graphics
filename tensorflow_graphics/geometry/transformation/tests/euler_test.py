@@ -55,7 +55,9 @@ class EulerTest(test_case.TestCase):
     x_axis_init, x_angle_init = test_helpers.generate_preset_test_axis_angle()
     x_axis = tf.convert_to_tensor(value=x_axis_init)
     x_angle = tf.convert_to_tensor(value=x_angle_init)
+
     y = euler.from_axis_angle(x_axis, x_angle)
+
     self.assert_jacobian_is_finite(x_axis, x_axis_init, y)
     self.assert_jacobian_is_finite(x_angle, x_angle_init, y)
 
@@ -65,26 +67,32 @@ class EulerTest(test_case.TestCase):
     x_axis_init, x_angle_init = test_helpers.generate_random_test_axis_angle()
     x_axis = tf.convert_to_tensor(value=x_axis_init)
     x_angle = tf.convert_to_tensor(value=x_angle_init)
+
     y = euler.from_axis_angle(x_axis, x_angle)
+
     self.assert_jacobian_is_finite(x_axis, x_axis_init, y)
     self.assert_jacobian_is_finite(x_angle, x_angle_init, y)
 
   def test_from_axis_angle_random(self):
     """Checks that Euler angles can be retrieved from an axis-angle."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
+
     random_matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     random_axis, random_angle = axis_angle.from_euler(random_euler_angles)
     predicted_matrix = rotation_matrix_3d.from_axis_angle(
         random_axis, random_angle)
+
     self.assertAllClose(random_matrix, predicted_matrix, atol=1e-3)
 
   def test_from_axis_angle_preset(self):
     """Checks that Euler angles can be retrieved from axis-angle."""
     preset_euler_angles = test_helpers.generate_preset_test_euler_angles()
+
     random_matrix = rotation_matrix_3d.from_euler(preset_euler_angles)
     random_axis, random_angle = axis_angle.from_euler(preset_euler_angles)
     predicted_matrix = rotation_matrix_3d.from_axis_angle(
         random_axis, random_angle)
+
     self.assertAllClose(random_matrix, predicted_matrix, atol=1e-3)
 
   @parameterized.parameters(
@@ -95,11 +103,13 @@ class EulerTest(test_case.TestCase):
     """Checks that from_axis_angle works when Ry = pi/2 or -pi/2."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
     random_euler_angles[..., 1] = gimbal_configuration
+
     random_matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     random_axis, random_angle = axis_angle.from_euler(random_euler_angles)
     predicted_random_angles = euler.from_axis_angle(random_axis, random_angle)
     reconstructed_random_matrices = rotation_matrix_3d.from_euler(
         predicted_random_angles)
+
     self.assertAllClose(reconstructed_random_matrices, random_matrix, atol=1e-3)
 
   @parameterized.parameters(
@@ -121,7 +131,9 @@ class EulerTest(test_case.TestCase):
     """Test the Jacobian of the from_quaternion function."""
     x_init = test_helpers.generate_preset_test_quaternions()
     x = tf.convert_to_tensor(value=x_init)
+
     y = euler.from_quaternion(x)
+
     self.assert_jacobian_is_finite(x, x_init, y)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
@@ -129,7 +141,9 @@ class EulerTest(test_case.TestCase):
     """Test the Jacobian of the from_quaternion function."""
     x_init = test_helpers.generate_random_test_quaternions()
     x = tf.convert_to_tensor(value=x_init)
+
     y = euler.from_quaternion(x)
+
     self.assert_jacobian_is_finite(x, x_init, y)
 
   @parameterized.parameters(
@@ -140,28 +154,34 @@ class EulerTest(test_case.TestCase):
     """Checks that from_quaternion works when Ry = pi/2 or -pi/2."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
     random_euler_angles[..., 1] = gimbal_configuration
+
     random_quaternion = quaternion.from_euler(random_euler_angles)
     random_matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     reconstructed_random_matrices = rotation_matrix_3d.from_quaternion(
         random_quaternion)
-    self.assertAllClose(reconstructed_random_matrices, random_matrix, atol=1e-3)
+
+    self.assertAllClose(reconstructed_random_matrices, random_matrix, atol=2e-3)
 
   def test_from_quaternion_preset(self):
     """Checks that Euler angles can be retrieved from quaternions."""
     preset_euler_angles = test_helpers.generate_preset_test_euler_angles()
+
     preset_matrix = rotation_matrix_3d.from_euler(preset_euler_angles)
     preset_quaternion = quaternion.from_euler(preset_euler_angles)
     predicted_matrix = rotation_matrix_3d.from_quaternion(preset_quaternion)
-    self.assertAllClose(preset_matrix, predicted_matrix, atol=1e-3)
+
+    self.assertAllClose(preset_matrix, predicted_matrix, atol=2e-3)
 
   def test_from_quaternion_random(self):
     """Checks that Euler angles can be retrieved from quaternions."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
+
     random_matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     random_quaternion = quaternion.from_rotation_matrix(random_matrix)
     predicted_angles = euler.from_quaternion(random_quaternion)
     predicted_matrix = rotation_matrix_3d.from_euler(predicted_angles)
-    self.assertAllClose(random_matrix, predicted_matrix, atol=1e-3)
+
+    self.assertAllClose(random_matrix, predicted_matrix, atol=2e-3)
 
   @parameterized.parameters(
       ((3, 3),),
@@ -186,7 +206,9 @@ class EulerTest(test_case.TestCase):
     """Test the Jacobian of the from_rotation_matrix function."""
     x_init = test_helpers.generate_preset_test_rotation_matrices_3d()
     x = tf.convert_to_tensor(value=x_init)
+
     y = euler.from_rotation_matrix(x)
+
     self.assert_jacobian_is_finite(x, x_init, y)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
@@ -194,7 +216,9 @@ class EulerTest(test_case.TestCase):
     """Test the Jacobian of the from_rotation_matrix function."""
     x_init = test_helpers.generate_random_test_rotation_matrix_3d()
     x = tf.convert_to_tensor(value=x_init)
+
     y = euler.from_rotation_matrix(x)
+
     self.assert_jacobian_is_finite(x, x_init, y)
 
   def test_from_rotation_matrix_gimbal(self):
@@ -205,29 +229,35 @@ class EulerTest(test_case.TestCase):
     matrix = rotation_matrix_3d.from_euler(angles)
     predicted_angles = euler.from_rotation_matrix(matrix)
     reconstructed_matrices = rotation_matrix_3d.from_euler(predicted_angles)
+
     self.assertAllClose(reconstructed_matrices, matrix, rtol=1e-3)
 
     angles[..., 1] = -np.pi / 2.
     matrix = rotation_matrix_3d.from_euler(angles)
     predicted_angles = euler.from_rotation_matrix(matrix)
     reconstructed_matrices = rotation_matrix_3d.from_euler(predicted_angles)
+
     self.assertAllClose(reconstructed_matrices, matrix, rtol=1e-3)
 
   def test_from_rotation_matrix_preset(self):
     """Tests that Euler angles can be retrieved from rotation matrices."""
     matrix = test_helpers.generate_preset_test_rotation_matrices_3d()
+
     predicted_angles = euler.from_rotation_matrix(matrix)
     reconstructed_matrices = rotation_matrix_3d.from_euler(predicted_angles)
+
     self.assertAllClose(reconstructed_matrices, matrix, rtol=1e-3)
 
   def test_from_rotation_matrix_random(self):
     """Tests that Euler angles can be retrieved from rotation matrices."""
     matrix = test_helpers.generate_random_test_rotation_matrix_3d()
+
     predicted_angles = euler.from_rotation_matrix(matrix)
     # There is not a unique mapping from rotation matrices to Euler angles. The
     # following constructs the rotation matrices from the `predicted_angles` and
     # compares them with `matrix`.
     reconstructed_matrices = rotation_matrix_3d.from_euler(predicted_angles)
+
     self.assertAllClose(reconstructed_matrices, matrix, rtol=1e-3)
 
   @parameterized.parameters(
@@ -249,7 +279,9 @@ class EulerTest(test_case.TestCase):
     """Test the Jacobian of the inverse function."""
     x_init = test_helpers.generate_preset_test_euler_angles()
     x = tf.convert_to_tensor(value=x_init)
+
     y = euler.inverse(x)
+
     self.assert_jacobian_is_correct(x, x_init, y)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
@@ -257,21 +289,27 @@ class EulerTest(test_case.TestCase):
     """Test the Jacobian of the inverse function."""
     x_init = test_helpers.generate_random_test_euler_angles()
     x = tf.convert_to_tensor(value=x_init)
+
     y = euler.inverse(x)
+
     self.assert_jacobian_is_correct(x, x_init, y)
 
   def test_inverse_preset(self):
     """Checks that inverse works as intended."""
     preset_euler_angles = test_helpers.generate_preset_test_euler_angles()
+
     prediction = euler.inverse(preset_euler_angles)
     groundtruth = -preset_euler_angles
+
     self.assertAllClose(prediction, groundtruth, rtol=1e-3)
 
   def test_inverse_random(self):
     """Checks that inverse works as intended."""
     random_euler_angles = test_helpers.generate_random_test_euler_angles()
+
     prediction = euler.inverse(random_euler_angles)
     groundtruth = -random_euler_angles
+
     self.assertAllClose(prediction, groundtruth, rtol=1e-3)
 
 

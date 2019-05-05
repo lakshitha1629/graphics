@@ -43,12 +43,24 @@ py_library(
 )
 
 py_library(
+    name = "quadratic_radial_distortion",
+    srcs = ["quadratic_radial_distortion.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        # google internal,
+        "//tensorflow_graphics/util:asserts",
+        "//tensorflow_graphics/util:export_api",
+    ],
+)
+
+py_library(
     name = "camera",
     srcs = ["__init__.py"],
     srcs_version = "PY2AND3",
     deps = [
         ":orthographic",
         ":perspective",
+        ":quadratic_radial_distortion",
         "//tensorflow_graphics/util:export_api",
     ],
 )
@@ -72,6 +84,19 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":orthographic",
+        # package dep
+
+        # google internal,
+        "//tensorflow_graphics/util:test_case",
+    ],
+)
+
+py_test(
+    name = "quadratic_radial_distortion_test",
+    srcs = ["tests/quadratic_radial_distortion_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":quadratic_radial_distortion",
         # package dep
 
         # google internal,

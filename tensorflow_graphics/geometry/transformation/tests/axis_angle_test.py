@@ -114,10 +114,10 @@ class AxisAngleTest(test_case.TestCase):
         np.ones(shape=random_angle.shape))
 
   def test_from_euler_with_small_angles_approximation_random(self):
-    # Only generate small angles. For a test tolerance of 1e-3, 0.24 was found
+    # Only generate small angles. For a test tolerance of 1e-3, 0.23 was found
     # empirically to be the range where the small angle approximation works.
     random_euler_angles = test_helpers.generate_random_test_euler_angles(
-        min_angle=-0.24, max_angle=0.24)
+        min_angle=-0.23, max_angle=0.23)
 
     exact_axis_angle = axis_angle.from_euler(random_euler_angles)
     approximate_axis_angle = (
@@ -283,40 +283,6 @@ class AxisAngleTest(test_case.TestCase):
       neg = np.allclose(quat_gt, -quat)
 
       self.assertTrue(pos or neg)
-
-  @parameterized.parameters(
-      ((3,),),
-      ((None, 3),),
-  )
-  def test_from_rotation_vector_exception_not_raised(self, *shape):
-    """Tests that the shape exceptions are not raised."""
-    self.assert_exception_is_not_raised(axis_angle.from_rotation_vector, shape)
-
-  @parameterized.parameters(
-      ("must have exactly 3 dimensions in axis -1", (None,)),)
-  def test_from_rotation_vector_exception_raised(self, error_msg, *shape):
-    """Tests that the shape exceptions are raised."""
-    self.assert_exception_is_raised(axis_angle.from_rotation_vector, error_msg,
-                                    shape)
-
-  @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
-  def test_from_rotation_vector_jacobian_random(self):
-    """Test the Jacobian of the from_rotation_vector function."""
-    x_axis_init, x_angle_init = test_helpers.generate_random_test_axis_angle()
-    x_init = x_axis_init * np.absolute(x_angle_init)
-    x = tf.convert_to_tensor(value=x_init)
-
-    y_axis, y_angle = axis_angle.from_rotation_vector(x)
-
-    self.assert_jacobian_is_correct(x, x_init, y_axis, atol=1e-4)
-    self.assert_jacobian_is_correct(x, x_init, y_angle)
-
-  @parameterized.parameters(
-      ((np.pi, 0., 0.), ((1., 0., 0.), (np.pi,))),)
-  def test_from_rotation_vector_preset(self, test_inputs, test_outputs):
-    """Tests the that from_rotation_vector produces expected results."""
-    self.assertAllClose(test_outputs,
-                        axis_angle.from_rotation_vector(test_inputs))
 
   @parameterized.parameters(
       ((3,), (1,)),

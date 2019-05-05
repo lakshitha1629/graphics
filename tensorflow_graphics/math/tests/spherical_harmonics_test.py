@@ -166,14 +166,14 @@ class SphericalHarmonicsTest(test_case.TestCase):
     """Tests the Jacobian of evaluate_legendre_polynomial."""
     tensor_size = np.random.randint(1, 3)
     tensor_shape = np.random.randint(1, 5, size=(tensor_size)).tolist()
-    # Initialization.
     l_init = np.random.randint(5, 10, size=tensor_shape)
     m_init = np.random.randint(0, 4, size=tensor_shape)
     x_init = np.random.uniform(-1.0, 1.0, size=tensor_shape)
     x = tf.convert_to_tensor(value=x_init)
+
     y = spherical_harmonics.evaluate_legendre_polynomial(l_init, m_init, x)
 
-    self.assert_jacobian_is_correct(x, x_init, y, atol=2e-5)
+    self.assert_jacobian_is_correct(x, x_init, y, atol=1e-3)
 
   @parameterized.parameters(
       ((4,), (4,)),

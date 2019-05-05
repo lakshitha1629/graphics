@@ -23,6 +23,7 @@ import tensorflow_graphics.geometry.convolution.graph_convolution as gc
 from tensorflow_graphics.util import export_api
 
 
+# pyformat: disable
 def feature_steered_convolution_layer(
     data,
     neighbors,
@@ -44,29 +45,29 @@ def feature_steered_convolution_layer(
 
   Args:
     data: A `float` tensor with shape `[A1, ..., An, V, C]`.
-    neighbors: A SparseTensor with the same type as `data` and with shape `[A1,
-      ..., An, V, V]` representing vertex neighborhoods. The neighborhood of a
-      vertex defines the support region for convolution. For a mesh, a common
-      choice for the neighborhood of vertex i would be the vertices in the
-      K-ring of i (including i itself). Each vertex must have at least one
-      neighbor. For a faithful implementation of the FeaStNet paper, neighbors
-      should be a row-normalized weight matrix
-      corresponding to the graph adjacency matrix with self-edges:
-        `neighbors[A1, ..., An, i, j] > 0` if vertex j is a neighbor of vertex
-        i, and `neighbors[A1, ..., An, i, i] > 0` for all i, and `sum(neighbors,
-        axis=-1)[A1, ..., An, i] == 1.0 for all i`. These requirements are
-        relaxed in this implementation.
+    neighbors: A SparseTensor with the same type as `data` and with shape
+      `[A1, ..., An, V, V]` representing vertex neighborhoods. The neighborhood
+      of a vertex defines the support region for convolution. For a mesh, a
+      common choice for the neighborhood of vertex `i` would be the vertices in
+      the K-ring of `i` (including `i` itself). Each vertex must have at least
+      one neighbor. For a faithful implementation of the FeaStNet paper,
+      neighbors should be a row-normalized weight matrix corresponding to the
+      graph adjacency matrix with self-edges:
+      `neighbors[A1, ..., An, i, j] > 0` if vertex `i` and `j` are neighbors,
+      `neighbors[A1, ..., An, i, i] > 0` for all `i`, and
+      `sum(neighbors, axis=-1)[A1, ..., An, i] == 1.0` for all `i`.
+      These requirements are relaxed in this implementation.
     sizes: An `int` tensor of shape `[A1, ..., An]` indicating the true input
-      sizes in case of padding (`sizes=None` indicates no padding). `sizes[A1,
-      ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes` will
-      be ignored. An example usage of `sizes`: consider an input consisting of
-        three graphs G0, G1, and G2 with V0, V1, and V2 vertices respectively.
-      The padded input would have the following shapes: `data.shape = [3, V,
-        C]`, and `neighbors.shape = [3, V, V]`, where `V=max([V0, V1, V2])`. The
-        true sizes of each graph will be specified by
-      `sizes=[V0, V1, V2]`, and `data[i, :Vi, :]` and `neighbors[i, :Vi, :Vi]`
-        will be the vertex and neighborhood data of graph Gi. The SparseTensor
-        `neighbors` should have no nonzero entries in the padded regions.
+      sizes in case of padding (`sizes=None` indicates no padding).
+      `sizes[A1, ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes` will
+      be ignored. As an example, consider an input consisting of three graphs
+      `G0`, `G1`, and `G2` with `V0`, `V1` and `V2` vertices respectively. The
+      padded input would have the following shapes: `data.shape = [3, V, C]`,
+      and `neighbors.shape = [3, V, V]`, where `V = max([V0, V1, V2])`. The true
+      sizes of each graph will be specified by `sizes=[V0, V1, V2]`.
+      `data[i, :Vi, :]` and `neighbors[i, :Vi, :Vi]` will be the vertex and
+      neighborhood data of graph `Gi`. The `SparseTensor` `neighbors` should
+      have no nonzero entries in the padded regions.
     translation_invariant: A `bool`. If `True` the assignment of features to
       weight matrices will be invariant to translation.
     num_weight_matrices: An `int` specifying the number of weight matrices used
@@ -82,13 +83,15 @@ def feature_steered_convolution_layer(
   Returns:
     Tensor with shape `[A1, ..., An, V, num_output_channels]`.
   """
+  # pyformat: enable
   with tf.compat.v1.variable_scope(
       var_name,
       default_name='graph_convolution_feature_steered_convolution_weights'):
     # Skips shape validation to avoid redundancy with
     # feature_steered_convolution().
     data = tf.convert_to_tensor(value=data)
-    in_channels = data.get_shape().as_list()[-1]
+
+    in_channels = tf.compat.v1.dimension_value(data.shape[-1])
     if num_output_channels is None:
       out_channels = in_channels
     else:
@@ -156,7 +159,7 @@ class FeatureSteeredConvolutionKerasLayer(tf.keras.layers.Layer):
         in the output. If `None` then `num_output_channels` will be the same as
         the input dimensionality.
       initializer: An initializer for the trainable variables. If `None`,
-        defaults to tf.compat.v1.truncated_normal_initializer(stddev=0.1).
+        defaults to `tf.compat.v1.truncated_normal_initializer(stddev=0.1)`.
       name: A name for this layer.
       **kwargs: Additional keyword arguments passed to the base layer.
     """
@@ -212,6 +215,7 @@ class FeatureSteeredConvolutionKerasLayer(tf.keras.layers.Layer):
         name='b',
         trainable=True)
 
+  # pyformat: disable
   def call(self, inputs, sizes=None):
     """Executes the convolution.
 
@@ -224,34 +228,35 @@ class FeatureSteeredConvolutionKerasLayer(tf.keras.layers.Layer):
 
     Args:
       inputs: A list of two tensors `[data, neighbors]`. `data` is a `float`
-        tensor with shape `[A1, ..., An, V, C]`. `neighbors` is a SparseTensor
+        tensor with shape `[A1, ..., An, V, C]`. `neighbors` is a `SparseTensor`
         with the same type as `data` and with shape `[A1, ..., An, V, V]`
         representing vertex neighborhoods. The neighborhood of a vertex defines
         the support region for convolution. For a mesh, a common choice for the
-        neighborhood of vertex i would be the vertices in the K-ring of i
-        (including i itself). Each vertex must have at least one neighbor. For a
-        faithful implementation of the FeaStNet paper, neighbors should be a
-        row-normalized weight matrix corresponding to the graph adjacency
-        matrix with self-edges: `neighbors[A1, ..., An, i, j] > 0` if vertex `j`
-          is a neighbor of vertex `i`, and `neighbors[A1, ..., An, i, i] > 0`
-          for all `i`, and `sum(neighbors, axis=-1)[A1, ..., An, i] == 1.0 for
-          all i`. These requirements are relaxed in this implementation.
+        neighborhood of vertex `i` would be the vertices in the K-ring of `i`
+        (including `i` itself). Each vertex must have at least one neighbor. For
+        a faithful implementation of the FeaStNet paper, neighbors should be a
+        row-normalized weight matrix corresponding to the graph adjacency matrix
+        with self-edges: `neighbors[A1, ..., An, i, j] > 0` if vertex `j` is a
+        neighbor of vertex `i`, and `neighbors[A1, ..., An, i, i] > 0` for all
+        `i`, and `sum(neighbors, axis=-1)[A1, ..., An, i] == 1.0' for all `i`.
+        These requirements are relaxed in this implementation.
       sizes: An `int` tensor of shape `[A1, ..., An]` indicating the true input
-        sizes in case of padding (`sizes=None` indicates no padding). `sizes[A1,
-        ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes`
-        will be ignored. An example usage of `sizes`: consider an input
-          consisting of three graphs G0, G1, and G2 with V0, V1, and V2 vertices
-        respectively. The padded input would have the following shapes:
-          `data.shape = [3, V, C]`, and `neighbors.shape = [3, V, V]`, where
-          `V=max([V0, V1, V2])`. The true sizes of each graph will be specified
-          by
-        `sizes=[V0, V1, V2]`, and `data[i, :Vi, :]` and `neighbors[i, :Vi, :Vi]`
-          will be the vertex and neighborhood data of graph Gi. The SparseTensor
-          `neighbors` should have no nonzero entries in the padded regions.
+        sizes in case of padding (`sizes=None` indicates no padding).
+        `sizes[A1, ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes`
+        will be ignored. As an example usage of `sizes`, consider an input
+        consisting of three graphs `G0`, `G1`, and `G2` with `V0`, `V1`, and
+        `V2` vertices respectively. The padded input would have the shapes
+        `data.shape = [3, V, C]`, and `neighbors.shape = [3, V, V]`,
+        where `V = max([V0, V1, V2])`. The true sizes of each graph will be
+        specified by `sizes=[V0, V1, V2]`. `data[i, :Vi, :]` and
+        `neighbors[i, :Vi, :Vi]` will be the vertex and neighborhood data of
+        graph `Gi`. The `SparseTensor` `neighbors` should have no nonzero
+        entries in the padded regions.
 
     Returns:
       Tensor with shape `[A1, ..., An, V, num_output_channels]`.
     """
+    # pyformat: enable
     return gc.feature_steered_convolution(
         data=inputs[0],
         neighbors=inputs[1],

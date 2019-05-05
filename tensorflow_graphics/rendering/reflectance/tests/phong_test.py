@@ -54,13 +54,24 @@ class PhongTest(test_case.TestCase):
     y = phong.brdf(direction_incoming_light, direction_outgoing_light,
                    surface_normal, shininess, albedo)
 
-    self.assert_jacobian_is_correct(direction_incoming_light,
-                                    direction_incoming_light_init, y)
-    self.assert_jacobian_is_correct(direction_outgoing_light,
-                                    direction_outgoing_light_init, y)
-    self.assert_jacobian_is_correct(surface_normal, surface_normal_init, y)
-    self.assert_jacobian_is_correct(shininess, shininess_init, y)
-    self.assert_jacobian_is_correct(albedo, albedo_init, y)
+    self.assert_jacobian_is_correct(
+        direction_incoming_light,
+        direction_incoming_light_init,
+        y,
+        atol=1e-5,
+        delta=1e-9)
+    self.assert_jacobian_is_correct(
+        direction_outgoing_light,
+        direction_outgoing_light_init,
+        y,
+        atol=1e-5,
+        delta=1e-9)
+    self.assert_jacobian_is_correct(
+        surface_normal, surface_normal_init, y, atol=1e-5, delta=1e-9)
+    self.assert_jacobian_is_correct(
+        shininess, shininess_init, y, atol=1e-5, delta=1e-9)
+    self.assert_jacobian_is_correct(
+        albedo, albedo_init, y, atol=1e-5, delta=1e-9)
 
   @flagsaver.flagsaver(tfg_add_asserts_to_graph=False)
   def test_brdf_jacobian_preset(self):

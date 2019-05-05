@@ -29,7 +29,7 @@ def normal(v0, v1, v2, clockwise=False, normalize=True, name=None):
   """Computes face normals (triangles).
 
   Note:
-    In the following, A1 to An are optional batch dimensions, which should be
+    In the following, A1 to An are optional batch dimensions, which must be
     broadcast compatible.
 
   Args:
@@ -40,7 +40,8 @@ def normal(v0, v1, v2, clockwise=False, normalize=True, name=None):
     v2: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
       represents the third vertex of a triangle.
     clockwise: Winding order to determine front-facing triangles.
-    normalize: Bool defining whether output normals are normalized.
+    normalize: A `bool` indicating whether output normals should be normalized
+      by the function.
     name: A name for this op. Defaults to "triangle_normal".
 
   Returns:

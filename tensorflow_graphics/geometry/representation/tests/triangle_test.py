@@ -83,8 +83,10 @@ class TriangleTest(test_case.TestCase):
 
     with self.subTest(name="v0"):
       self.assert_jacobian_is_correct(v0_tensor, v0_init, y)
+
     with self.subTest(name="v1"):
       self.assert_jacobian_is_correct(v1_tensor, v1_init, y)
+
     with self.subTest(name="v2"):
       self.assert_jacobian_is_correct(v2_tensor, v2_init, y)
 
@@ -102,11 +104,16 @@ class TriangleTest(test_case.TestCase):
     y = triangle.normal(v0_tensor, v1_tensor, v2_tensor)
 
     with self.subTest(name="v0"):
-      self.assert_jacobian_is_correct(v0_tensor, v0_init, y)
+      self.assert_jacobian_is_correct(
+          v0_tensor, v0_init, y, atol=1e-4, delta=1e-9)
+
     with self.subTest(name="v1"):
-      self.assert_jacobian_is_correct(v1_tensor, v1_init, y)
+      self.assert_jacobian_is_correct(
+          v1_tensor, v1_init, y, atol=1e-4, delta=1e-9)
+
     with self.subTest(name="v2"):
-      self.assert_jacobian_is_correct(v2_tensor, v2_init, y)
+      self.assert_jacobian_is_correct(
+          v2_tensor, v2_init, y, atol=1e-4, delta=1e-9)
 
   @parameterized.parameters(
       (((0., 0., 1.), (0., 0., 0.), (0., 1., 0.)), ((-1., 0., 0.),)),
@@ -139,11 +146,13 @@ class TriangleTest(test_case.TestCase):
       n[..., i] = 1.
       normal = triangle.normal(v0, v1, v2, clockwise)
 
-      with self.subTest():
+      with self.subTest(name="n"):
         self.assertAllClose(tf.abs(normal), n)
-      with self.subTest():
+
+      with self.subTest(name="v1-v0"):
         self.assertAllClose(vector.dot(normal, (v1 - v0)), zeros)
-      with self.subTest():
+
+      with self.subTest(name="v2-v0"):
         self.assertAllClose(vector.dot(normal, (v2 - v0)), zeros)
 
 

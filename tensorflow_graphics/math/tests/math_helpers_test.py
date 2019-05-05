@@ -149,11 +149,9 @@ class MathTest(test_case.TestCase):
 
   def test_square_to_spherical_coordinates_jacobian_random(self):
     """Tests the Jacobian of square_to_spherical_coordinates."""
-    point_2d_init = np.random.uniform(
-        sys.float_info.epsilon,
-        1.0 - asserts.select_eps_for_addition(tf.float32),
-        size=(10, 2))
-    point_2d = tf.convert_to_tensor(value=point_2d_init)
+    epsilon = 1e-3
+    point_2d_init = np.random.uniform(epsilon, 1.0 - epsilon, size=(10, 2))
+    point_2d = tf.convert_to_tensor(value=point_2d_init, dtype=tf.float64)
 
     y = math_helpers.square_to_spherical_coordinates(point_2d)
 

@@ -186,43 +186,6 @@ def from_rotation_matrix(rotation_matrix, name=None):
     return from_quaternion(quaternion)
 
 
-def from_rotation_vector(rotation_vector, name=None):
-  r"""Converts a rotation vector to an axis-angle representation.
-
-  A rotation vector is a vector $$r \in \mathbb{R}^3$$ where
-  $$\frac{r}{\|r\|_2} = \mathbf{a}$$ is a unit vector indicating the axis of
-  rotation and $$\|r\|_2 = \theta$$ is the angle.
-
-  Note:
-    In the following, A1 to An are optional batch dimensions.
-
-  Args:
-    rotation_vector: A tensor of shape `[A1, ..., An, 3]`, where the last
-      dimension represents a rotation vector.
-    name: A name for this op that defaults to "axis_angle_from_rotation_vector".
-
-  Returns:
-    A tuple of two tensors, respectively of shape `[A1, ..., An, 3]` and
-    `[A1, ..., An, 1]`, where the first tensor represents the axis, and the
-    second represents the angle. The resulting axis is a normalized vector.
-
-  Raises:
-    ValueError: If the shape of `rotation_vector` is not supported.
-  """
-  with tf.compat.v1.name_scope(name, "axis_angle_from_rotation_vector",
-                               [rotation_vector]):
-    rotation_vector = tf.convert_to_tensor(value=rotation_vector)
-
-    shape.check_static(
-        tensor=rotation_vector,
-        tensor_name="rotation_vector",
-        has_dim_equals=(-1, 3))
-
-    angle = tf.norm(tensor=rotation_vector, axis=-1, keepdims=True)
-    axis = safe_ops.safe_unsigned_div(rotation_vector, angle)
-    return axis, angle
-
-
 def inverse(axis, angle, name=None):
   """Computes the axis-angle that is the inverse of the input axis-angle.
 

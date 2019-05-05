@@ -70,8 +70,55 @@ def check_valid_graph_convolution_input(data, neighbors, sizes):
         broadcast_compatible=False)
 
 
+def check_valid_graph_pooling_input(data, pool_map, sizes):
+  """Checks that the inputs are valid for graph pooling.
+
+  Note:
+    In the following, A1 to An are optional batch dimensions.
+
+  Args:
+    data: A `float` tensor with shape `[A1, ..., An, V1, C]`.
+    pool_map: A SparseTensor with the same type as `data` and with shape
+      `[A1, ..., An, V2, V1]`.
+    sizes: An `int` tensor of shape `[A1, ..., An, 2]`. Can be `None`.
+
+  Raises:
+    TypeError: if the input types are invalid.
+    ValueError: if the input dimensions are invalid.
+  """
+  if not data.dtype.is_floating:
+    raise TypeError("'data' must have a float type.")
+  if pool_map.dtype != data.dtype:
+    raise TypeError("'pool_map' and 'data' must have the same type.")
+  if sizes is not None and not sizes.dtype.is_integer:
+    raise TypeError("'sizes' must have an integer type.")
+
+  data_ndims = data.shape.ndims
+  shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=1)
+  shape.check_static(
+      tensor=pool_map, tensor_name="pool_map", has_rank=data_ndims)
+  shape.compare_dimensions(
+      tensors=(data, pool_map),
+      tensor_names=("data", "pool_map"),
+      axes=(-2, -1))
+  if sizes is None:
+    shape.compare_batch_dimensions(
+        tensors=(data, pool_map),
+        tensor_names=("data", "pool_map"),
+        last_axes=-3,
+        broadcast_compatible=False)
+  else:
+    shape.check_static(
+        tensor=sizes, tensor_name="sizes", has_rank=data_ndims - 1)
+    shape.compare_batch_dimensions(
+        tensors=(data, pool_map, sizes),
+        tensor_names=("data", "pool_map", "sizes"),
+        last_axes=(-3, -3, -2),
+        broadcast_compatible=False)
+
+
 def flatten_batch_to_2d(data, sizes=None, name=None):
-  """Reshape a batch of 2d Tensors by flattening across the batch dimensions.
+  """Reshapes a batch of 2d Tensors by flattening across the batch dimensions.
 
   Note:
     In the following, A1 to An are optional batch dimensions.
@@ -165,6 +212,86 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
               indices=mask_indices, updates=flat, shape=output_shape)
 
     return flat, unflatten
+
+
+def unflatten_2d_to_batch(data, sizes, max_rows=None, name=None):
+  r"""Reshapes a 2d Tensor into a batch of 2d Tensors.
+
+  The `data` tensor with shape `[D1, D2]` will be mapped to a tensor with shape
+  `[A1, ..., An, max_rows, D2]` where `max_rows` defaults to `max(sizes)`.
+  `sizes` determines the segment of rows in the input that get mapped to a
+  particular batch dimension (`sum(sizes) == D1`).
+
+  Examples:
+
+      >>> data = [[1., 2.],
+                  [3., 4.],
+                  [5., 6.],
+                  [7., 8.],
+                  [9., 10.],
+                  [11., 12.]]
+      >>> sizes = [2, 3, 1]
+
+      >>> output = unflatten_2d_to_batch(data, sizes, max_rows=None)
+      >>> print(output.shape)
+      [3, 3, 2]
+      >>> print(output)
+      [[[1., 2.],
+       [3., 4.],
+       [0., 0.]],
+      [[5., 6.],
+       [7., 8.],
+       [9., 10.]],
+      [[11., 12.],
+       [0., 0.],
+       [0., 0.]]]
+
+      >>> output = unflatten_2d_to_batch(data, sizes, max_rows=4)
+      >>> print(output.shape)
+      [3, 4, 2]
+      >>> print(output)
+      [[[1., 2.],
+       [3., 4.],
+       [0., 0.],
+       [0., 0.]],
+      [[5., 6.],
+       [7., 8.],
+       [9., 10.],
+       [0., 0.]],
+      [[11., 12.],
+       [0., 0.],
+       [0., 0.],
+       [0., 0.]]]
+
+  Args:
+    data: A tensor with shape `[D1, D2]`.
+    sizes: An `int` tensor with shape `[A1, ..., An]`.
+    max_rows: An `int` specifying the maximum number of rows in the
+      unflattened output. `max_rows >= max(sizes)`.
+    name: A name for this op. Defaults to `utils_unflatten_2d_to_batch`.
+
+  Returns:
+    A tensor with shape `[A1, A2, ..., max_rows, D2]`.
+  """
+  with tf.compat.v1.name_scope(
+      name, "utils_unflatten_2d_to_batch", [data, sizes]):
+    data = tf.convert_to_tensor(value=data)
+    sizes = tf.convert_to_tensor(value=sizes)
+    if max_rows is None:
+      max_rows = tf.reduce_max(input_tensor=sizes)
+    else:
+      max_rows = tf.convert_to_tensor(value=max_rows)
+
+    shape.check_static(tensor=data, tensor_name="data", has_rank=2)
+    if not sizes.dtype.is_integer:
+      raise TypeError("'sizes' must have an integer type.")
+
+    mask = tf.sequence_mask(sizes, max_rows)
+    mask_indices = tf.cast(tf.where(mask), tf.int32)
+    output_shape = tf.concat(
+        (tf.shape(input=sizes), (max_rows,), tf.shape(input=data)[-1:]), axis=0)
+    return tf.scatter_nd(
+        indices=mask_indices, updates=data, shape=output_shape)
 
 
 def convert_to_block_diag_2d(data,

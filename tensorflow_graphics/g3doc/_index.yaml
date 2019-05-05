@@ -1,0 +1,48 @@
+#Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+book_path: /graphics/_book.yaml
+project_path: /graphics/_project.yaml
+description: <!--no description-->
+landing_page:
+  custom_css_path: /site-assets/css/style.css
+  rows:
+  - heading: TensorFlow Graphics is a library of differentiable graphics Layers for TensorFlow.
+    items:
+    - classname: devsite-landing-row-50
+      description: >
+        The last few years have seen a rise in novel differentiable graphics layers
+        which can be inserted in neural network architectures. From spatial transformers
+        to differentiable graphics renderers, these new layers leverage the knowledge
+        acquired over years of computer vision and graphics research to build new and
+        more efficient network architectures. Explicitly modeling geometric priors and
+        constraints into neural networks opens up the door to architectures that can be
+        trained robustly, efficiently, and more importantly, in a self-supervised
+        fashion.
+        We aim at bringing some of these functionalities into TensorFlow, in order to stimulate
+        research and developmen in this field by making useful graphics functions widely accessible
+        to the community. TensorFlow Graphics provides a set of differentiable graphics layers
+        (e.g. cameras and reflectance models) and 3D functionalities
+        (e.g. mesh convolution, 3D tensorboard) that can be used in your machine learning
+        models of choice.
+        To get started, see a more detailed <a href="./overview">overview</a> and the
+        <a href="./install">installation guide</a>.
+
+  - classname: devsite-landing-row-cards
+    items:
+    - heading: "TensorFlow Graphics on GitHub"
+      image_path: /resources/images/github-card-16x9.png
+      path: https://github.com/tensorflow/graphics
+      buttons:
+      - label: View on GitHub
+        path: https://github.com/tensorflow/graphics

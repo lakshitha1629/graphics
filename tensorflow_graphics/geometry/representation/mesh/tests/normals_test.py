@@ -121,7 +121,8 @@ class MeshTest(test_case.TestCase):
     face_tensor = normals.gather_faces(vertex_tensor, index_tensor)
     y = normals.face_normals(face_tensor)
 
-    self.assert_jacobian_is_correct(vertex_tensor, vertex_init, y)
+    self.assert_jacobian_is_correct(
+        vertex_tensor, vertex_init, y, atol=1e-4, delta=1e-9)
 
   @parameterized.parameters(
       ((((0., 0., 0.), (1., 0., 0.), (0., 1., 0.)), ((0, 1, 2),)),

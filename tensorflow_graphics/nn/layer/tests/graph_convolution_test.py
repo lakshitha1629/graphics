@@ -91,6 +91,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
     output = _run_convolution()
     output_shape = output.shape.as_list()
     out_channels = in_channels if out_channels is None else out_channels
+
     self.assertEqual(output_shape[-1], out_channels)
     self.assertAllEqual(output_shape[:-1], data.shape[:-1])
 

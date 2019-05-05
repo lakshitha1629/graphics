@@ -306,10 +306,10 @@ class RotationMatrix3dTest(test_case.TestCase):
 
   def test_from_euler_with_small_angles_approximation_random(self):
     """Tests small_angles approximation by comparing to exact calculation."""
-    # Only generate small angles. For a test tolerance of 1e-3, 0.17 was found
+    # Only generate small angles. For a test tolerance of 1e-3, 0.16 was found
     # empirically to be the range where the small angle approximation works.
     random_euler_angles = test_helpers.generate_random_test_euler_angles(
-        min_angle=-0.17, max_angle=0.17)
+        min_angle=-0.16, max_angle=0.16)
 
     exact_matrix = rotation_matrix_3d.from_euler(random_euler_angles)
     approximate_matrix = (
