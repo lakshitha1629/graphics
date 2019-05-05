@@ -1,6 +1,6 @@
 # TensorFlow Graphics
 
-## The repository is currently in development. The library will be officially released the 7th of May, including the pip package.
+## The repository is currently in development. The library will be officially released the 9th of May, including the pip package.
 
 [![PyPI project status](https://img.shields.io/pypi/status/tensorflow-graphics.svg)](https://pypi.org/project/tensorflow-graphics/)
 [![Travis build status](https://img.shields.io/travis/tensorflow/graphics.svg)](https://travis-ci.org/tensorflow/graphics)
