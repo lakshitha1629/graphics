@@ -18,7 +18,7 @@ renderer to generate an image of the scene.
 </div>
 
 In comparison, a computer vision system would start from an image and try to
-infer the paramaters that allowed to create this scene, allowing to answer
+infer the parameters that allowed to create this scene, allowing to answer
 questions like 'which objects are in the scene?', 'what is the 3D position of
 these objects?', 'what materials are objects made of?'.
 
@@ -123,16 +123,16 @@ advised to write code that takes dependency on them.
 <div align="center">
   <table>
     <tr>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/6dof_alignment.ipynb">Object pose estimation</a></th>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb">Camera intrisic optimization</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/6dof_alignment.ipynb">Object pose estimation</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb">Camera intrisic optimization</a></th>
     </tr>
     <tr>
-      <td style="text-align:center">
-        <a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/6dof_alignment.ipynb"><img border="0"  src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/thumbnail.jpg" width="200" height="200">
+      <td align="center">
+        <a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/6dof_alignment.ipynb"><img border="0"  src="https://storage.googleapis.com/tensorflow-graphics/notebooks/6dof_pose/thumbnail.jpg" width="200" height="200">
         </a>
       </td>
-      <td style="text-align:center">
-              <a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/intrinsics/intrinsics_thumbnail.png" width="200" height="200">
+      <td align="center">
+              <a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/intrinsics/intrinsics_thumbnail.png" width="200" height="200">
         </a>
       </td>   
     </tr>
@@ -144,12 +144,12 @@ advised to write code that takes dependency on them.
 <div align="center">
   <table>
     <tr>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb">B-spline and slerp interpolation</a></th>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb">Reflectance</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb">B-spline and slerp interpolation</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb">Reflectance</a></th>
     </tr>
     <tr>
-      <td><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/interpolation/thumbnail.png" width="200" height="200"> </td>
-      <td><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/reflectance/thumbnail.png" width="200" height="200"></td>
+      <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/interpolation/thumbnail.png" width="200" height="200"> </td>
+      <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/reflectance/thumbnail.png" width="200" height="200"></td>
     </tr>
   </table>
 </div>
@@ -159,16 +159,16 @@ advised to write code that takes dependency on them.
 <div align="center">
   <table>
     <tr>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb">Spherical harmonics rendering</a></th>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb">Environment map optimization</a></th>
-      <th style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb">Non-rigid surface deformation</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb">Spherical harmonics rendering</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb">Environment map optimization</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb">Non-rigid surface deformation</a></th>
     </tr>
     <tr>
-      <td style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/sh_rendering/thumbnail.png" width="200" height="200">
+      <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/sh_rendering/thumbnail.png" width="200" height="200">
       </a></td>
-      <td style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/environment_lighting/thumbnail.png" width="200" height="200">
+      <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/environment_lighting/thumbnail.png" width="200" height="200">
       </a></td>
-      <td style="text-align:center"><a href="https://colab.sandbox.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/non_rigid_deformation/thumbnail.jpg" width="200" height="200">
+      <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/non_rigid_deformation/thumbnail.jpg" width="200" height="200">
       </a></td>
     </tr>
   </table>
