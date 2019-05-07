@@ -17,24 +17,25 @@ description: <!--no description-->
 landing_page:
   custom_css_path: /site-assets/css/style.css
   rows:
-  - heading: TensorFlow Graphics is a library of differentiable graphics Layers for TensorFlow.
+  - heading: Differentiable graphics Layers for TensorFlow.
     items:
     - classname: devsite-landing-row-50
       description: >
         The last few years have seen a rise in novel differentiable graphics layers
         which can be inserted in neural network architectures. From spatial transformers
         to differentiable graphics renderers, these new layers leverage the knowledge
-        acquired over years of computer vision and graphics research to build new and
+        acquired over years of computer vision and graphics research to build novel and
         more efficient network architectures. Explicitly modeling geometric priors and
-        constraints into neural networks opens up the door to architectures that can be
+        constraints into machine learning models opens up the door to architectures that can be
         trained robustly, efficiently, and more importantly, in a self-supervised
         fashion.
-        We aim at bringing some of these functionalities into TensorFlow, in order to stimulate
-        research and developmen by making useful graphics functions widely accessible
-        to the community. TensorFlow Graphics provides a set of differentiable graphics layers
-        (e.g. cameras and reflectance models) and 3D functionalities
-        (e.g. mesh convolution, 3D tensorboard) that can be used in your machine learning
+        <br>
+        <em>TensorFlow Graphics</em> aims at making useful graphics functions widely
+        accessible to the community by providing a set of differentiable graphics
+        layers (e.g. cameras and reflectance models) and 3D functionalities
+        (e.g. mesh convolution, 3D TensorBoard) that can be used in your machine learning
         models of choice.
+        <br>
         To get started, see a more detailed <a href="./overview">overview</a> and the
         <a href="./install">installation guide</a>.
 
@@ -50,7 +51,7 @@ landing_page:
         tf.enable_eager_execution()
 
         # Download the mesh.
-        !wget -N https://storage.googleapis.com/tensorflow-graphics/notebooks/index/cow.obj
+        !wget https://storage.googleapis.com/tensorflow-graphics/notebooks/index/cow.obj
         # Load the mesh.
         mesh = trimesh.load("cow.obj")
         mesh = {"vertices": mesh.vertices, "faces": mesh.faces}
@@ -60,7 +61,7 @@ landing_page:
         axis = np.array((0., 1., 0.))  # y axis.
         angle = np.array((np.pi / 4.,))  # 45 degree angle.
         # Rotate the mesh.
-        mesh['vertices'] = tfg_transformation.axis_angle.rotate(mesh['vertices'], axis,
+        mesh['vertices'] = tfg_transformation.axis_angle.rotate(mesh["vertices"], axis,
                                                                 angle).numpy()
         # Visualize the rotated mesh.
         threejs_visualization.triangular_mesh_renderer(mesh, width=400, height=400)
