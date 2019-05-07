@@ -30,11 +30,13 @@ landing_page:
         trained robustly, efficiently, and more importantly, in a self-supervised
         fashion.
         <br>
+        <br>
         <em>TensorFlow Graphics</em> aims at making useful graphics functions widely
         accessible to the community by providing a set of differentiable graphics
         layers (e.g. cameras and reflectance models) and 3D functionalities
         (e.g. mesh convolution, 3D TensorBoard) that can be used in your machine learning
         models of choice.
+        <br>
         <br>
         To get started, see a more detailed <a href="./overview">overview</a> and the
         <a href="./install">installation guide</a>.
