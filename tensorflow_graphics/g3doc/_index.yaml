@@ -38,6 +38,37 @@ landing_page:
         To get started, see a more detailed <a href="./overview">overview</a> and the
         <a href="./install">installation guide</a>.
 
+      code_block: |
+        <pre class = "prettyprint">
+        import numpy as np
+        import tensorflow as tf
+        import trimesh
+
+        import tensorflow_graphics.geometry.transformation as tfg_transformation
+        from tensorflow_graphics.notebooks import threejs_visualization
+
+        tf.enable_eager_execution()
+
+        # Download the mesh.
+        !wget -N https://storage.googleapis.com/tensorflow-graphics/notebooks/index/cow.obj --no-check-certificate
+        # Load the mesh.
+        mesh = trimesh.load("cow.obj")
+        mesh = {"vertices": mesh.vertices, "faces": mesh.faces}
+        # Visualize the original mesh.
+        threejs_visualization.triangular_mesh_renderer(mesh, width=400, height=400)
+        # Set the axis and angle parameters.
+        axis = np.array((0., 1., 0.))  # y axis.
+        angle = np.array((np.pi / 4.,))  # 45 degree angle.
+        # Rotate the mesh.
+        mesh['vertices'] = tfg_transformation.axis_angle.rotate(mesh['vertices'], axis,
+                                                                angle).numpy()
+        # Visualize the rotated mesh.
+        threejs_visualization.triangular_mesh_renderer(mesh, width=400, height=400)
+        </pre>
+        {% dynamic if request.tld != 'cn' %}
+        <a class="colab-button" target="_blank" href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/g3doc/_index.ipynb">Run in a <span>Notebook</span></a>
+        {% dynamic endif %}
+
   - classname: devsite-landing-row-cards
     items:
     - heading: "TensorFlow Graphics on GitHub"

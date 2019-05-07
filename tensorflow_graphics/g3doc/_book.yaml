@@ -31,19 +31,19 @@ upper_tabs:
       - title: Install
         path: /graphics/install
       - heading: Tutorials
-      - title: TensorFlow Graphics - 6DOF alignment
+      - title: 6DOF alignment
         path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/6dof_alignment.ipynb
         status: external
-      - title: TensorFlow Graphics - camera intrinsics optimization
+      - title: Camera intrinsics optimization
         path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/intrinsics_optimization.ipynb
         status: external
-      - title: TensorFlow Graphics - interpolation
+      - title: Interpolation
         path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/interpolation.ipynb
         status: external
-      - title: TensorFlow Graphics - reflectance
+      - title: Reflectance
         path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/reflectance.ipynb
         status: external
-      - title: TensorFlow Graphics - non rigid deformation
+      - title: Non-rigid deformation
         path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb
         status: external
 

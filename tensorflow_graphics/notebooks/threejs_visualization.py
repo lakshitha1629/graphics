@@ -119,9 +119,9 @@ def triangular_mesh_renderer(meshes,
       ndarray of vertex indices that belong to each face of the mesh. V and F
       respectively correspond to the number of vertices and faces in any given
       mesh. In addition, following optional keys may be provided for each mesh:
-      'vertex_colors', a [V, 3] numpy ndarray of vertex colors, and
-      'material', a Three.js Material object. If a material is not provided,
-      then a default Lambertian material is used.
+        'vertex_colors', a [V, 3] numpy ndarray of vertex colors, and
+        'material', a Three.js Material object. If a material is not provided,
+        then a default Lambertian material is used.
     lights: a list of Three.js lights to add to the scene. If no light is
       provided, a point light is added to the scene at the position (0., 0.,
       5.).
@@ -135,6 +135,9 @@ def triangular_mesh_renderer(meshes,
     A list of Three.js BufferGeometry objects that can be used to manipulate the
     vertices of the meshes being rendered.
   """
+  if not isinstance(meshes, (tuple, list)):
+    meshes = [meshes]
+
   context = _build_context()
 
   # Instantiate the renderer.
@@ -158,9 +161,10 @@ def triangular_mesh_renderer(meshes,
 
   # Add lights to the scene.
   if lights is None:
-    light = context.THREE.PointLight.new_object(0xffffff)
-    light.position.set(0., 0., 5.)
-    lights = (light,)
+    ambient_light = context.THREE.AmbientLight.new_object(0x404040)
+    point_light = context.THREE.PointLight.new_object(0xffffff)
+    point_light.position.set(0., 0., 5.)
+    lights = (ambient_light, point_light)
   for light in lights:
     scene.add(light)
 
@@ -177,8 +181,7 @@ def triangular_mesh_renderer(meshes,
       vertex_colors = None
       default_material['vertexColors'] = context.THREE.NoColors
     geometry = _triangular_mesh_to_three_geometry(mesh['vertices'],
-                                                  mesh['faces'],
-                                                  vertex_colors)
+                                                  mesh['faces'], vertex_colors)
     geometries.append(geometry)
     if 'material' in mesh.keys() and mesh['material'] is not None:
       scene.add(context.THREE.Mesh.new_object(geometry, mesh['material']))
