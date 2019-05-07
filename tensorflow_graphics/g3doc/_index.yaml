@@ -50,7 +50,7 @@ landing_page:
         tf.enable_eager_execution()
 
         # Download the mesh.
-        !wget -N https://storage.googleapis.com/tensorflow-graphics/notebooks/index/cow.obj --no-check-certificate
+        !wget -N https://storage.googleapis.com/tensorflow-graphics/notebooks/index/cow.obj
         # Load the mesh.
         mesh = trimesh.load("cow.obj")
         mesh = {"vertices": mesh.vertices, "faces": mesh.faces}
