@@ -145,7 +145,6 @@ advised to write code that takes dependency on them.
       </a></td>
       <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/mesh_segmentation_demo.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/mesh_segmentation/thumbnail.jpg" width="200" height="200">
       </a></td>
-      
     </tr>
   </table>
 </div>
