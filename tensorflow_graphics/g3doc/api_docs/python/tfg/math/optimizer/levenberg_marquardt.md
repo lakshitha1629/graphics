@@ -13,7 +13,7 @@ Defined in [`math/optimizer/levenberg_marquardt.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Minimizes $\min_{\mathbf{x}} \sum_i \|\mathbf{r}_i(\mathbf{x})\|^2_2$ where
+Minimizes \(\min_{\mathbf{x}} \sum_i \|\mathbf{r}_i(\mathbf{x})\|^2_2\) where
 $\mathbf{r}_i(\mathbf{x})$
 are the residuals. This function implements Levenberg-Marquardt, an iterative
 process that linearizes the residuals and iteratively finds a displacement
