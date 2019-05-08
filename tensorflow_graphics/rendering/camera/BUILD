@@ -50,6 +50,7 @@ py_library(
         # google internal,
         "//tensorflow_graphics/util:asserts",
         "//tensorflow_graphics/util:export_api",
+        "//tensorflow_graphics/util:shape",
     ],
 )
 

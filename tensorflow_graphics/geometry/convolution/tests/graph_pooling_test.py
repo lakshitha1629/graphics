@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import itertools
 from absl.testing import parameterized
 import numpy as np
 import tensorflow as tf
@@ -195,6 +196,348 @@ class GraphPoolingTestPoolTests(test_case.TestCase):
                                 sizes,
                                 algorithm='weighted')
       self.assert_jacobian_is_correct(data, data_init, pooled_weighted)
+
+
+class GraphPoolingTestUnpoolTests(test_case.TestCase):
+
+  @parameterized.parameters(
+      ("'sizes' must have an integer type.", np.float32, np.float32,
+       np.float32),
+      ("'data' must have a float type.", np.int32, np.float32, np.int32),
+      ("'pool_map' and 'data' must have the same type.", np.float32, np.float64,
+       np.int32)
+  )
+  def test_unpool_exception_raised_types(
+      self, err_msg, data_type, pool_map_type, sizes_type):
+    """Tests the correct exceptions are raised for invalid types."""
+    data = np.ones((2, 3, 3), dtype=data_type)
+    pool_map = _dense_to_sparse(np.ones((2, 3, 3), dtype=pool_map_type))
+    sizes = np.array(((1, 2), (2, 3)), dtype=sizes_type)
+
+    with self.assertRaisesRegexp(TypeError, err_msg):
+      gp.unpool(data, pool_map, sizes)
+
+  @parameterized.parameters(
+      ('data must have a rank greater than 1', (3,), (3,), None),
+      ('pool_map must have a rank of 2', (3, 3), (3,), None),
+      ('sizes must have a rank of 3', (4, 5, 3, 2), (4, 5, 3, 3), (3, 2)),
+      ('data must have a rank less than 6',
+       (2, 3, 4, 5, 3, 2),
+       (2, 3, 4, 5, 3, 3),
+       None),
+  )
+  def test_unpool_exception_raised_shapes(
+      self, err_msg, data_shape, pool_map_shape, sizes_shape):
+    """Tests the correct exceptions are raised for invalid shapes."""
+    data = np.ones(data_shape, dtype=np.float32)
+    pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
+    if sizes_shape is not None:
+      sizes = np.ones(sizes_shape, dtype=np.int32)
+    else:
+      sizes = None
+
+    with self.assertRaisesRegexp(ValueError, err_msg):
+      gp.unpool(data, pool_map, sizes)
+
+  @parameterized.parameters(
+      ((2, 3), 4, 3, np.float32),
+      ((1,), 6, 1, np.float32),
+      ((4, 1, 3), 9, 7, np.float64),
+      ((2, 8, 4), 19, 11, np.float64),
+  )
+  def test_unpool_identity(self,
+                           batch_shape,
+                           num_vertices,
+                           num_features,
+                           data_type):
+    """Tests graph unpooling with identity maps."""
+    data_shape = np.concatenate((batch_shape, (num_vertices, num_features)))
+    data = np.random.uniform(size=data_shape).astype(data_type)
+    pool_map = _batch_sparse_eye(batch_shape, num_vertices, data_type)
+
+    unpooled = gp.unpool(data, pool_map, sizes=None)
+    self.assertAllClose(unpooled, data)
+
+  def test_unpool_preset_padded(self):
+    """Tests pooling with preset data and padding."""
+    data = np.reshape(np.arange(12).astype(np.float32), (2, 3, 2))
+    data[0, -1, :] = 0.
+    sizes = ((2, 3), (3, 3))
+    pool_map = _dense_to_sparse(np.array(
+        (((0.5, 0.5, 0.),
+          (0., 0., 1.),
+          (0., 0., 0.)),
+         ((1., 0., 0.),
+          (0., 1., 0.),
+          (0., 0., 1.))), dtype=np.float32))
+
+    unpooled = gp.unpool(data, pool_map, sizes)
+
+    true = (((0., 1.), (0., 1.), (2., 3.)),
+            ((6., 7.), (8., 9.), (10., 11.)))
+    self.assertAllClose(unpooled, true)
+
+  @parameterized.parameters((20, 4), (2, 1), (12, 4), (6, 3))
+  def test_unpool_random(self, num_vertices, num_features):
+    """Tests pooling with random data inputs."""
+    output_vertices = num_vertices // 2
+    pool_map = np.zeros(shape=(output_vertices, num_vertices), dtype=np.float32)
+    for i in range(output_vertices):
+      pool_map[i, (i * 2, i * 2 + 1)] = (0.5, 0.5)
+    data = np.random.uniform(
+        size=(output_vertices, num_features)).astype(np.float32)
+
+    unpooled = gp.unpool(
+        data, _dense_to_sparse(pool_map), sizes=None, name=None)
+
+    with self.subTest(name='direct_unpool'):
+      true = np.zeros(shape=(num_vertices, num_features)).astype(np.float32)
+      true[0::2, :] = data
+      true[1::2, :] = data
+      self.assertAllClose(unpooled, true)
+
+    with self.subTest(name='permute_pool_map'):
+      permutation = np.random.permutation(num_vertices)
+      pool_map_permute = pool_map[:, permutation]
+      unpooled_permute = gp.unpool(
+          data, _dense_to_sparse(pool_map_permute), None)
+      true_permute = true[permutation, :]
+      self.assertAllClose(unpooled_permute, true_permute)
+
+  def test_unpool_jacobian_random(self):
+    """Tests the jacobian is correct."""
+    sizes = ((2, 4), (3, 5))
+    data_init = np.random.uniform(size=(2, 3, 6))
+    pool_map = np.random.uniform(size=(2, 3, 5))
+    data_init[0, -1, :] = 0.
+    pool_map[0, -1, :] = 0.
+    pool_map = _dense_to_sparse(pool_map)
+    data = tf.convert_to_tensor(value=data_init)
+
+    unpooled = gp.unpool(data, pool_map, sizes)
+
+    self.assert_jacobian_is_correct(data, data_init, unpooled)
+
+
+class GraphPoolingUpsampleTransposeConvolutionTests(test_case.TestCase):
+
+  @parameterized.parameters(
+      ("'sizes' must have an integer type.", np.float32, np.float32,
+       np.float32),
+      ("'data' must have a float type.", np.int32, np.float32, np.int32),
+      ("'pool_map' and 'data' must have the same type.", np.float32, np.float64,
+       np.int32)
+  )
+  def test_upsample_transposed_convolution_exception_raised_types(
+      self, err_msg, data_type, pool_map_type, sizes_type):
+    """Tests the correct exceptions are raised for invalid types."""
+    data = np.ones((2, 3, 3), dtype=data_type)
+    pool_map = _dense_to_sparse(np.ones((2, 3, 3), dtype=pool_map_type))
+    sizes = np.array(((1, 2), (2, 3)), dtype=sizes_type)
+
+    with self.assertRaisesRegexp(TypeError, err_msg):
+      gp.upsample_transposed_convolution(
+          data, pool_map, sizes,
+          kernel_size=1, transposed_convolution_op=None)
+
+  @parameterized.parameters(
+      ('data must have a rank greater than 1', (3,), (3,), None),
+      ('pool_map must have a rank of 2', (3, 3), (3,), None),
+      ('sizes must have a rank of 3', (4, 5, 3, 2), (4, 5, 3, 3), (3, 2)),
+      ('data must have a rank less than 6',
+       (2, 3, 4, 5, 3, 2),
+       (2, 3, 4, 5, 3, 3),
+       None),
+  )
+  def test_upsample_transposed_convolution_exception_raised_shapes(
+      self, err_msg, data_shape, pool_map_shape, sizes_shape):
+    """Tests the correct exceptions are raised for invalid shapes."""
+    data = np.ones(data_shape, dtype=np.float32)
+    pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
+    if sizes_shape is not None:
+      sizes = np.ones(sizes_shape, dtype=np.int32)
+    else:
+      sizes = None
+
+    with self.assertRaisesRegexp(ValueError, err_msg):
+      gp.upsample_transposed_convolution(
+          data, pool_map, sizes,
+          kernel_size=1, transposed_convolution_op=None)
+
+  def test_upsample_transposed_convolution_exception_raised_callable(self):
+    """Tests the correct exception is raised for a invalid convolution op."""
+    data = np.ones((5, 3))
+    pool_map = _dense_to_sparse(np.eye(5))
+    err_msg = "'transposed_convolution_op' must be callable."
+
+    with self.assertRaisesRegexp(TypeError, err_msg):
+      gp.upsample_transposed_convolution(
+          data, pool_map, sizes=None, kernel_size=1,
+          transposed_convolution_op=1)
+
+  @parameterized.parameters(
+      (1, 1, 1, np.float32), (5, 3, 1, np.float32), (3, 6, 15, np.float64)
+  )
+  def test_upsample_transposed_convolution_zero_kernel(
+      self, num_vertices, num_features, kernel_size, data_type):
+    """Tests the upsampling with a zero kernel."""
+    if not tf.executing_eagerly():
+      return
+    data = np.random.uniform(
+        size=(num_vertices, num_features)).astype(data_type)
+    pool_map = np.zeros(
+        shape=(num_vertices, num_vertices * kernel_size), dtype=data_type)
+    for i in range(num_vertices):
+      pool_map[i, np.arange(kernel_size * i, kernel_size * (i + 1))] = (
+          1.0 / kernel_size)
+    pool_map = _dense_to_sparse(pool_map)
+    # Transposed convolution op with a zero kernel.
+    transposed_convolution_op = tf.keras.layers.Conv2DTranspose(
+        filters=num_features,
+        kernel_size=(1, kernel_size),
+        strides=(1, kernel_size),
+        padding='valid',
+        use_bias=False,
+        kernel_initializer=tf.initializers.zeros())
+
+    upsampled = gp.upsample_transposed_convolution(
+        data, pool_map, sizes=None, kernel_size=kernel_size,
+        transposed_convolution_op=transposed_convolution_op)
+
+    self.assertAllEqual(tf.shape(input=upsampled),
+                        (num_vertices * kernel_size, num_features))
+    self.assertAllEqual(upsampled, tf.zeros_like(upsampled))
+
+  @parameterized.parameters(
+      itertools.product((3,), (6,), (3,), range(3), range(6), range(6)),
+  )
+  def test_upsample_transposed_convolution_selector_kernel_random(
+      self, num_vertices, num_features, kernel_size,
+      kernel_index, feature1_index, feature2_index):
+    """Tests the upsampling with an indicator kernel."""
+    if not tf.executing_eagerly():
+      return
+    data = np.random.uniform(
+        size=(num_vertices, num_features)).astype(np.float32)
+    pool_map = np.zeros(
+        shape=(num_vertices, num_vertices * kernel_size), dtype=np.float32)
+    for i in range(num_vertices):
+      pool_map[i, np.arange(kernel_size * i, kernel_size * (i + 1))] = (
+          1.0 / kernel_size)
+    pool_map = _dense_to_sparse(pool_map)
+
+    selection = np.zeros(
+        shape=(1, kernel_size, num_features, num_features),
+        dtype=np.float32)
+    selection[0, kernel_index, feature1_index, feature2_index] = 1.
+    initializer = tf.constant_initializer(value=selection)
+    transposed_convolution_op = tf.keras.layers.Conv2DTranspose(
+        filters=num_features,
+        kernel_size=(1, kernel_size),
+        strides=(1, kernel_size),
+        padding='valid',
+        use_bias=False,
+        kernel_initializer=initializer)
+
+    true = np.zeros(shape=(num_vertices * kernel_size, num_features),
+                    dtype=np.float32)
+    input_column = feature2_index
+    output_column = feature1_index
+    output_row_start = kernel_index
+    true[output_row_start::kernel_size, output_column] = (
+        data[:, input_column])
+    upsampled = gp.upsample_transposed_convolution(
+        data, pool_map, sizes=None, kernel_size=kernel_size,
+        transposed_convolution_op=transposed_convolution_op)
+
+    self.assertAllEqual(upsampled, true)
+
+  def test_upsample_transposed_convolution_preset_padded(self):
+    """Tests upsampling with presets."""
+    if not tf.executing_eagerly():
+      return
+    data = np.reshape(np.arange(12).astype(np.float32), (2, 3, 2))
+    data[0, -1, :] = 0.
+    sizes = ((2, 3), (3, 3))
+    pool_map = _dense_to_sparse(np.array(
+        (((0.5, 0.5, 0.),
+          (0., 0., 1.),
+          (0., 0., 0.)),
+         ((1., 0., 0.),
+          (0., 1., 0.),
+          (0., 0., 1.))), dtype=np.float32))
+
+    kernel = np.ones(shape=(1, 2, 2, 2), dtype=np.float32)
+    initializer = tf.constant_initializer(value=kernel)
+    transposed_convolution_op = tf.keras.layers.Conv2DTranspose(
+        filters=2,
+        kernel_size=(1, 2),
+        strides=(1, 2),
+        padding='valid',
+        use_bias=False,
+        kernel_initializer=initializer)
+
+    # Convolving with an all-ones kernel is equal to summation of the input.
+    data_sum = np.tile(np.sum(data, axis=-1, keepdims=True), (1, 1, 2))
+    true = np.zeros(shape=(2, 3, 2), dtype=np.float32)
+    true[0, :, :] = data_sum[0, (0, 0, 1), :]
+    true[1, :, :] = data_sum[1, :, :]
+    upsampled = gp.upsample_transposed_convolution(
+        data, pool_map, sizes=sizes, kernel_size=2,
+        transposed_convolution_op=transposed_convolution_op)
+
+    self.assertAllEqual(upsampled.shape, (2, 3, 2))
+    self.assertAllClose(upsampled, true)
+
+  def test_upsample_transposed_convolution_jacobian_random(self):
+    """Tests the jacobian is correct."""
+    if not tf.executing_eagerly():
+      return
+    num_filters = 6
+    kernel_size = 1
+    data_init = np.random.uniform(size=(2, 5, num_filters))
+    data = tf.convert_to_tensor(value=data_init)
+    pool_map = _batch_sparse_eye((2,), 5, np.float64)
+    transposed_convolution_op = tf.keras.layers.Conv2DTranspose(
+        filters=num_filters,
+        kernel_size=(1, kernel_size),
+        strides=(1, kernel_size),
+        padding='valid')
+
+    upsampled = gp.upsample_transposed_convolution(
+        data, pool_map, sizes=None, kernel_size=kernel_size,
+        transposed_convolution_op=transposed_convolution_op)
+
+    self.assert_jacobian_is_correct(data, data_init, upsampled)
+
+  def test_upsample_transposed_convolution_jacobian_random_padding(self):
+    """Tests the jacobian is correct with padded data."""
+    if not tf.executing_eagerly():
+      return
+    num_filters = 6
+    sizes = ((2, 4), (3, 5))
+    data_init = np.random.uniform(size=(2, 3, num_filters))
+    data_init[0, -1, :] = 0.
+    data = tf.convert_to_tensor(value=data_init)
+    pool_map = np.array((((0.5, 0.5, 0., 0., 0.),
+                          (0., 0., 0.5, 0.5, 0.),
+                          (0., 0., 0., 0., 0.)),
+                         ((1., 0., 0., 0., 0.),
+                          (0., 1. / 3., 1. / 3., 1. / 3., 0.),
+                          (0., 0., 0., 0., 1.))), dtype=data_init.dtype)
+    pool_map = _dense_to_sparse(pool_map)
+    kernel_size = 2
+    transposed_convolution_op = tf.keras.layers.Conv2DTranspose(
+        filters=num_filters,
+        kernel_size=(1, kernel_size),
+        strides=(1, kernel_size),
+        padding='valid')
+
+    upsampled = gp.upsample_transposed_convolution(
+        data, pool_map, sizes=sizes, kernel_size=kernel_size,
+        transposed_convolution_op=transposed_convolution_op)
+
+    self.assert_jacobian_is_correct(data, data_init, upsampled)
 
 
 if __name__ == '__main__':

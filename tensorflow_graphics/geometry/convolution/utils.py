@@ -117,6 +117,54 @@ def check_valid_graph_pooling_input(data, pool_map, sizes):
         broadcast_compatible=False)
 
 
+def check_valid_graph_unpooling_input(data, pool_map, sizes):
+  """Checks that the inputs are valid for graph unpooling.
+
+  Note:
+    In the following, A1 to A3 are optional batch dimensions.
+
+  Args:
+    data: A `float` tensor with shape `[A1, ..., A3, V1, C]`.
+    pool_map: A `SparseTensor` with the same type as `data` and with shape
+      `[A1, ..., A3, V1, V2]`.
+    sizes: An `int` tensor of shape `[A1, ..., A3, 2]`. Can be `None`.
+
+  Raises:
+    TypeError: if the input types are invalid.
+    ValueError: if the input dimensions are invalid.
+  """
+  if not data.dtype.is_floating:
+    raise TypeError("'data' must have a float type.")
+  if pool_map.dtype != data.dtype:
+    raise TypeError("'pool_map' and 'data' must have the same type.")
+  if sizes is not None and not sizes.dtype.is_integer:
+    raise TypeError("'sizes' must have an integer type.")
+
+  data_ndims = data.shape.ndims
+  shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=1)
+  shape.check_static(tensor=data, tensor_name="data", has_rank_less_than=6)
+  shape.check_static(
+      tensor=pool_map, tensor_name="pool_map", has_rank=data_ndims)
+  shape.compare_dimensions(
+      tensors=(data, pool_map),
+      tensor_names=("data", "pool_map"),
+      axes=(-2, -2))
+  if sizes is None:
+    shape.compare_batch_dimensions(
+        tensors=(data, pool_map),
+        tensor_names=("data", "pool_map"),
+        last_axes=-3,
+        broadcast_compatible=False)
+  else:
+    shape.check_static(
+        tensor=sizes, tensor_name="sizes", has_rank=data_ndims - 1)
+    shape.compare_batch_dimensions(
+        tensors=(data, pool_map, sizes),
+        tensor_names=("data", "pool_map", "sizes"),
+        last_axes=(-3, -3, -2),
+        broadcast_compatible=False)
+
+
 def flatten_batch_to_2d(data, sizes=None, name=None):
   """Reshapes a batch of 2d Tensors by flattening across the batch dimensions.
 

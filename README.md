@@ -142,7 +142,8 @@ advised to write code that takes dependency on them.
 </div>
 
 ## Coming next...
-Among many things, we are hoping to release resamplers, additional 3D convolution and pooling operators, and a differentiable rasterizer!
+Among many things, we are hoping to release resamplers, additional 3D
+convolution and pooling operators, and a differentiable rasterizer!
 
 Follow us on Twitter [@_TFGraphics_](https://twitter.com/_TFGraphics_) to
 hear about the latest updates!
