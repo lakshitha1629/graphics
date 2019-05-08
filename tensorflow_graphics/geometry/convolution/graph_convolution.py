@@ -159,23 +159,31 @@ def edge_convolution_template(data,
                               neighbors,
                               sizes,
                               edge_function,
+                              reduction,
                               edge_function_kwargs,
                               name=None):
   #  pyformat: disable
   r"""A template for edge convolutions.
 
   This function implements a general edge convolution for graphs of the form
-  $$
-  y_i = \sum_{j \in \mathcal{N}(i)} w_{ij} f(x_i, x_j)
-  $$
+  \\(y_i = \sum_{j \in \mathcal{N}(i)} w_{ij} f(x_i, x_j)\\), where
+  \\(\mathcal{N}(i)\\) is the set of vertices in the neighborhood of vertex
+  \\(i\\), \\(x_i \in \mathbb{R}^C\\) are the features at vertex \\(i\\),
+  \\(w_{ij} \in \mathbb{R}\\) is the weight for the edge between vertex \\(i\\)
+  and vertex \\(j\\), and finally
+  \\(f(x_i, x_j): \mathbb{R}^{C} \times \mathbb{R}^{C} \to \mathbb{R}^{D}\\) is
+  a user-supplied function.
 
-  Where
-  $$\mathcal{N}(i)$$ is the set of vertices in the neighborhood of vertex $$i$$,
-  $$x_i \in \mathbb{R}^C$$  are the features at vertex $$i$$,
-  $$w_{ij} \in \mathbb{R}$$ is the weight for the edge between vertex $$i$$ and
-    vertex $$j$$, and finally
-  $$f(x_i, x_j): \mathbb{R}^{C} \times \mathbb{R}^{C} \to \mathbb{R}^{D}$$ is a
-    user-supplied function.
+  This template also implements the same general edge convolution described
+  above with a max-reduction instead of a weighted sum.
+
+  An example of how this template can be used is for Laplacian smoothing,
+  which is defined as
+  $$y_i = \frac{1}{|\mathcal{N(i)}|} \sum_{j \in \mathcal{N(i)}} x_j$$.
+  `edge_convolution_template` can be used to perform Laplacian smoothing by
+  setting
+  $$w_{ij} = \frac{1}{|\mathcal{N(i)}|}$$, `edge_function=lambda x, y: y`,
+  and reduction='weighted'.
 
   The shorthands used below are
     `V`: The number of vertices.
@@ -189,8 +197,8 @@ def edge_convolution_template(data,
     neighbors: A `SparseTensor` with the same type as `data` and with shape
       `[A1, ..., An, V, V]` representing vertex neighborhoods. The neighborhood
       of a vertex defines the support region for convolution. The value at
-      `neighbors[A1, ..., An, i, j]` corresponds to the weight $$w_{ij}$$ above.
-      Each vertex must have at least one neighbor.
+      `neighbors[A1, ..., An, i, j]` corresponds to the weight \\(w_{ij}\\)
+      above. Each vertex must have at least one neighbor.
     sizes: An `int` tensor of shape `[A1, ..., An]` indicating the true input
       sizes in case of padding (`sizes=None` indicates no padding). Note that
       `sizes[A1, ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes` will
@@ -206,6 +214,10 @@ def edge_convolution_template(data,
       features and returns a tensor of vertex features. `Y = f(X1, X2,
       **kwargs)`, where `X1` and `X2` have shape `[V3, C]` and `Y` must have
       shape `[V3, D], D >= 1`.
+    reduction: Either 'weighted' or 'max'. Specifies the reduction over the
+        neighborhood. For 'weighted', the reduction is a weighted sum as shown
+        in the equation above. For 'max' the reduction is a max over features in
+        which case the weights $$w_{ij}$$ are ignored.
     edge_function_kwargs: A dict containing any additional keyword arguments to
       be passed to `edge_function`.
     name: A name for this op. Defaults to
@@ -248,8 +260,19 @@ def edge_convolution_template(data,
     neighbor_features = tf.gather(x_flat, adjacency_ind_1)
     edge_features = edge_function(vertex_features, neighbor_features,
                                   **edge_function_kwargs)
-    features = utils.partition_sums_2d(edge_features, adjacency_ind_0,
-                                       adjacency.values)
+
+    if reduction == "weighted":
+      features = utils.partition_sums_2d(edge_features, adjacency_ind_0,
+                                         adjacency.values)
+    elif reduction == "max":
+      features = tf.math.segment_max(data=edge_features,
+                                     segment_ids=adjacency_ind_0)
+      features.set_shape(features.shape.merge_with(
+          (tf.compat.v1.dimension_value(x_flat.shape[0]),
+           tf.compat.v1.dimension_value(edge_features.shape[-1]))))
+    else:
+      raise ValueError("The reduction method must be 'weighted' or 'max'")
+
     if data_ndims > 2:
       features = unflatten(features)
     return features

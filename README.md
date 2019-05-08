@@ -74,6 +74,11 @@ instructions on how to install TensorFlow Graphics.
 ## API Documentation
 You can find the API documentation [here](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/g3doc/api_docs/python/tfg.md).
 
+## Compatibility
+TensorFlow Graphics is fully compatible with the latest stable release of
+TensorFlow, tf-nightly, and tf-nightly-2.0-preview. All the functions are
+compatible with graph and eager execution.
+
 ## Colab tutorials
 To help you get started with some of the functionalities provided by TF
 Graphics, some Colab notebooks are available below and roughly ordered by
@@ -131,12 +136,16 @@ advised to write code that takes dependency on them.
     <tr>
       <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb">Spherical harmonics rendering</a></th>
       <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb">Environment map optimization</a></th>
+      <th style="text-align:center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/mesh_segmentation_demo.ipynb">Semantic mesh segmentation</a></th>
     </tr>
     <tr>
       <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/sh_rendering/thumbnail.png" width="200" height="200">
       </a></td>
       <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/environment_lighting/thumbnail.png" width="200" height="200">
       </a></td>
+      <td align="center"><a href="https://colab.research.google.com/github/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/mesh_segmentation_demo.ipynb"><img border="0" src="https://storage.googleapis.com/tensorflow-graphics/notebooks/mesh_segmentation/thumbnail.jpg" width="200" height="200">
+      </a></td>
+      
     </tr>
   </table>
 </div>
@@ -145,8 +154,8 @@ advised to write code that takes dependency on them.
 Among many things, we are hoping to release resamplers, additional 3D
 convolution and pooling operators, and a differentiable rasterizer!
 
-Follow us on Twitter [@_TFGraphics_](https://twitter.com/_TFGraphics_) to
-hear about the latest updates!
+Follow us on [Twitter](https://twitter.com/_TFGraphics_) to hear about the
+latest updates!
 
 ## Additional Information
 You may use this software under the [Apache 2.0 License](https://github.com/tensorflow/graphics/blob/master/LICENSE).

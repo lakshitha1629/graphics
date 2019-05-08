@@ -20,13 +20,18 @@ var vz_mesh;
 (function(vz_mesh) {
 
 class MeshViewer extends THREE.EventDispatcher {
-  constructor() {
+  /**
+   * MeshViewer constructor. Initializes the component and underlying objects.
+   * @param {string} runColor Run color to use in case when colors are absent.
+   */
+  constructor(runColor) {
     super();
     /** @type {!THREE.Mesh} Last rendered mesh. */
     this._lastMesh = null;
     this._clock = new THREE.Clock();
     /** @type {!Object} Contains width and height of the canvas. */
     this._canvasSize = null;
+    this._runColor = runColor;
   }
 
   // TODO replace with some thirdparty library call.
@@ -362,6 +367,8 @@ class MeshViewer extends THREE.EventDispatcher {
       material: {
         cls: 'MeshStandardMaterial',
         color: '#a0a0a0',
+        roughness: 1,
+        metalness: 0,
       }
     });
 

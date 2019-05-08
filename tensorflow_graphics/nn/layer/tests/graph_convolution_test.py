@@ -118,17 +118,46 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
       self.assertAllEqual(
           _get_var_shape("v"), [in_channels, num_weight_matrices])
 
+  def test_feature_steered_convolution_layer_initializer(self):
+    """Tests a custom variable initializer."""
+    data = np.array(((1.0, 1.0), (-1.0, 1.0), (-1.0, -1.0), (1.0, -1.0)))
+    neighbors_indices = np.array(((0, 0), (0, 1), (0, 3),
+                                  (1, 0), (1, 1), (1, 2),
+                                  (2, 1), (2, 2), (2, 3),
+                                  (3, 0), (3, 2), (3, 3)))
+    neighbors = tf.SparseTensor(
+        neighbors_indices, np.ones(shape=(12,)) / 3.0, dense_shape=(4, 4))
+    initializer = tf.initializers.zeros()
+
+    if tf.executing_eagerly():
+      layer = gc_layer.FeatureSteeredConvolutionKerasLayer(
+          translation_invariant=False,
+          initializer=initializer)
+      output = layer(inputs=[data, neighbors], sizes=None)
+    else:
+      out = gc_layer.feature_steered_convolution_layer(
+          data=data,
+          neighbors=neighbors,
+          sizes=None,
+          translation_invariant=False,
+          initializer=initializer)
+      self.evaluate(tf.compat.v1.global_variables_initializer())
+      output = self.evaluate(out)
+
+    # All zeros initializer should result in all zeros output.
+    self.assertAllEqual(output, np.zeros_like(data))
+
   def test_feature_steered_convolution_layer_training(self):
     """Test a simple training loop."""
     # Generate a small valid input for a simple training task.
     # Four corners of a square.
-    data = np.array([[1.0, 1.0], [-1.0, 1.0], [-1.0, -1.0], [1.0, -1.0]])
-    neighbors_indices = np.array([[0, 0], [0, 1], [0, 3], [1, 0], [1,
-                                                                   1], [1, 2],
-                                  [2, 1], [2, 2], [2, 3], [3, 0], [3, 2],
-                                  [3, 3]])
+    data = np.array(((1.0, 1.0), (-1.0, 1.0), (-1.0, -1.0), (1.0, -1.0)))
+    neighbors_indices = np.array(((0, 0), (0, 1), (0, 3),
+                                  (1, 0), (1, 1), (1, 2),
+                                  (2, 1), (2, 2), (2, 3),
+                                  (3, 0), (3, 2), (3, 3)))
     neighbors = tf.SparseTensor(
-        neighbors_indices, np.ones(shape=(12)) / 3.0, dense_shape=(4, 4))
+        neighbors_indices, np.ones(shape=(12,)) / 3.0, dense_shape=(4, 4))
     # Desired output is arbitrary.
     labels = np.reshape([-1.0, -0.5, 0.5, 1.0], (-1, 1))
     num_training_iterations = 5
@@ -162,6 +191,109 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
         for _ in range(num_training_iterations):
           sess.run(train_op)
 
+
+class GraphConvolutionTestDynamicGraphConvolutionKerasLayerTests(
+    test_case.TestCase):
+
+  @parameterized.parameters(
+      (1, 1, 1, 1, "weighted"),
+      (4, 2, 3, 12, "max"),
+      (1, 2, 3, 4, "max"),
+  )
+  def test_dynamic_graph_convolution_keras_layer_exception_not_raised_shapes(
+      self, batch_size, num_vertices, in_channels, out_channels, reduction):
+    """Check if the convolution parameters and output have correct shapes."""
+    if not tf.executing_eagerly():
+      return
+    data, neighbors = _dummy_data(batch_size, num_vertices, in_channels)
+    layer = gc_layer.DynamicGraphConvolutionKerasLayer(
+        num_output_channels=out_channels,
+        reduction=reduction)
+
+    try:
+      output = layer(inputs=[data, neighbors], sizes=None)
+    except Exception as e:  # pylint: disable=broad-except
+      self.fail("Exception raised: %s" % str(e))
+
+    self.assertAllEqual((batch_size, num_vertices, out_channels), output.shape)
+
+  @parameterized.parameters(
+      (1, 1, 1, 1, "weighted"),
+      (4, 2, 3, 12, "max"),
+      (1, 2, 3, 4, "max"),
+  )
+  def test_dynamic_graph_convolution_keras_layer_zero_kernel(
+      self, batch_size, num_vertices, in_channels, out_channels, reduction):
+    """Tests convolution with an all-zeros kernel."""
+    if not tf.executing_eagerly():
+      return
+    data, neighbors = _dummy_data(batch_size, num_vertices, in_channels)
+    data = np.random.uniform(size=data.shape).astype(np.float32)
+    layer = gc_layer.DynamicGraphConvolutionKerasLayer(
+        num_output_channels=out_channels,
+        reduction=reduction,
+        use_bias=False,
+        kernel_initializer=tf.initializers.zeros())
+
+    output = layer(inputs=[data, neighbors], sizes=None)
+
+    self.assertAllEqual(
+        output,
+        np.zeros(shape=(batch_size, num_vertices, out_channels),
+                 dtype=np.float32))
+
+  @parameterized.parameters((1, 1, 1), (2, 3, 12), (2, 3, 4))
+  def test_dynamic_graph_convolution_keras_layer_duplicate_features(
+      self, num_vertices, in_channels, out_channels):
+    """Tests convolution when all vertex features are identical."""
+    if not tf.executing_eagerly():
+      return
+    data = np.random.uniform(size=(1, in_channels))
+    data = np.tile(data, (num_vertices, 1))
+    # Results should be independent of 'neighbors'.
+    neighbors = np.maximum(np.random.randint(
+        0, 2, size=(num_vertices, num_vertices)), np.eye(num_vertices))
+    neighbors = _dense_to_sparse(neighbors)
+    layer = gc_layer.DynamicGraphConvolutionKerasLayer(
+        num_output_channels=out_channels,
+        reduction="max")
+
+    output = layer(inputs=[data, neighbors], sizes=None)
+
+    output_tile = tf.tile(output[:1, :], (num_vertices, 1))
+
+    self.assertAllEqual(output, output_tile)
+
+  @parameterized.parameters("weighted", "max")
+  def test_dynamic_graph_convolution_keras_layer_training(self, reduction):
+    """Test a simple training loop."""
+    if not tf.executing_eagerly():
+      return
+    # Generate a small valid input for a simple training task.
+    # Four corners of a square.
+    data = np.array(((1.0, 1.0), (-1.0, 1.0), (-1.0, -1.0), (1.0, -1.0)))
+    neighbors_indices = np.array(((0, 0), (0, 1), (0, 3),
+                                  (1, 0), (1, 1), (1, 2),
+                                  (2, 1), (2, 2), (2, 3),
+                                  (3, 0), (3, 2), (3, 3)))
+    neighbors = tf.SparseTensor(
+        neighbors_indices, np.ones(shape=(12,)) / 3.0, dense_shape=(4, 4))
+    # Desired output is arbitrary.
+    labels = np.reshape([-1.0, -0.5, 0.5, 1.0], (-1, 1))
+    num_training_iterations = 5
+
+    with tf.GradientTape(persistent=True) as tape:
+      layer = gc_layer.DynamicGraphConvolutionKerasLayer(
+          num_output_channels=2,
+          reduction=reduction)
+      output = layer(inputs=[data, neighbors], sizes=None)
+      loss = tf.nn.l2_loss(output - labels)
+
+      trainable_variables = layer.trainable_variables
+      for _ in range(num_training_iterations):
+        grads = tape.gradient(loss, trainable_variables)
+        tf.compat.v1.train.GradientDescentOptimizer(1e-4).apply_gradients(
+            zip(grads, trainable_variables))
 
 if __name__ == "__main__":
   test_case.main()

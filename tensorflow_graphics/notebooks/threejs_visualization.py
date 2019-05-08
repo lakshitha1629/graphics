@@ -68,7 +68,7 @@ def _triangular_mesh_to_three_geometry(vertices, faces, vertex_colors=None):
   return geometry
 
 
-def _build_context():
+def build_context():
   """Builds a javascript context."""
   threejs_url = 'https://www.gstatic.com/external_hosted/threejs-r98/'
   _publish.javascript(url=threejs_url + 'three.min.js')
@@ -95,7 +95,7 @@ def build_perspective_camera(field_of_view=60.0,
   Returns:
     A Threejs camera with orbit controls.
   """
-  context = _build_context()
+  context = build_context()
   camera = context.THREE.PerspectiveCamera.new_object(field_of_view,
                                                       aspect_ratio, near_plane,
                                                       far_plane)
@@ -138,7 +138,7 @@ def triangular_mesh_renderer(meshes,
   if not isinstance(meshes, (tuple, list)):
     meshes = [meshes]
 
-  context = _build_context()
+  context = build_context()
 
   # Instantiate the renderer.
   renderer = context.THREE.WebGLRenderer.new_object({'antialias': True})

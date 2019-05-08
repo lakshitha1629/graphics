@@ -103,6 +103,39 @@ def adjacency_from_edges(edges, weights, num_edges, num_vertices):
   return adjacency
 
 
+def get_weighted_edges(faces, self_edges=True):
+  r"""Gets unique edges and degree weights from a triangular mesh.
+
+  The shorthands used below are:
+      `T`: The number of triangles in the mesh.
+      `E`: The number of unique directed edges in the mesh.
+
+  Args:
+    faces: A [T, 3] `int32` numpy.ndarray of triangle vertex indices.
+    self_edges: A `bool` flag. If true, then for every vertex 'i' an edge
+      [i, i] is added to edge list.
+  Returns:
+    edges: A  [E, 2] `int32` numpy.ndarray of directed edges.
+    weights: A [E] `float32` numpy.ndarray denoting edge weights.
+
+    The degree of a vertex is the number of edges incident on the vertex,
+    including any self-edges. The weight for an edge $w_{ij}$ connecting vertex
+    $v_i$ and vertex $v_j$ is defined as,
+    $$
+    w_{ij} = 1.0 / degree(v_i)
+    \sum_{j} w_{ij} = 1
+    $$
+  """
+  edges = mesh_utils.extract_unique_edges_from_triangular_mesh(
+      faces, directed_edges=True).astype(np.int32)
+  if self_edges:
+    vertices = np.expand_dims(np.unique(edges[:, 0]), axis=1)
+    self_edges = np.concatenate((vertices, vertices), axis=1)
+    edges = np.unique(np.concatenate((edges, self_edges), axis=0), axis=0)
+  weights = mesh_utils.get_degree_based_edge_weights(edges, dtype=np.float32)
+  return edges, weights
+
+
 def _tfrecords_to_dataset(tfrecords,
                           parallel_threads,
                           shuffle,
@@ -191,15 +224,8 @@ def _parse_mesh_data(mesh_data, mean_center=True):
     vertices = vertices - tf.reduce_mean(
         input_tensor=vertices, axis=0, keepdims=True)
 
-  def _weighted_edges(triangles):
-    """Gets unique edges and degree weights from a triangular mesh."""
-    edges = mesh_utils.extract_unique_edges_from_triangular_mesh(
-        triangles, directed_edges=True).astype(np.int32)
-    weights = mesh_utils.get_degree_based_edge_weights(edges, dtype=np.float32)
-    return edges, weights
-
   edges, weights = tf.py_function(
-      func=lambda t: _weighted_edges(t.numpy()),
+      func=lambda t: get_weighted_edges(t.numpy()),
       inp=[triangles],
       Tout=[tf.int32, tf.float32])
 

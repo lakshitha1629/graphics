@@ -14,8 +14,8 @@
 r"""This module implements perspective camera functionalities.
 
 The perspective camera model, also referred to as pinhole camera model, is
-defined using a focal length $$(f_x, f_y)$$ and a principal point
-$$(c_x, c_y)$$. The perspective camera model can be written as a calibration
+defined using a focal length \\((f_x, f_y)\\) and a principal point
+\\((c_x, c_y)\\). The perspective camera model can be written as a calibration
 matrix
 
 $$
@@ -28,7 +28,7 @@ f_x & 0 & c_x \\
 $$
 
 also referred to as the intrinsic parameter matrix. The camera focal length
-$$(f_x, f_y)$$, defined in pixels, is the physical focal length divided by the
+\\((f_x, f_y)\\), defined in pixels, is the physical focal length divided by the
 physical size of a camera pixel. The physical focal length is the distance
 between the camera center and the image plane. The principal point is the
 intersection of the camera axis with the image plane. The camera axis is the
@@ -54,8 +54,8 @@ from tensorflow_graphics.util import shape
 def intrinsics_from_matrix(matrix, name=None):
   r"""Extracts intrinsic parameters from a calibration matrix.
 
-  Extracts the focal length $$(f_x, f_y)$$ and the principal point
-  $$(c_x, c_y)$$ from a camera calibration matrix
+  Extracts the focal length \\((f_x, f_y)\\) and the principal point
+  \\((c_x, c_y)\\) from a camera calibration matrix
 
   $$
   \mathbf{C} =
@@ -115,7 +115,8 @@ def matrix_from_intrinsics(focal, principal_point, name=None):
   \end{bmatrix}
   $$
 
-  from the focal length $$(f_x, f_y)$$ and the principal point $$(c_x, c_y)$$.
+  from the focal length \\((f_x, f_y)\\) and the principal point
+  \\((c_x, c_y)\\).
 
   Note:
     In the following, A1 to An are optional batch dimensions.
@@ -169,8 +170,8 @@ def matrix_from_intrinsics(focal, principal_point, name=None):
 def project(point_3d, focal, principal_point, name=None):
   r"""Projects a 3d point onto the 2d camera plane.
 
-  Projects a 3d point $$(x, y, z)$$ to a 2d point $$(x', y')$$ onto the image
-  plane with
+  Projects a 3d point \\((x, y, z)\\) to a 2d point \\((x', y')\\) onto the
+  image plane with
 
   $$
   \begin{matrix}
@@ -178,7 +179,7 @@ def project(point_3d, focal, principal_point, name=None):
   \end{matrix}
   $$
 
-  where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
+  where \\((f_x, f_y)\\) is the focal length and \\((c_x, c_y)\\) the principal
   point.
 
   Note:
@@ -231,8 +232,8 @@ def project(point_3d, focal, principal_point, name=None):
 def ray(point_2d, focal, principal_point, name=None):
   r"""Computes the 3d ray for a 2d point (the z component of the ray is 1).
 
-  Computes the 3d ray $$(r_x, r_y, 1)$$ from the camera center to a 2d point
-  $$(x', y')$$ on the image plane with
+  Computes the 3d ray \\((r_x, r_y, 1)\\) from the camera center to a 2d point
+  \\((x', y')\\) on the image plane with
 
   $$
   \begin{matrix}
@@ -240,8 +241,8 @@ def ray(point_2d, focal, principal_point, name=None):
   \end{matrix}
   $$
 
-  where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
-  point. The camera optical center is assumed to be at $$(0, 0, 0)$$.
+  where \\((f_x, f_y)\\) is the focal length and \\((c_x, c_y)\\) the principal
+  point. The camera optical center is assumed to be at \\((0, 0, 0)\\).
 
   Note:
     In the following, A1 to An are optional batch dimensions that must be
@@ -295,8 +296,8 @@ def ray(point_2d, focal, principal_point, name=None):
 def unproject(point_2d, depth, focal, principal_point, name=None):
   r"""Unprojects a 2d point in 3d.
 
-  Unprojects a 2d point $$(x', y')$$ to a 3d point $$(x, y, z)$$ knowing the
-  depth $$z$$ with
+  Unprojects a 2d point \\((x', y')\\) to a 3d point \\((x, y, z)\\) knowing the
+  depth \\(z\\) with
 
   $$
   \begin{matrix}
@@ -304,7 +305,7 @@ def unproject(point_2d, depth, focal, principal_point, name=None):
   \end{matrix}
   $$
 
-  where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
+  where \\((f_x, f_y)\\) is the focal length and \\((c_x, c_y)\\) the principal
   point.
 
   Note:

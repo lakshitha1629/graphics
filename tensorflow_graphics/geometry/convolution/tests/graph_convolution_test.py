@@ -17,6 +17,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import itertools
+
 from absl.testing import parameterized
 import numpy as np
 import tensorflow as tf
@@ -556,6 +558,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=sizes,
           edge_function=self._zeros,
+          reduction="weighted",
           edge_function_kwargs=dict())
 
   @parameterized.parameters(
@@ -579,6 +582,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=sizes,
           edge_function=self._zeros,
+          reduction="weighted",
           edge_function_kwargs=dict())
     except Exception as e:  # pylint: disable=broad-except
       self.fail("Exception raised: %s" % str(e))
@@ -593,6 +597,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=None,
           edge_function=self._zeros,
+          reduction="weighted",
           edge_function_kwargs=dict())
 
     with self.assertRaisesRegexp(ValueError, "must have a rank greater than 1"):
@@ -603,6 +608,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=None,
           edge_function=self._zeros,
+          reduction="weighted",
           edge_function_kwargs=dict())
 
     with self.assertRaisesRegexp(ValueError, "must have a rank of 1"):
@@ -612,17 +618,33 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=((1, 1), (1, 1)),
           edge_function=self._zeros,
+          reduction="weighted",
+          edge_function_kwargs=dict())
+
+  @parameterized.parameters("", "invalid")
+  def test_edge_convolution_template_exception_raised_reduction(self,
+                                                                reduction):
+    """Check that an invalid reduction method triggers the exception."""
+    with self.assertRaisesRegexp(ValueError, "reduction method"):
+      data, neighbors = _dummy_data(1, 5, 2)
+      gc.edge_convolution_template(
+          data=data,
+          neighbors=neighbors,
+          sizes=None,
+          edge_function=self._zeros,
+          reduction=reduction,
           edge_function_kwargs=dict())
 
   @parameterized.parameters(
-      (1, 1, 1, 1),
-      (4, 2, 3, 6),
-      (0, 1, 1, 1),
-      (0, 2, 3, 6),
+      (1, 1, 1, 1, "weighted"),
+      (4, 2, 3, 6, "weighted"),
+      (0, 1, 1, 1, "max"),
+      (0, 2, 3, 6, "max"),
   )
   def test_edge_convolution_template_output_shape(self, batch_size,
                                                   num_vertices, in_channels,
-                                                  out_channels):
+                                                  out_channels,
+                                                  reduction):
     """Check that the output of convolution has the correct shape."""
     data, neighbors = _dummy_data(batch_size, num_vertices, in_channels)
 
@@ -631,6 +653,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
         neighbors,
         None,
         self._zeros,
+        reduction=reduction,
         edge_function_kwargs={"out_dimensions": out_channels})
     y_shape = y.shape.as_list()
 
@@ -641,16 +664,16 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
       self.assertAllEqual(y_shape[:-1], data.shape[:-1])
 
   @parameterized.parameters(
-      (1, 10, 3, True),
-      (3, 6, 1, True),
-      (0, 10, 5, False),
-      (1, 10, 3, False),
-      (3, 6, 1, False),
-      (0, 10, 5, False),
+      (1, 10, 3, True, "weighted"),
+      (3, 6, 1, True, "weighted"),
+      (0, 10, 5, False, "weighted"),
+      (1, 10, 3, False, "max"),
+      (3, 6, 1, False, "max"),
+      (0, 10, 5, False, "max"),
   )
   def test_edge_convolution_template_jacobian_random(self, batch_size,
                                                      num_vertices, in_channels,
-                                                     padding):
+                                                     padding, reduction):
     """Test the jacobian for random input data."""
     random_data = _random_data(
         batch_size,
@@ -670,23 +693,49 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
         neighbors=neighbors,
         sizes=sizes,
         edge_function=self._pass_through,
+        reduction=reduction,
         edge_function_kwargs=dict())
 
     self.assert_jacobian_is_correct(data, data_init, y)
 
+  def test_edge_convolution_template_preset_max(self):
+    data = np.array(((1, 2), (3, 4), (5, 6), (7, 8)), np.float32)
+    neighbors = np.array(
+        ((0, 1, 0, 1), (0, 0, 1, 0), (1, 1, 1, 0), (0, 0, 1, 1)), np.float32)
+    neighbors = _dense_to_sparse(neighbors)
+    true = np.array(((8, 10), (8, 10), (10, 12), (14, 16)), np.float32)
+
+    with self.subTest("max_sum"):
+      max_sum = gc.edge_convolution_template(
+          data=data,
+          neighbors=neighbors,
+          sizes=None,
+          edge_function=lambda x, y: x + y,
+          reduction="max",
+          edge_function_kwargs=dict())
+
+      self.assertAllEqual(max_sum, true)
+
+    with self.subTest("max_sum_scaled"):
+      # Max reduction ignores the weights, so scaling the neighbors weights
+      # should not change the result.
+      max_sum_scaled = gc.edge_convolution_template(
+          data=data,
+          neighbors=neighbors * 10.0,
+          sizes=None,
+          edge_function=lambda x, y: x + y,
+          reduction="max",
+          edge_function_kwargs=dict())
+
+      self.assertAllEqual(max_sum_scaled, true)
+
   @parameterized.parameters(
-      (1, 1, 0.0),
-      (5, 1, 0.0),
-      (1, 3, 0.0),
-      (5, 3, 0.0),
-      (1, 1, 1.0),
-      (5, 1, 1.0),
-      (1, 3, 1.0),
-      (5, 3, 1.0),
+      itertools.product((1, 5), (1, 3), (0.0, 1.0), ("weighted", "max"))
   )
   def test_edge_convolution_template_jacobian_preset(self, num_vertices,
                                                      num_channels,
-                                                     data_multiplier):
+                                                     data_multiplier,
+                                                     reduction):
     """Test the jacobian is correct for preset inputs."""
     # Corner cases include one vertex, one channel, and all-zero features.
     data_init = data_multiplier * np.random.uniform(
@@ -699,6 +748,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
         neighbors=neighbors,
         sizes=None,
         edge_function=self._pass_through,
+        reduction=reduction,
         edge_function_kwargs=dict())
 
     self.assert_jacobian_is_correct(data, data_init, y)
@@ -723,6 +773,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=None,
           edge_function=self._pass_through,
+          reduction="weighted",
           edge_function_kwargs=dict())
 
       self.assertAllEqual(data, data_smoothed)
@@ -736,6 +787,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           neighbors=neighbors,
           sizes=None,
           edge_function=self._pass_through,
+          reduction="weighted",
           edge_function_kwargs=dict())
       # The smoothed points should have the same direction as the originals.
       data_smoothed_normalized = tf.nn.l2_normalize(data_smoothed, axis=-1)
@@ -766,6 +818,7 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
         neighbors=neighbors,
         sizes=None,
         edge_function=self._edge_curvature_2d,
+        reduction="weighted",
         edge_function_kwargs=dict())
 
     # The curvature at each point on a circle of radius 1 should be 1.

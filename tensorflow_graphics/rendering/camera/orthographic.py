@@ -33,8 +33,8 @@ from tensorflow_graphics.util import shape
 def project(point_3d, name=None):
   r"""Projects a 3d point onto the 2d camera plane.
 
-  Projects a 3d point $$(x, y, z)$$ to a 2d point $$(x', y')$$ onto the image
-  plane, with
+  Projects a 3d point \\((x, y, z)\\) to a 2d point \\((x', y')\\) onto the
+  image plane, with
 
   $$
   \begin{matrix}
@@ -69,7 +69,7 @@ def project(point_3d, name=None):
 def ray(point_2d, name=None):
   r"""Computes the 3d ray for a 2d point (the z component of the ray is 1).
 
-  Computes the 3d ray $$(r_x, r_y, 1)$$ for a 2d point $$(x', y')$$ on the
+  Computes the 3d ray \\((r_x, r_y, 1)\\) for a 2d point \\((x', y')\\) on the
   image plane. For an orthographic camera the rays are constant over the image
   plane with
 
@@ -110,8 +110,8 @@ def ray(point_2d, name=None):
 def unproject(point_2d, depth, name=None):
   r"""Unprojects a 2d point in 3d.
 
-  Unprojects a 2d point $$(x', y')$$ to a 3d point $$(x, y, z)$$ given its
-  depth $$z$$, with
+  Unprojects a 2d point \\((x', y')\\) to a 3d point \\((x, y, z)\\) given its
+  depth \\(z\\), with
 
   $$
   \begin{matrix}

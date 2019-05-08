@@ -17,7 +17,7 @@ description: <!--no description-->
 landing_page:
   custom_css_path: /site-assets/css/style.css
   rows:
-  - heading: Differentiable graphics Layers for TensorFlow.
+  - heading: Differentiable Graphics Layers for TensorFlow.
     items:
     - classname: devsite-landing-row-50
       description: >

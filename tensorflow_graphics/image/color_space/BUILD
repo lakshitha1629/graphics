@@ -24,8 +24,44 @@ py_library(
     srcs = ["__init__.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":constants",
+        ":linear_rgb",
         ":srgb",
         "//tensorflow_graphics/util:export_api",
+    ],
+)
+
+py_library(
+    name = "constants",
+    srcs = ["constants.py"],
+    srcs_version = "PY2AND3",
+    deps = [],
+)
+
+py_library(
+    name = "linear_rgb",
+    srcs = ["linear_rgb.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":constants",
+        # google internal,
+        "//tensorflow_graphics/util:asserts",
+        "//tensorflow_graphics/util:export_api",
+        "//tensorflow_graphics/util:shape",
+    ],
+)
+
+py_test(
+    name = "linear_rgb_test",
+    srcs = ["tests/linear_rgb_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":linear_rgb",
+        ":srgb",
+        # package dep
+
+        # google internal,
+        "//tensorflow_graphics/util:test_case",
     ],
 )
 
@@ -34,6 +70,7 @@ py_library(
     srcs = ["srgb.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":constants",
         # google internal,
         "//tensorflow_graphics/util:asserts",
         "//tensorflow_graphics/util:export_api",
@@ -46,6 +83,7 @@ py_test(
     srcs = ["tests/srgb_test.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":linear_rgb",
         ":srgb",
         # package dep
 

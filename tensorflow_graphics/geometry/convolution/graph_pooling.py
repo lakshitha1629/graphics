@@ -92,14 +92,11 @@ def pool(data, pool_map, sizes, algorithm='max', name=None):
       pool_map_block_diagonal = pool_map
 
     if algorithm == 'weighted':
-      pooled = tf.sparse.sparse_dense_matmul(
-          pool_map_block_diagonal, x_flat)
+      pooled = tf.sparse.sparse_dense_matmul(pool_map_block_diagonal, x_flat)
     elif algorithm == 'max':
       pool_groups = tf.gather(x_flat, pool_map_block_diagonal.indices[:, 1])
-      ragged_groups = tf.RaggedTensor.from_value_rowids(
-          values=pool_groups,
-          value_rowids=pool_map_block_diagonal.indices[:, 0])
-      pooled = tf.reduce_max(input_tensor=ragged_groups, axis=1)
+      pooled = tf.math.segment_max(
+          data=pool_groups, segment_ids=pool_map_block_diagonal.indices[:, 0])
     else:
       raise ValueError('The pooling method must be "weighted" or "max"')
 

@@ -75,27 +75,27 @@ def generate(starts, stops, nums, name=None):
     ValueError: If the shape of `starts`, `stops`, or 'nums' is not supported.
 
   Examples:
-
-      >>> generate((-1.0, -2.0), (1.0, 2.0), (3, 5))
-      [[[-1. -2.]
-        [-1. -1.]
-        [-1.  0.]
-        [-1.  1.]
-        [-1.  2.]]
-       [[ 0. -2.]
-        [ 0. -1.]
-        [ 0.  0.]
-        [ 0.  1.]
-        [ 0.  2.]]
-       [[ 1. -2.]
-        [ 1. -1.]
-        [ 1.  0.]
-        [ 1.  1.]
-        [ 1.  2.]]]
-      Generates a 3x5 2d grid from -1.0 to 1.0 with 3 subdivisions for the x
-      axis
-      and from -2.0 to 2.0 with 5 subdivisions for the y axis. This lead to a
-      tensor of shape (3, 5, 2).
+    ```python
+    generate((-1.0, -2.0), (1.0, 2.0), (3, 5))
+    >>> [[[-1. -2.]
+          [-1. -1.]
+          [-1.  0.]
+          [-1.  1.]
+          [-1.  2.]]
+         [[ 0. -2.]
+          [ 0. -1.]
+          [ 0.  0.]
+          [ 0.  1.]
+          [ 0.  2.]]
+         [[ 1. -2.]
+          [ 1. -1.]
+          [ 1.  0.]
+          [ 1.  1.]
+          [ 1.  2.]]]
+    ```
+    Generates a 3x5 2d grid from -1.0 to 1.0 with 3 subdivisions for the x
+    axis and from -2.0 to 2.0 with 5 subdivisions for the y axis. This lead to a
+    tensor of shape (3, 5, 2).
   """
   with tf.compat.v1.name_scope(name, "grid_generate", [starts, stops, nums]):
     starts = tf.convert_to_tensor(value=starts)

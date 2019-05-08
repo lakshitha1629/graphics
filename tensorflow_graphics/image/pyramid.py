@@ -24,6 +24,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
+from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import shape
 
 
@@ -249,3 +250,6 @@ def upsample(image, num_levels, name=None):
     shape.check_static(tensor=image, tensor_name="image", has_rank=4)
 
     return _build_pyramid(image, _upsample, num_levels)
+
+# API contains all public functions and classes.
+__all__ = export_api.get_functions_and_classes()

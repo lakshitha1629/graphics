@@ -100,9 +100,9 @@ def dot(vector1, vector2, axis=-1, keepdims=True, name=None):
 def reflect(vector, normal, axis=-1, name=None):
   r"""Computes the reflection direction for an incident vector.
 
-  For an incident vector $$\mathbf{v}$$ and normal $$\mathbf{n}$$ this function
-  computes the reflected vector as
-  $$\mathbf{r} = $$\mathbf{v}$$ - 2(\mathbf{n}^T\mathbf{v})\mathbf{n}$$.
+  For an incident vector \\(\mathbf{v}\\) and normal $$\mathbf{n}$$ this
+  function computes the reflected vector as
+  \\(\mathbf{r} = \mathbf{v} - 2(\mathbf{n}^T\mathbf{v})\mathbf{n}\\).
 
   Note:
     In the following, A1 to An are optional batch dimensions, which should be
