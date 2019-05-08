@@ -41,7 +41,7 @@ data = [[[1., 2.], [3., 4.]],
         [[5., 6.], [7., 8.]],
         [[9., 10.], [11., 12.]]]
 sizes = None
-output = flatten(data, size)
+output = flatten_batch_to_2d(data, size)
 print(output)
 >>> [[1., 2.], [3., 4.], [5., 6.], [7., 8.], [9., 10.], [11., 12.]]
 
@@ -49,7 +49,7 @@ data = [[[1., 2.], [0., 0.]],
         [[5., 6.], [7., 8.]],
         [[9., 10.], [0., 0.]]]
 sizes = [1, 2, 1]
-output = flatten(data, size)
+output = flatten_batch_to_2d(data, size)
 print(output)
 >>> [[1., 2.], [5., 6.], [7., 8.], [9., 10.]]
 ```

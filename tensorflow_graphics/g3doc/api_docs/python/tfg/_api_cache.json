@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {
-  "current_doc_full_name": "tfg.geometry.representation.point", 
+  "current_doc_full_name": "tfg.geometry.representation.mesh.normals.face_normals", 
   "duplicate_of": {}, 
   "is_fragment": {
     "tfg": false, 
