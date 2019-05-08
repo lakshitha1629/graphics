@@ -7,7 +7,7 @@
 
 Finds positions and surface normals where the sphere and the ray intersect.
 
-```python
+``` python
 tfg.geometry.representation.ray.intersection_ray_sphere(
     sphere_center,
     sphere_radius,
@@ -17,24 +17,27 @@ tfg.geometry.representation.ray.intersection_ray_sphere(
 )
 ```
 
+
+
 Defined in [`geometry/representation/ray.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/representation/ray.py).
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-*   <b>`sphere_center`</b>: A tensor of shape `[3]` representing the 3d sphere
-    center.
-*   <b>`sphere_radius`</b>: A tensor of shape `[1]` containing a strictly
-    positive value defining the radius of the sphere.
-*   <b>`ray`</b>: A tensor of shape `[A1, ..., An, 3]` containing normalized 3D
-    vectors.
-*   <b>`point_on_ray`</b>: A tensor of shape `[A1, ..., An, 3]`.
-*   <b>`name`</b>: A name for this op. The default value of None means
-    "ray_intersection_ray_sphere".
+* <b>`sphere_center`</b>: A tensor of shape `[3]` representing the 3d sphere center.
+* <b>`sphere_radius`</b>: A tensor of shape `[1]` containing a strictly positive value
+  defining the radius of the sphere.
+* <b>`ray`</b>: A tensor of shape `[A1, ..., An, 3]` containing normalized 3D vectors.
+* <b>`point_on_ray`</b>: A tensor of shape `[A1, ..., An, 3]`.
+* <b>`name`</b>: A name for this op. The default value of None means
+  "ray_intersection_ray_sphere".
+
 
 #### Returns:
 
@@ -48,5 +51,5 @@ the first and second intersections of the ray with the sphere.
 #### Raises:
 
 * <b>`ValueError`</b>: if the shape of `sphere_center`, `sphere_radius`, `ray` or
-    `point_on_ray` is not supported.
+  `point_on_ray` is not supported.
 * <b>`tf.errors.InvalidArgumentError`</b>: If `ray` is not normalized.

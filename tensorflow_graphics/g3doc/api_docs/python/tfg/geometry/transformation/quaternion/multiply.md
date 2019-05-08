@@ -21,20 +21,24 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-*   <b>`quaternion1`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last
-    dimension represents a quaternion.
-*   <b>`quaternion2`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last
-    dimension represents a quaternion.
-*   <b>`name`</b>: A name for this op that defaults to "quaternion_multiply".
+* <b>`quaternion1`</b>:  A tensor of shape `[A1, ..., An, 4]`, where the last dimension
+  represents a quaternion.
+* <b>`quaternion2`</b>:  A tensor of shape `[A1, ..., An, 4]`, where the last dimension
+  represents a quaternion.
+* <b>`name`</b>: A name for this op that defaults to "quaternion_multiply".
+
 
 #### Returns:
 
 A tensor of shape `[A1, ..., An, 4]` representing quaternions.
+
 
 #### Raises:
 

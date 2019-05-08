@@ -24,8 +24,8 @@ Defined in [`image/pyramid.py`](https://github.com/tensorflow/graphics/blob/mast
 #### Args:
 
 * <b>`image`</b>: A tensor of shape `[B, H, W, C]`, where `B` is the batch size, `H`
-    the height of the image, `W` the width of the image, and `C` the number of
-    channels of the image.
+  the height of the image, `W` the width of the image, and `C` the number of
+  channels of the image.
 * <b>`num_levels`</b>: The number of levels to generate.
 * <b>`name`</b>: A name for this op that defaults to "pyramid_split".
 

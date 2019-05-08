@@ -22,7 +22,7 @@ Defined in [`__init__.py`](https://github.com/tensorflow/graphics/blob/master/te
 
 [`math`](./tfg/math.md) module: Math module.
 
-[`nn`](./tfg/nn.md) module: nn module.
+[`nn`](./tfg/nn.md) module: Neural Network module.
 
 [`rendering`](./tfg/rendering.md) module: Rendering module.
 

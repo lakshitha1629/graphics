@@ -20,14 +20,16 @@ Defined in [`math/math_helpers.py`](https://github.com/tensorflow/graphics/blob/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point_2d`</b>: A tensor of shape `[A1, ..., An, 2]` with values in [0,1].
 * <b>`name`</b>: A name for this op. Defaults to
-    "math_square_to_spherical_coordinates".
+  "math_square_to_spherical_coordinates".
 
 
 #### Returns:
@@ -40,4 +42,4 @@ A tensor of shape `[A1, ..., An, 2]` with [..., 0] having values in
 
 * <b>`ValueError`</b>: if the shape of `point_2d`  is not supported.
 * <b>`InvalidArgumentError`</b>: if at least an element of `point_2d` is outside of
-  [0,1].
+[0,1].

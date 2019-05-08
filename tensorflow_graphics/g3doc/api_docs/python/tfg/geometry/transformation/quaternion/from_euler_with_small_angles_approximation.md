@@ -25,19 +25,24 @@ approximated by their second order Taylor expansions, where
 $$\sin(x) \approx x$$ and $$\cos(x) \approx 1 - \frac{x^2}{2}$$.
 In the current implementation, the smallness of the angles is not verified.
 
-Note:
-  Uses the z-y-x rotation convention (Tait-Bryan angles).
+#### Note:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+Uses the z-y-x rotation convention (Tait-Bryan angles).
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-angles: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-represents the three Euler angles. `[..., 0]` is the angle about `x` in radians,
-`[..., 1]` is the angle about `y` in radians and `[..., 2]` is the angle about
-`z` in radians. * <b>`name`</b>: A name for this op that defaults to
-"quaternion_from_euler".
+* <b>`angles`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
+  represents the three Euler angles. `[..., 0]` is the angle about `x` in
+  radians, `[..., 1]` is the angle about `y` in radians and `[..., 2]` is the
+  angle about `z` in radians.
+ name: A name for this op that defaults to "quaternion_from_euler".
+
 
 #### Returns:
 

@@ -27,26 +27,28 @@ This function applies geometric slerp to unnormalized vectors by first
 normalizing them to return the interpolation weights. It reduces to lerp when
 input vectors are exactly anti-parallel.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`vector1`</b>: A tensor of shape `[A1, ... , An, M]`, which stores a normalized
-    vector in its last dimension.
+  vector in its last dimension.
 * <b>`vector2`</b>: A tensor of shape `[A1, ... , An, M]`, which stores a normalized
-    vector in its last dimension.
+  vector in its last dimension.
 * <b>`percent`</b>: A `float` or tensor with shape broadcastable to the shape of input
-    vectors.
+  vectors.
 * <b>`eps`</b>: A small float for operation safety. If left None, its value is
-    automatically selected using dtype of input vectors.
+  automatically selected using dtype of input vectors.
 * <b>`name`</b>: A name for this op. Defaults to "vector_weights".
 
 
 #### Raises:
 
 * <b>`ValueError`</b>: if the shape of `vector1`, `vector2`, or `percent` is not
-    supported.
+  supported.
 
 
 #### Returns:

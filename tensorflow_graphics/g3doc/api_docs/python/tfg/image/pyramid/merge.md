@@ -23,8 +23,8 @@ Defined in [`image/pyramid.py`](https://github.com/tensorflow/graphics/blob/mast
 #### Args:
 
 * <b>`levels`</b>: A list containing tensors of shape `[B, H_i, W_i, C]`, where `B` is
-    the batch size, H_i and W_i are the height and width of the image for the
-    level i, and `C` the number of channels of the image.
+  the batch size, H_i and W_i are the height and width of the image for the
+  level i, and `C` the number of channels of the image.
 * <b>`name`</b>: A name for this op that defaults to "pyramid_merge".
 
 

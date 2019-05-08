@@ -10,7 +10,7 @@ Checks whether a matrix is a rotation matrix.
 ``` python
 tfg.geometry.transformation.rotation_matrix_3d.assert_rotation_matrix_normalized(
     matrix,
-    eps=None,
+    eps=0.001,
     name=None
 )
 ```
@@ -21,16 +21,18 @@ Defined in [`geometry/transformation/rotation_matrix_3d.py`](https://github.com/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`matrix`</b>: A tensor of shape `[A1, ..., An, 3, 3]`, where the last two
-    dimensions represent a 3d rotation matrix.
+  dimensions represent a 3d rotation matrix.
 * <b>`eps`</b>: The absolute tolerance parameter.
 * <b>`name`</b>: A name for this op that defaults to
-    'assert_rotation_matrix_normalized'.
+  'assert_rotation_matrix_normalized'.
 
 
 #### Returns:

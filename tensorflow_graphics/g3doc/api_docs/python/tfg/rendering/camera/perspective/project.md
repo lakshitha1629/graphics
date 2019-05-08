@@ -34,17 +34,20 @@ $$
 where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
 point.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions that must be
+broadcast compatible.
+
 
 #### Args:
 
 * <b>`point_3d`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents a 3d point to project.
+  represents a 3d point to project.
 * <b>`focal`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
-    represents a camera focal length.
+  represents a camera focal length.
 * <b>`principal_point`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last
-    dimension represents a camera principal point.
+  dimension represents a camera principal point.
 * <b>`name`</b>: A name for this op that defaults to "perspective_project".
 
 
@@ -57,4 +60,4 @@ a 2d point.
 #### Raises:
 
 * <b>`ValueError`</b>: If the shape of `point_3d`, `focal`, or `principal_point` is not
-  supported.
+supported.

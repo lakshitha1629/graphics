@@ -21,17 +21,20 @@ Defined in [`geometry/transformation/rotation_matrix_3d.py`](https://github.com/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions, which must be
+broadcast compatible.
+
 
 #### Args:
 
 * <b>`axis`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents a normalized axis.
+  represents a normalized axis.
 * <b>`angle`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-    represents a normalized axis.
+  represents a normalized axis.
 * <b>`name`</b>: A name for this op that defaults to
-    "rotation_matrix_3d_from_axis_angle".
+  "rotation_matrix_3d_from_axis_angle".
 
 
 #### Returns:

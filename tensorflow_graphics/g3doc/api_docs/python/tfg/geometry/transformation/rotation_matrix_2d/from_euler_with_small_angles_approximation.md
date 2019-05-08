@@ -35,18 +35,22 @@ $$
 
  In the current implementation, the smallness of the angles is not verified.
 
-Note:
-  The resulting matrix rotates points in the $$xy$$-plane counterclockwise.
+#### Note:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+The resulting matrix rotates points in the $$xy$$-plane counterclockwise.
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`angles`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-    represents a small angle in radians.
+  represents a small angle in radians.
 * <b>`name`</b>: A name for this op that defaults to
-    "rotation_matrix_2d_from_euler_with_small_angles_approximation".
+  "rotation_matrix_2d_from_euler_with_small_angles_approximation".
 
 
 #### Returns:

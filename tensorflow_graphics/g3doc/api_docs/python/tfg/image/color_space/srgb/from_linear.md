@@ -21,13 +21,15 @@ Defined in [`image/color_space/srgb.py`](https://github.com/tensorflow/graphics/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-    In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`linear`</b>: A Tensor of shape `[A_1, ..., A_n, 3]`, where the last dimension
-    represents RGB values in the range [0, 1] in linear color space.
+  represents RGB values in the range [0, 1] in linear color space.
 * <b>`gamma`</b>: A float gamma value to use for the conversion.
 * <b>`name`</b>: A name for this op that defaults to "srgb_from_linear".
 
@@ -35,7 +37,7 @@ Note:
 #### Raises:
 
 * <b>`ValueError`</b>: If `linear` has rank < 1 or has its last dimension not equal to
-    3.
+  3.
 
 
 #### Returns:

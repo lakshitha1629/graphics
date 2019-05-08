@@ -7,7 +7,7 @@
 
 Evaluates the specular brdf of the Phong model.
 
-```python
+``` python
 tfg.rendering.reflectance.phong.brdf(
     direction_incoming_light,
     direction_outgoing_light,
@@ -19,32 +19,42 @@ tfg.rendering.reflectance.phong.brdf(
 )
 ```
 
+
+
 Defined in [`rendering/reflectance/phong.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/reflectance/phong.py).
 
 <!-- Placeholder for "Used in" -->
 
-Note: In the following, A1 to An are optional batch dimensions.
+#### Note:
 
-Note: The gradient of this function is not smooth when the dot product of the
+In the following, A1 to An are optional batch dimensions, which must be
+broadcast compatible.
+
+
+#### Note:
+
+The gradient of this function is not smooth when the dot product of the
 normal with any light is 0.0.
+
 
 #### Args:
 
-*   <b>`direction_incoming_light`</b>: A tensor of shape `[A1, ..., An, 3]`,
-    where the last dimension represents a normalized incoming light vector.
-*   <b>`direction_outgoing_light`</b>: A tensor of shape `[A1, ..., An, 3]`,
-    where the last dimension represents a normalized outgoing light vector.
-*   <b>`surface_normal`</b>: A tensor of shape `[A1, ..., An, 3]`, where the
-    last dimension represents a normalized surface normal.
-*   <b>`shininess`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last
-    dimension represents a shininess coefficient.
-*   <b>`albedo`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last
-    dimension represents albedo with values in [0,1].
-*   <b>`brdf_normalization`</b>: A `bool` indicating whether normalization
-    should be applied to enforce the energy conservation property of BRDFs. Note
-    that `brdf_normalization` must be set to False in order to use the original
-    Blinn specular model.
-*   <b>`name`</b>: A name for this op. Defaults to "phong_brdf".
+* <b>`direction_incoming_light`</b>: A tensor of shape `[A1, ..., An, 3]`, where the
+  last dimension represents a normalized incoming light vector.
+* <b>`direction_outgoing_light`</b>: A tensor of shape `[A1, ..., An, 3]`, where the
+  last dimension represents a normalized outgoing light vector.
+* <b>`surface_normal`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last
+  dimension represents a normalized surface normal.
+* <b>`shininess`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
+  represents a non-negative shininess coefficient.
+* <b>`albedo`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
+  represents albedo with values in [0,1].
+* <b>`brdf_normalization`</b>: A `bool` indicating whether normalization should be
+  applied to enforce the energy conservation property of BRDFs. Note that
+  `brdf_normalization` must be set to False in order to use the original
+  Blinn specular model.
+* <b>`name`</b>: A name for this op. Defaults to "phong_brdf".
+
 
 #### Returns:
 
@@ -54,8 +64,8 @@ A tensor of shape `[A1, ..., An, 3]`, where the last dimension represents
 
 #### Raises:
 
-*   <b>`ValueError`</b>: if the shape of `direction_incoming_light`,
-    `direction_outgoing_light`, `surface_normal`, `shininess` or `albedo` is not
-    supported.
-*   <b>`InvalidArgumentError`</b>: if at least one element of `albedo` is
-    outside of [0,1].
+* <b>`ValueError`</b>: if the shape of `direction_incoming_light`,
+`direction_outgoing_light`, `surface_normal`, `shininess` or `albedo` is not
+supported.
+* <b>`InvalidArgumentError`</b>: if not all of shininess values are non-negative, or if
+at least one element of `albedo` is outside of [0,1].

@@ -21,21 +21,24 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`quaternion`</b>:  A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-    represents a quaternion.
+  represents a quaternion.
 * <b>`eps`</b>: A lower bound value for the norm that defaults to 1e-12.
 * <b>`name`</b>: A name for this op that defaults to "quaternion_normalize".
 
 
 #### Returns:
 
-A N-D tensor of shape `[?, ..., ?, 1]` where the quaternion elements have been
-normalized.
+A N-D tensor of shape `[?, ..., ?, 1]` where the quaternion elements have
+been normalized.
+
 
 #### Raises:
 

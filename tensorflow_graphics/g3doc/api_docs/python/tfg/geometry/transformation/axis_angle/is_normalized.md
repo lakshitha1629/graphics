@@ -7,7 +7,7 @@
 
 Determines if the axis-angle is normalized or not.
 
-```python
+``` python
 tfg.geometry.transformation.axis_angle.is_normalized(
     axis,
     angle,
@@ -16,24 +16,28 @@ tfg.geometry.transformation.axis_angle.is_normalized(
 )
 ```
 
-Defined in
-[`geometry/transformation/axis_angle.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/axis_angle.py).
+
+
+Defined in [`geometry/transformation/axis_angle.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/axis_angle.py).
 
 <!-- Placeholder for "Used in" -->
 
-Note: In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-*   <b>`axis`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last
-    dimension represents a normalized axis.
-*   <b>`angle`</b>: A tensor of shape `[A1, ..., An, 1]` where the last
-    dimension represents an angle.
-*   <b>`atol`</b>: The absolute tolerance parameter.
-*   <b>`name`</b>: A name for this op that defaults to
-    "axis_angle_is_normalized".
+* <b>`axis`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
+  represents a normalized axis.
+* <b>`angle`</b>: A tensor of shape `[A1, ..., An, 1]` where the last dimension
+  represents an angle.
+* <b>`atol`</b>: The absolute tolerance parameter.
+* <b>`name`</b>: A name for this op that defaults to "axis_angle_is_normalized".
+
 
 #### Returns:
 
-A tensor of shape `[A1, ..., An, 1]`, where False indicates that the axis is not
-normalized.
+A tensor of shape `[A1, ..., An, 1]`, where False indicates that the axis is
+not normalized.

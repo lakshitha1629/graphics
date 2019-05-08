@@ -32,15 +32,17 @@ f_x & 0 & c_x \\
 \end{bmatrix}.
 $$
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`matrix`</b>: A tensor of shape `[A1, ..., An, 3, 3]`, where the last two
-    dimensions represent a camera calibration matrix.
+  dimensions represent a camera calibration matrix.
 * <b>`name`</b>: A name for this op that defaults to
-    "perspective_intrinsics_from_matrix".
+  "perspective_intrinsics_from_matrix".
 
 
 #### Returns:

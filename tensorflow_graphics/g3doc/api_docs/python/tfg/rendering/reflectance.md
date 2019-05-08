@@ -18,8 +18,7 @@ Defined in [`rendering/reflectance/__init__.py`](https://github.com/tensorflow/g
 
 [`blinn_phong`](../../tfg/rendering/reflectance/blinn_phong.md) module: This module implements the Blinn-Phong specular reflectance.
 
-[`lambertian`](../../tfg/rendering/reflectance/lambertian.md) module: This
-module implements phong specular reflectance.
+[`lambertian`](../../tfg/rendering/reflectance/lambertian.md) module: This module implements the Lambertian reflectance.
 
 [`phong`](../../tfg/rendering/reflectance/phong.md) module: This module implements phong specular reflectance.
 

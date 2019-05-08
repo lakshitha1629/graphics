@@ -14,8 +14,10 @@ Defined in [`rendering/reflectance/phong.py`](https://github.com/tensorflow/grap
 <!-- Placeholder for "Used in" -->
 
 For a derivation of the normalization factor ensuring energy conservation, we
-refer the interested reader to Eric P. Lafortune, and Yves D. Willems. "Using
-the modified phong reflectance model for physically based rendering". 1994.
+refer the interested reader to
+Eric P. Lafortune, and Yves D. Willems.
+"Using the modified phong reflectance model for physically based rendering".
+1994.
 
 ## Functions
 

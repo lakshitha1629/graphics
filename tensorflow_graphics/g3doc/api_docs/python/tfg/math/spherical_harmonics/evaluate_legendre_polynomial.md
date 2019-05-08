@@ -9,8 +9,8 @@ Evaluates the Legendre polynomial of degree l and order m at x.
 
 ``` python
 tfg.math.spherical_harmonics.evaluate_legendre_polynomial(
-    l,
-    m,
+    degree_l,
+    order_m,
     x
 )
 ```
@@ -21,19 +21,25 @@ Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphic
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  This function is implementating the algorithm described p. 10 of `Spherical
-  Harmonic Lighting: The Gritty Details`.
+#### Note:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+This function is implementing the algorithm described in p. 10 of `Spherical
+Harmonic Lighting: The Gritty Details`.
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-* <b>`l`</b>: A tensor of shape `[A1, ..., An]` corresponding to the degree of the
-    associated Legendre polynomial. Note that `l` must satisfy `l >= 0`.
-* <b>`m`</b>: A tensor of shape `[A1, ..., An]` corresponding to the order of the
-    associated Legendre polynomial. Note that `m` must satisfy `0 <= m <= l`.
+* <b>`degree_l`</b>: An integer tensor of shape `[A1, ..., An]` corresponding to the
+  degree of the associated Legendre polynomial. Note that `degree_l` must be
+  non-negative.
+* <b>`order_m`</b>: An integer tensor of shape `[A1, ..., An]` corresponding to the
+  order of the associated Legendre polynomial. Note that `order_m` must
+  satisfy `0 <= order_m <= l`.
 * <b>`x`</b>: A tensor of shape `[A1, ..., An]` with values in [-1,1].
 
 

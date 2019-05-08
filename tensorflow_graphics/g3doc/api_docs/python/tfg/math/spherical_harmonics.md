@@ -20,11 +20,11 @@ Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphic
 
 [`evaluate_spherical_harmonics(...)`](../../tfg/math/spherical_harmonics/evaluate_spherical_harmonics.md): Evaluates a point sample of a Spherical Harmonic basis function.
 
-[`generate_l_m_permutations(...)`](../../tfg/math/spherical_harmonics/generate_l_m_permutations.md): Generates l and m coefficients for spherical harmonics.
+[`generate_l_m_permutations(...)`](../../tfg/math/spherical_harmonics/generate_l_m_permutations.md): Generates permutations of degree l and order m for spherical harmonics.
 
 [`generate_l_m_zonal(...)`](../../tfg/math/spherical_harmonics/generate_l_m_zonal.md): Generates l and m coefficients for zonal harmonics.
 
-[`integration_product(...)`](../../tfg/math/spherical_harmonics/integration_product.md): Computes the integral of f.g over the sphere.
+[`integration_product(...)`](../../tfg/math/spherical_harmonics/integration_product.md): Computes the integral of harmonics1.harmonics2 over the sphere.
 
 [`rotate_zonal_harmonics(...)`](../../tfg/math/spherical_harmonics/rotate_zonal_harmonics.md): Rotates zonal harmonics.
 

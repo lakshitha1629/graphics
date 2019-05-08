@@ -20,19 +20,23 @@ Defined in [`geometry/transformation/axis_angle.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  The conversion is performed by first converting to a quaternion
-  representation, and then by converting the quaternion to an axis-angle.
+#### Note:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+The conversion is performed by first converting to a quaternion
+representation, and then by converting the quaternion to an axis-angle.
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`angles`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the three Euler angles. `[A1, ..., An, 0]` is the angle about
-    `x` in radians `[A1, ..., An, 1]` is the angle about `y` in radians and
-    `[A1, ..., An, 2]` is the angle about `z` in radians.
+  represents the three Euler angles. `[A1, ..., An, 0]` is the angle about
+  `x` in radians `[A1, ..., An, 1]` is the angle about `y` in radians and
+  `[A1, ..., An, 2]` is the angle about `z` in radians.
 * <b>`name`</b>: A name for this op that defaults to "axis_angle_from_euler".
 
 

@@ -26,19 +26,21 @@ Defined in [`math/interpolation/slerp.py`](https://github.com/tensorflow/graphic
 Interpolation for all variants of slerp is a simple weighted sum over inputs.
 Therefore this function simply returns weight1 * vector1 + weight2 * vector2.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`vector1`</b>: A tensor of shape `[A1, ... , An, M]`, which stores a normalized
-    vector in its last dimension.
+  vector in its last dimension.
 * <b>`vector2`</b>: A tensor of shape `[A1, ... , An, M]`, which stores a normalized
-    vector in its last dimension.
+  vector in its last dimension.
 * <b>`weight1`</b>: A `float` or a tensor describing weights for the `vector1` and with
-    a shape broadcastable to the shape of the input vectors.
+  a shape broadcastable to the shape of the input vectors.
 * <b>`weight2`</b>: A `float` or a tensor describing weights for the `vector2` and with
-    a shape broadcastable to the shape of the input vectors.
+  a shape broadcastable to the shape of the input vectors.
 * <b>`name`</b>: A name for this op. Defaults to "interpolate_with_weights".
 
 

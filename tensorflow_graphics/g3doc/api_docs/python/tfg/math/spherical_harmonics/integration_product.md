@@ -5,12 +5,12 @@
 
 # tfg.math.spherical_harmonics.integration_product
 
-Computes the integral of f.g over the sphere.
+Computes the integral of harmonics1.harmonics2 over the sphere.
 
 ``` python
 tfg.math.spherical_harmonics.integration_product(
-    f,
-    g,
+    harmonics1,
+    harmonics2,
     keepdims=True,
     name=None
 )
@@ -22,26 +22,29 @@ Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphic
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-* <b>`f`</b>: A tensor of shape `[A1, ..., An, C]`, where the last dimension represents
-    spherical harmonics coefficients.
-* <b>`g`</b>: A tensor of shape `[A1, ..., An, C]`, where the last dimension represents
-    spherical harmonics coefficients.
-* <b>`keepdims`</b>: If true, retains reduced dimensions with length 1.
+* <b>`harmonics1`</b>: A tensor of shape `[A1, ..., An, C]`, where the last dimension
+  represents spherical harmonics coefficients.
+* <b>`harmonics2`</b>: A tensor of shape `[A1, ..., An, C]`, where the last dimension
+  represents spherical harmonics coefficients.
+* <b>`keepdims`</b>: If True, retains reduced dimensions with length 1.
 * <b>`name`</b>: A name for this op. Defaults to "spherical_harmonics_convolution".
 
 
 #### Returns:
 
 A tensor of shape `[A1, ..., An]` containing scalar values resulting from
-integrating the product of the spherical harmonics `f` and `g`.
+integrating the product of the spherical harmonics `harmonics1` and
+`harmonics2`.
 
 
 #### Raises:
 
-* <b>`ValueError`</b>: if the last dimension of `f` is different from the last
-  dimension of `g`.
+* <b>`ValueError`</b>: if the last dimension of `harmonics1` is different from the last
+dimension of `harmonics2`.

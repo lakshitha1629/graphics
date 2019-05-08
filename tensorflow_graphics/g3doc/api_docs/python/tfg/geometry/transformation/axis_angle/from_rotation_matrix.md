@@ -20,20 +20,24 @@ Defined in [`geometry/transformation/axis_angle.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the current version the returned axis-angle representation is not unique
-  for a given rotation matrix. Since a direct conversion would not really be
-  faster, we first transform the rotation matrix to a quaternion, and finally
-  perform the conversion from that quaternion to the corresponding axis-angle
-  representation.
+#### Note:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+In the current version the returned axis-angle representation is not unique
+for a given rotation matrix. Since a direct conversion would not really be
+faster, we first transform the rotation matrix to a quaternion, and finally
+perform the conversion from that quaternion to the corresponding axis-angle
+representation.
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`rotation_matrix`</b>: A tensor of shape `[A1, ..., An, 3, 3]`, where the last two
-    dimensions represent a rotation matrix.
+  dimensions represent a rotation matrix.
 * <b>`name`</b>: A name for this op that defaults to "axis_angle_from_rotation_matrix".
 
 

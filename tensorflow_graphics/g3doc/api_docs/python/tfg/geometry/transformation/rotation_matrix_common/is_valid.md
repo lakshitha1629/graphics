@@ -29,7 +29,7 @@ Note: In the following, A1 to An are optional batch dimensions.
 #### Args:
 
 * <b>`matrix`</b>: A tensor of shape `[A1, ..., An, K, K]`, where the last two
-    dimensions represent a rotation matrix in K-dimensions.
+  dimensions represent a rotation matrix in K-dimensions.
 * <b>`atol`</b>: The absolute tolerance parameter.
 * <b>`name`</b>: A name for this op that defaults to "rotation_matrix_common_is_valid".
 

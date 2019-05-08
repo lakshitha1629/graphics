@@ -17,8 +17,10 @@ Defined in [`math/math_helpers.py`](https://github.com/tensorflow/graphics/blob/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 

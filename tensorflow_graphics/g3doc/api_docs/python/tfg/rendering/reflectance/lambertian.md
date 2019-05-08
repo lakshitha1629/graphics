@@ -5,7 +5,9 @@
 
 # Module: tfg.rendering.reflectance.lambertian
 
-This module implements phong specular reflectance.
+This module implements the Lambertian reflectance.
+
+
 
 Defined in [`rendering/reflectance/lambertian.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/rendering/reflectance/lambertian.py).
 

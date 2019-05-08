@@ -22,15 +22,18 @@ Defined in [`math/vector.py`](https://github.com/tensorflow/graphics/blob/master
 
 <!-- Placeholder for "Used in" -->
 
-Note: In the following, A1 to An are optional batch dimensions, which should be
+#### Note:
+
+In the following, A1 to An are optional batch dimensions, which should be
 broadcast compatible.
+
 
 #### Args:
 
 * <b>`vector1`</b>: A tensor of shape `[A1, ..., Ai = 3, ..., An]`, where the dimension
-    i = axis represents a 3d vector.
+  i = axis represents a 3d vector.
 * <b>`vector2`</b>: A tensor of shape `[A1, ..., Ai = 3, ..., An]`, where the dimension
-    i = axis represents a 3d vector.
+  i = axis represents a 3d vector.
 * <b>`axis`</b>: The dimension along which to compute the cross product.
 * <b>`name`</b>: A name for this op which defaults to "vector_cross".
 

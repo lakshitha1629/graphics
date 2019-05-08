@@ -24,13 +24,15 @@ Defined in [`geometry/transformation/rotation_matrix_2d.py`](https://github.com/
 Determines if a matrix $$\mathbf{R}$$ is a valid rotation matrix by checking
 that $$\mathbf{R}^T\mathbf{R} = \mathbf{I}$$ and $$\det(\mathbf{R}) = 1$$.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-* <b>`matrix`</b>: A tensor of shape `[A1, ..., An, 2, 2]`, where the last dimension
-    represents a 2d rotation matrix.
+* <b>`matrix`</b>: A tensor of shape `[A1, ..., An, 2, 2]`, where the last two
+  dimensions represent a 2d rotation matrix.
 * <b>`atol`</b>: The absolute tolerance parameter.
 * <b>`name`</b>: A name for this op that defaults to "rotation_matrix_2d_is_valid".
 

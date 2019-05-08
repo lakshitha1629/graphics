@@ -25,11 +25,10 @@ these coefficients for -l <= m <= l, where l is the rank of `coefficients`.
 
 #### Args:
 
-* <b>`coefficients`</b>: A tensor of shape `[C]` storing zonal harmonics
-    coefficients.
-* <b>`name`</b>: A name for this op. Defaults to
-    'spherical_harmonics_tile_zonal_coefficients'.
-Return: A tensor of shape `[C*C]` containing zonal coefficients tiled as
+coefficients: A tensor of shape `[C]` storing zonal harmonics coefficients.
+name: A name for this op. Defaults to
+  'spherical_harmonics_tile_zonal_coefficients'.
+* <b>`Return`</b>: A tensor of shape `[C*C]` containing zonal coefficients tiled as
   'regular' spherical harmonics coefficients.
 
 

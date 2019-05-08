@@ -40,8 +40,7 @@ $$x^2 + y^2 + z^2 + w^2 = 1$$.
 
 [`inverse(...)`](../../../tfg/geometry/transformation/quaternion/inverse.md): Computes the inverse of a quaternion.
 
-[`is_normalized(...)`](../../../tfg/geometry/transformation/quaternion/is_normalized.md):
-Determines if quaternion is normalized quaternion or not.
+[`is_normalized(...)`](../../../tfg/geometry/transformation/quaternion/is_normalized.md): Determines if quaternion is normalized quaternion or not.
 
 [`multiply(...)`](../../../tfg/geometry/transformation/quaternion/multiply.md): Multiplies two quaternions.
 

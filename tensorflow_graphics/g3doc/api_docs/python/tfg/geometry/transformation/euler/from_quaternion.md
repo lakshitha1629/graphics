@@ -23,7 +23,7 @@ Defined in [`geometry/transformation/euler.py`](https://github.com/tensorflow/gr
 #### Args:
 
 * <b>`quaternions`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-    represents a normalized quaternion.
+  represents a normalized quaternion.
 * <b>`name`</b>: A name for this op that defaults to "euler_from_quaternion".
 
 

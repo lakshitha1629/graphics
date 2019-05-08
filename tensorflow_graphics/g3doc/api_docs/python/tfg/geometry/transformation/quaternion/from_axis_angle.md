@@ -21,15 +21,17 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`axis`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents a normalized axis.
+  represents a normalized axis.
 * <b>`angle`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-    represents an angle.
+  represents an angle.
 * <b>`name`</b>: A name for this op that defaults to "quaternion_from_axis_angle".
 
 

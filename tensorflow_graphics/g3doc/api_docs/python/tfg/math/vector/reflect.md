@@ -26,16 +26,19 @@ For an incident vector $$\mathbf{v}$$ and normal $$\mathbf{n}$$ this function
 computes the reflected vector as
 $$\mathbf{r} = $$\mathbf{v}$$ - 2(\mathbf{n}^T\mathbf{v})\mathbf{n}$$.
 
-Note: In the following, A1 to An are optional batch dimensions, which should be
+#### Note:
+
+In the following, A1 to An are optional batch dimensions, which should be
 broadcast compatible.
+
 
 #### Args:
 
 * <b>`vector`</b>: A tensor of shape `[A1, ..., Ai, ..., An]`, where the dimension i =
-    axis represents a vector.
+  axis represents a vector.
 * <b>`normal`</b>: A tensor of shape `[A1, ..., Ai, ..., An]`, where the dimension i =
-    axis represents a normal around which the vector needs to be reflected.
-    The normal vector needs to be normalized.
+  axis represents a normal around which the vector needs to be reflected.
+  The normal vector needs to be normalized.
 * <b>`axis`</b>: The dimension along which to compute the reflection.
 * <b>`name`</b>: A name for this op which defaults to "vector_reflect".
 

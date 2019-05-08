@@ -35,19 +35,21 @@ $$
 where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
 point.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point_2d`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
-    represents a 2d point to unproject.
+  represents a 2d point to unproject.
 * <b>`depth`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-    represents the depth of a 2d point.
+  represents the depth of a 2d point.
 * <b>`focal`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
-    represents a camera focal length.
+  represents a camera focal length.
 * <b>`principal_point`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last
-    dimension represents a camera principal point.
+  dimension represents a camera principal point.
 * <b>`name`</b>: A name for this op that defaults to "perspective_unproject".
 
 
@@ -60,4 +62,4 @@ a 3d point.
 #### Raises:
 
 * <b>`ValueError`</b>: If the shape of `point_2d`, `depth`, `focal`, or
-  `principal_point` is not supported.
+`principal_point` is not supported.

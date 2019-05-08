@@ -7,15 +7,16 @@
 
 This module implements various graph convolutions in TensorFlow.
 
-Defined in
-[`geometry/convolution/graph_convolution.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/convolution/graph_convolution.py).
+
+
+Defined in [`geometry/convolution/graph_convolution.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/convolution/graph_convolution.py).
 
 <!-- Placeholder for "Used in" -->
 
+
 ## Functions
 
-[`edge_convolution_template(...)`](../../../tfg/geometry/convolution/graph_convolution/edge_convolution_template.md):
-A template for edge convolutions.
+[`edge_convolution_template(...)`](../../../tfg/geometry/convolution/graph_convolution/edge_convolution_template.md): A template for edge convolutions.
 
-[`feature_steered_convolution(...)`](../../../tfg/geometry/convolution/graph_convolution/feature_steered_convolution.md):
-Implements the Feature Steered graph convolution.
+[`feature_steered_convolution(...)`](../../../tfg/geometry/convolution/graph_convolution/feature_steered_convolution.md): Implements the Feature Steered graph convolution.
+

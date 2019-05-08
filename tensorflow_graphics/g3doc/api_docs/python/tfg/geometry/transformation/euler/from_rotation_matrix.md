@@ -23,17 +23,21 @@ Defined in [`geometry/transformation/euler.py`](https://github.com/tensorflow/gr
 The rotation matrices are assumed to have been constructed by rotation around
 the $$x$$, then $$y$$, and finally the $$z$$ axis.
 
-Note:
+#### Note:
+
   There is an infinite number of solutions to this problem. There are
 Gimbal locks when abs(rotation_matrix(2,0)) == 1, which are not handled.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`rotation_matrix`</b>: A tensor of shape `[A1, ..., An, 3, 3]`, where the last two
-    dimensions represent a rotation matrix.
+  dimensions represent a rotation matrix.
 * <b>`name`</b>: A name for this op that defaults to "euler_from_rotation_matrix".
 
 

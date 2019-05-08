@@ -5,7 +5,7 @@
 
 # tfg.math.spherical_harmonics.generate_l_m_permutations
 
-Generates l and m coefficients for spherical harmonics.
+Generates permutations of degree l and order m for spherical harmonics.
 
 ``` python
 tfg.math.spherical_harmonics.generate_l_m_permutations(
@@ -24,7 +24,7 @@ Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphic
 
 * <b>`max_band`</b>: An integer scalar storing the highest band.
 * <b>`name`</b>: A name for this op. Defaults to
-    'spherical_harmonics_generate_l_m_permutations'.
+  'spherical_harmonics_generate_l_m_permutations'.
 
 
 #### Returns:

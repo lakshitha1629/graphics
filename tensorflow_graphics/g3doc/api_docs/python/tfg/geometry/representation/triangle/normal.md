@@ -24,19 +24,23 @@ Defined in [`geometry/representation/triangle.py`](https://github.com/tensorflow
 
 <!-- Placeholder for "Used in" -->
 
-Note: In the following, A1 to An are optional batch dimensions, which should be
+#### Note:
+
+In the following, A1 to An are optional batch dimensions, which must be
 broadcast compatible.
+
 
 #### Args:
 
 * <b>`v0`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the first vertex of a triangle.
+  represents the first vertex of a triangle.
 * <b>`v1`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the second vertex of a triangle.
+  represents the second vertex of a triangle.
 * <b>`v2`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the third vertex of a triangle.
+  represents the third vertex of a triangle.
 * <b>`clockwise`</b>: Winding order to determine front-facing triangles.
-* <b>`normalize`</b>: Bool defining whether output normals are normalized.
+* <b>`normalize`</b>: A `bool` indicating whether output normals should be normalized
+  by the function.
 * <b>`name`</b>: A name for this op. Defaults to "triangle_normal".
 
 

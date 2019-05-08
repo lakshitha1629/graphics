@@ -21,15 +21,17 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents a 3d point.
+  represents a 3d point.
 * <b>`quaternion`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-    represents a normalized quaternion.
+  represents a normalized quaternion.
 * <b>`name`</b>: A name for this op that defaults to "quaternion_rotate".
 
 

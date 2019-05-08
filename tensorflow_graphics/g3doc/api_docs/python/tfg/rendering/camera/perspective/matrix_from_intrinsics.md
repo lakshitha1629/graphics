@@ -34,17 +34,19 @@ $$
 
 from the focal length $$(f_x, f_y)$$ and the principal point $$(c_x, c_y)$$.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`focal`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
-    represents a camera focal length.
+  represents a camera focal length.
 * <b>`principal_point`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last
-    dimension represents a camera principal point.
+  dimension represents a camera principal point.
 * <b>`name`</b>: A name for this op that defaults to
-    "perspective_matrix_from_intrinsics".
+  "perspective_matrix_from_intrinsics".
 
 
 #### Returns:
@@ -56,4 +58,4 @@ represent a camera calibration matrix.
 #### Raises:
 
 * <b>`ValueError`</b>: If the shape of `focal`, or `principal_point` is not
-  supported.
+supported.

@@ -35,7 +35,7 @@ Note: In the following, A1 to An are optional batch dimensions.
 #### Args:
 
 * <b>`point_2d`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
-    represents a 2d point.
+  represents a 2d point.
 * <b>`name`</b>: A name for this op that defaults to "orthographic_ray".
 
 

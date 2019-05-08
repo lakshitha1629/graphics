@@ -20,13 +20,15 @@ Defined in [`math/math_helpers.py`](https://github.com/tensorflow/graphics/blob/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point_cartesian`</b>: A tensor of shape `[A1, ..., An, 3]`. In the last
-    dimension, the data follows the x,y,z order.
+  dimension, the data follows the x,y,z order.
 * <b>`name`</b>: A name for this op. Defaults to 'cartesian_to_spherical_coordinates'.
 
 

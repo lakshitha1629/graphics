@@ -18,3 +18,5 @@ Defined in [`geometry/representation/mesh/__init__.py`](https://github.com/tenso
 
 [`normals`](../../../tfg/geometry/representation/mesh/normals.md) module: Tensorflow utility functions to compute normals on meshes.
 
+[`utils`](../../../tfg/geometry/representation/mesh/utils.md) module: This module implements utility functions for meshes.
+

@@ -27,18 +27,18 @@ Defined in [`math/interpolation/slerp.py`](https://github.com/tensorflow/graphic
 #### Args:
 
 * <b>`vector1`</b>: A tensor of shape `[A1, ... , An, M]`, which stores a normalized
-    vector in its last dimension.
+  vector in its last dimension.
 * <b>`vector2`</b>: A tensor of shape `[A1, ... , An, M]`, which stores a normalized
-    vector in its last dimension.
+  vector in its last dimension.
 * <b>`percent`</b>: A `float` or a tensor with shape broadcastable to the shape of
-    input vectors.
+  input vectors.
 * <b>`method`</b>: An enumerated constant from the class InterpolationType, which is
-    either InterpolationType.QUATERNION (default) if the input vectors are 4-D
-    quaternions, or InterpolationType.VECTOR if they are regular M-D vectors.
+  either InterpolationType.QUATERNION (default) if the input vectors are 4-D
+  quaternions, or InterpolationType.VECTOR if they are regular M-D vectors.
 * <b>`eps`</b>: A small float for operation safety. If left None, its value is
-    automatically selected using dtype of input vectors.
+  automatically selected using dtype of input vectors.
 * <b>`name`</b>: A name for this op. Defaults to "vector_weights" or
-    "quaternion_weights" depending on the method.
+  "quaternion_weights" depending on the method.
 
 
 #### Returns:
@@ -50,4 +50,4 @@ interpolation.
 #### Raises:
 
 * <b>`ValueError`</b>: if method is not amongst enumerated constants defined in
-    InterpolationType.
+  InterpolationType.

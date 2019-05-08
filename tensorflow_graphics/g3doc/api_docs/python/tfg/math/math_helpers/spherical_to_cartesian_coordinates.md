@@ -20,21 +20,23 @@ Defined in [`math/math_helpers.py`](https://github.com/tensorflow/graphics/blob/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point_spherical`</b>: A tensor of shape `[A1, ..., An, 3]`. The last dimension
-    contains r, theta, and phi that respectively correspond to the radius,
-    polar angle and azimuthal angle; r must be non-negative.
+  contains r, theta, and phi that respectively correspond to the radius,
+  polar angle and azimuthal angle; r must be non-negative.
 * <b>`name`</b>: A name for this op. Defaults to 'spherical_to_cartesian_coordinates'.
 
 
 #### Raises:
 
 * <b>`tf.errors.InvalidArgumentError`</b>: If r, theta or phi contains out of range
-  data.
+data.
 
 
 #### Returns:

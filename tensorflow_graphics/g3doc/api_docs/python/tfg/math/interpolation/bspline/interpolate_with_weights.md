@@ -21,17 +21,19 @@ Defined in [`math/interpolation/bspline.py`](https://github.com/tensorflow/graph
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An, and B1 to Bk are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An, and B1 to Bk are optional batch dimensions.
+
 
 #### Args:
 
-*   <b>`knots`</b>: A tensor with shape `[B1, ..., Bk, C]` containing knot
-    values, where `C` is the number of knots.
-*   <b>`weights`</b>: A tensor with shape `[A1, ..., An, C]` containing dense
-    weights for the knots, where `C` is the number of knots.
-*   <b>`name`</b>: A name for this op. Defaults to
-    "bsplines_interpolate_with_weights".
+* <b>`knots`</b>: A tensor with shape `[B1, ..., Bk, C]` containing knot values, where
+  `C` is the number of knots.
+* <b>`weights`</b>: A tensor with shape `[A1, ..., An, C]` containing dense weights for
+  the knots, where `C` is the number of knots.
+* <b>`name`</b>: A name for this op. Defaults to "bsplines_interpolate_with_weights".
+
 
 #### Returns:
 

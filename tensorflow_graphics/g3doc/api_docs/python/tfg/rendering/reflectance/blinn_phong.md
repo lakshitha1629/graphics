@@ -14,8 +14,9 @@ Defined in [`rendering/reflectance/blinn_phong.py`](https://github.com/tensorflo
 <!-- Placeholder for "Used in" -->
 
 For a derivation of the normalization factor ensuring energy conservation, we
-refer the interested reader to Fabian Giesen. "Derivation of Phong and
-Blinn-Phong BRDF normalization factors". 2009
+refer the interested reader to:
+Fabian Giesen.
+"Derivation of Phong and Blinn-Phong BRDF normalization factors". 2009
 
 ## Functions
 

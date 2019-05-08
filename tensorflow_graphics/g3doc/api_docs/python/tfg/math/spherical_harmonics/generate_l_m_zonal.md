@@ -24,9 +24,9 @@ Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphic
 
 * <b>`max_band`</b>: An integer scalar storing the highest band.
 * <b>`name`</b>: A name for this op. Defaults to
-    'spherical_harmonics_generate_l_m_zonal'.
+  'spherical_harmonics_generate_l_m_zonal'.
 
 
 #### Returns:
 
-Two tensors of shape `[max_band+1]`.
+Two tensors of shape `[max_band+1]`, one for degree l and one for order m.

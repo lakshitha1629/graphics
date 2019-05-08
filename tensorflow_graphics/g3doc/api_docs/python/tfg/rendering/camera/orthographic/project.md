@@ -29,13 +29,15 @@ x' = x, & y' = y.
 \end{matrix}
 $$
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point_3d`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents a 3d point to project.
+  represents a 3d point to project.
 * <b>`name`</b>: A name for this op that defaults to "orthographic_project".
 
 

@@ -40,12 +40,9 @@ $$x^2 + y^2 + z^2 = 1$$.
 
 [`from_rotation_matrix(...)`](../../../tfg/geometry/transformation/axis_angle/from_rotation_matrix.md): Converts a rotation matrix to an axis-angle representation.
 
-[`from_rotation_vector(...)`](../../../tfg/geometry/transformation/axis_angle/from_rotation_vector.md): Converts a rotation vector to an axis-angle representation.
-
 [`inverse(...)`](../../../tfg/geometry/transformation/axis_angle/inverse.md): Computes the axis-angle that is the inverse of the input axis-angle.
 
-[`is_normalized(...)`](../../../tfg/geometry/transformation/axis_angle/is_normalized.md):
-Determines if the axis-angle is normalized or not.
+[`is_normalized(...)`](../../../tfg/geometry/transformation/axis_angle/is_normalized.md): Determines if the axis-angle is normalized or not.
 
 [`rotate(...)`](../../../tfg/geometry/transformation/axis_angle/rotate.md): Rotates a 3d point using an axis-angle by applying the Rodrigues' formula.
 

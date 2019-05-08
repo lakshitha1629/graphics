@@ -28,17 +28,19 @@ function supports planar convex polygon faces. For non-triangular meshes,
 this function converts them into triangular meshes to calculate vertex
 normals.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`vertices`</b>: A tensor of shape `[A1, ..., An, V, 3]`, where V is the number of
-    vertices.
+  vertices.
 * <b>`indices`</b>: A tensor of shape `[A1, ..., An, F, M]`, where F is the number of
-    faces and M is the number of vertices per face.
+  faces and M is the number of vertices per face.
 * <b>`clockwise`</b>: Winding order to determine front-facing faces. The order of
-    vertices should be either clockwise or counterclockwise.
+  vertices should be either clockwise or counterclockwise.
 * <b>`name`</b>: A name for this op. Defaults to "normals_vertex_normals".
 
 

@@ -7,7 +7,10 @@
 
 Shape utility functions.
 
-Defined in
-[`util/shape.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/util/shape.py).
+
+
+Defined in [`util/shape.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/util/shape.py).
 
 <!-- Placeholder for "Used in" -->
+
+

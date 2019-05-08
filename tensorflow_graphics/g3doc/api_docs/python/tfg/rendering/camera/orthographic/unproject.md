@@ -30,15 +30,17 @@ x = x', & y = y', & z = z.
 \end{matrix}
 $$
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`point_2d`</b>: A tensor of shape `[A1, ..., An, 2]`, where the last dimension
-    represents a 2d point to unproject.
+  represents a 2d point to unproject.
 * <b>`depth`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-    represents the depth of a 2d point.
+  represents the depth of a 2d point.
 * <b>`name`</b>: A name for this op that defaults to "orthographic_unproject".
 
 

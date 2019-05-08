@@ -22,15 +22,18 @@ Defined in [`geometry/representation/point.py`](https://github.com/tensorflow/gr
 
 <!-- Placeholder for "Used in" -->
 
-Note: In the following, A1 to An are optional batch dimensions, which must be
+#### Note:
+
+In the following, A1 to An are optional batch dimensions, which must be
 broadcast compatible.
+
 
 #### Args:
 
 * <b>`point`</b>: A tensor of shape `[A1, ..., An, M]`.
 * <b>`origin`</b>: A tensor of shape `[A1, ..., An, M]`.
 * <b>`direction`</b>: A tensor of shape `[A1, ..., An, M]`. The last dimension must be
-    normalized.
+  normalized.
 * <b>`name`</b>: A name for this op. Defaults to "point_project_to_ray".
 
 
@@ -42,4 +45,4 @@ A tensor of shape `[A1, ..., An, M]` containing the projected point.
 #### Raises:
 
 * <b>`ValueError`</b>: If the shape of `point`, `origin`, or 'direction' is not
-  supported.
+supported.

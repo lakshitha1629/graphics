@@ -20,15 +20,17 @@ Defined in [`geometry/transformation/rotation_matrix_3d.py`](https://github.com/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`quaternion`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-    represents a normalized quaternion.
+  represents a normalized quaternion.
 * <b>`name`</b>: A name for this op that defaults to
-    "rotation_matrix_3d_from_quaternion".
+  "rotation_matrix_3d_from_quaternion".
 
 
 #### Returns:

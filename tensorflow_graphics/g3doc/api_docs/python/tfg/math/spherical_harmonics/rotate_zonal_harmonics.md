@@ -22,17 +22,18 @@ Defined in [`math/spherical_harmonics.py`](https://github.com/tensorflow/graphic
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
-* <b>`zonal_coeffs`</b>: A tensor of shape `[C]` storing zonal harmonics
-    coefficients.
+* <b>`zonal_coeffs`</b>: A tensor of shape `[C]` storing zonal harmonics coefficients.
 * <b>`theta`</b>: A tensor of shape `[A1, ..., An, 1]` storing polar angles.
 * <b>`phi`</b>: A tensor of shape `[A1, ..., An, 1]` storing azimuthal angles.
 * <b>`name`</b>: A name for this op. Defaults to
-    'spherical_harmonics_rotate_zonal_harmonics'.
+  'spherical_harmonics_rotate_zonal_harmonics'.
 
 
 #### Returns:
@@ -44,4 +45,4 @@ harmonics.
 #### Raises:
 
 * <b>`ValueError`</b>: If the shape of `zonal_coeffs`, `theta` or `phi` is not
-    supported.
+  supported.

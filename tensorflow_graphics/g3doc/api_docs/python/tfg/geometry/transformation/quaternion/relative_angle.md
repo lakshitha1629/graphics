@@ -25,15 +25,17 @@ Given two normalized quanternions $$\mathbf{q}_1$$ and $$\mathbf{q}_2$$, the
 relative angle is computed as
 $$\theta = 2\arccos(\mathbf{q}_1^T\mathbf{q}_2)$$.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`quaternion1`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-    represents a normalized quaternion.
+  represents a normalized quaternion.
 * <b>`quaternion2`</b>: A tensor of shape `[A1, ..., An, 4]`, where the last dimension
-    represents a normalized quaternion.
+  represents a normalized quaternion.
 * <b>`name`</b>: A name for this op that defaults to "quaternion_relative_angle".
 
 

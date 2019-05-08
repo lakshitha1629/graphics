@@ -20,16 +20,20 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 
 <!-- Placeholder for "Used in" -->
 
-Warning:
-  This function is not smooth everywhere.
+#### Warning:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+This function is not smooth everywhere.
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`rotation_matrix`</b>: A tensor of shape `[A1, ..., An, 3, 3]`, where the last two
-    dimensions represent a rotation matrix.
+  dimensions represent a rotation matrix.
 * <b>`name`</b>: A name for this op that defaults to "quaternion_from_rotation_matrix".
 
 

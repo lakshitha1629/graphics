@@ -7,12 +7,14 @@
 
 Random normalized quaternion following a uniform distribution law on SO(3).
 
-```python
+``` python
 tfg.geometry.transformation.quaternion.normalized_random_uniform(
     quaternion_shape,
     name=None
 )
 ```
+
+
 
 Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/geometry/transformation/quaternion.py).
 
@@ -20,9 +22,12 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 
 #### Args:
 
-*   <b>`quaternion_shape`</b>: A list representing the shape of the output
-    tensor.
-*   <b>`name`</b>: A name for this op that defaults to
-    "quaternion_normalized_random_uniform".
+* <b>`quaternion_shape`</b>: A list representing the shape of the output tensor.
+* <b>`name`</b>: A name for this op that defaults to
+  "quaternion_normalized_random_uniform".
 
-Returns:
+
+#### Returns:
+
+A tensor of shape `[quaternion_shape[0],...,quaternion_shape[-1], 4]`
+representing random normalized quaternions.

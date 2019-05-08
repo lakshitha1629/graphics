@@ -7,12 +7,14 @@
 
 Layer module.
 
-Defined in
-[`nn/layer/__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/nn/layer/__init__.py).
+
+
+Defined in [`nn/layer/__init__.py`](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/nn/layer/__init__.py).
 
 <!-- Placeholder for "Used in" -->
 
+
 ## Modules
 
-[`graph_convolution`](../../tfg/nn/layer/graph_convolution.md) module: This
-module implements graph convolutions layers.
+[`graph_convolution`](../../tfg/nn/layer/graph_convolution.md) module: This module implements graph convolutions layers.
+

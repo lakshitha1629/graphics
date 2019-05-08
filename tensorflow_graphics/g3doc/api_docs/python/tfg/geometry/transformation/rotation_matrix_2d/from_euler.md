@@ -30,18 +30,22 @@ $$
 \end{bmatrix}.
 $$
 
-Note:
-  The resulting matrix rotates points in the $$xy$$-plane counterclockwise.
+#### Note:
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+The resulting matrix rotates points in the $$xy$$-plane counterclockwise.
+
+
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`angle`</b>: A tensor of shape `[A1, ..., An, 1]`, where the last dimension
-    represents an angle in radian.
+  represents an angle in radians.
 * <b>`name`</b>: A name for this op that defaults to
-    "rotation_matrix_2d_from_euler_angle".
+  "rotation_matrix_2d_from_euler_angle".
 
 
 #### Returns:

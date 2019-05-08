@@ -21,13 +21,15 @@ Defined in [`image/color_space/srgb.py`](https://github.com/tensorflow/graphics/
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-    In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`srgb`</b>: A tensor of shape `[A_1, ..., A_n, 3]`, where the last dimension
-    represents sRGB values.
+  represents sRGB values.
 * <b>`gamma`</b>: A float gamma value to use for the conversion.
 * <b>`name`</b>: A name for this op that defaults to "srgb_to_linear".
 

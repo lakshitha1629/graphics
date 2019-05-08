@@ -20,13 +20,15 @@ Defined in [`geometry/transformation/euler.py`](https://github.com/tensorflow/gr
 
 <!-- Placeholder for "Used in" -->
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`euler_angle`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the three Euler angles.
+  represents the three Euler angles.
 * <b>`name`</b>: A name for this op that defaults to "euler_inverse".
 
 

@@ -24,17 +24,19 @@ Defined in [`geometry/transformation/quaternion.py`](https://github.com/tensorfl
 Result quaternion describes shortest geodesic rotation from
 vector1 to vector2.
 
-Note:
-  In the following, A1 to An are optional batch dimensions.
+#### Note:
+
+In the following, A1 to An are optional batch dimensions.
+
 
 #### Args:
 
 * <b>`vector1`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the first vector.
+  represents the first vector.
 * <b>`vector2`</b>: A tensor of shape `[A1, ..., An, 3]`, where the last dimension
-    represents the second vector.
+  represents the second vector.
 * <b>`name`</b>: A name for this op that defaults to
-    "quaternion_between_two_vectors_3d".
+  "quaternion_between_two_vectors_3d".
 
 
 #### Returns:

@@ -23,18 +23,22 @@ Defined in [`math/vector.py`](https://github.com/tensorflow/graphics/blob/master
 
 <!-- Placeholder for "Used in" -->
 
-Note: In the following, A1 to An are optional batch dimensions, which should be
+#### Note:
+
+In the following, A1 to An are optional batch dimensions, which should be
 broadcast compatible.
+
 
 #### Args:
 
-*   <b>`vector1`</b>: Tensor of rank R and shape `[A1, ..., Ai, ..., An]`, where
-    the dimension i = axis represents a vector.
-*   <b>`vector2`</b>: Tensor of rank R and shape `[A1, ..., Ai, ..., An]`, where
-    the dimension i = axis represents a vector.
-*   <b>`axis`</b>: The dimension along which to compute the dot product.
-*   <b>`keepdims`</b>: If True, retains reduced dimensions with length 1.
-*   <b>`name`</b>: A name for this op which defaults to "vector_dot".
+* <b>`vector1`</b>: Tensor of rank R and shape `[A1, ..., Ai, ..., An]`, where the
+  dimension i = axis represents a vector.
+* <b>`vector2`</b>: Tensor of rank R and shape `[A1, ..., Ai, ..., An]`, where the
+  dimension i = axis represents a vector.
+* <b>`axis`</b>: The dimension along which to compute the dot product.
+* <b>`keepdims`</b>: If True, retains reduced dimensions with length 1.
+* <b>`name`</b>: A name for this op which defaults to "vector_dot".
+
 
 #### Returns:
 
