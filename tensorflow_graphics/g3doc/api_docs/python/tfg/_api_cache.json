@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {
-  "current_doc_full_name": "tfg.nn.layer.graph_convolution.FeatureSteeredConvolutionKerasLayer.add_update", 
+  "current_doc_full_name": "tfg.math.interpolation.slerp", 
   "duplicate_of": {}, 
   "is_fragment": {
     "tfg": false, 
