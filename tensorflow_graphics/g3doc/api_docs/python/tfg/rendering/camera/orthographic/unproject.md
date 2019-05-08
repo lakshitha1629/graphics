@@ -21,8 +21,8 @@ Defined in [`rendering/camera/orthographic.py`](https://github.com/tensorflow/gr
 
 <!-- Placeholder for "Used in" -->
 
-Unprojects a 2d point $$(x', y')$$ to a 3d point $$(x, y, z)$$ given its
-depth $$z$$, with
+Unprojects a 2d point \\((x', y')\\) to a 3d point \\((x, y, z)\\) given its
+depth \\(z\\), with
 
 $$
 \begin{matrix}

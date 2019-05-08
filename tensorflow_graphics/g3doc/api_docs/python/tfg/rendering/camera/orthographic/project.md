@@ -20,8 +20,8 @@ Defined in [`rendering/camera/orthographic.py`](https://github.com/tensorflow/gr
 
 <!-- Placeholder for "Used in" -->
 
-Projects a 3d point $$(x, y, z)$$ to a 2d point $$(x', y')$$ onto the image
-plane, with
+Projects a 3d point \\((x, y, z)\\) to a 2d point \\((x', y')\\) onto the
+image plane, with
 
 $$
 \begin{matrix}

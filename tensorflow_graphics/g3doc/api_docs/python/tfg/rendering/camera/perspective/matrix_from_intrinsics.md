@@ -32,7 +32,8 @@ f_x & 0 & c_x \\
 \end{bmatrix}
 $$
 
-from the focal length $$(f_x, f_y)$$ and the principal point $$(c_x, c_y)$$.
+from the focal length \\((f_x, f_y)\\) and the principal point
+\\((c_x, c_y)\\).
 
 #### Note:
 

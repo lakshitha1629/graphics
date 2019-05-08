@@ -16,10 +16,6 @@ Defined in [`image/pyramid.py`](https://github.com/tensorflow/graphics/blob/mast
 More details about image pyramids can be found on [this page.]
 (https://en.wikipedia.org/wiki/Pyramid_(image_processing))
 
-## Modules
-
-[`shape`](../../tfg/image/pyramid/shape.md) module: Shape utility functions.
-
 ## Functions
 
 [`downsample(...)`](../../tfg/image/pyramid/downsample.md): Generates the different levels of the pyramid (downsampling).

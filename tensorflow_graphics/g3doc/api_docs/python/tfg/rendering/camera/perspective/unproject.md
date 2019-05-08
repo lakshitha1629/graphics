@@ -23,8 +23,8 @@ Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/gra
 
 <!-- Placeholder for "Used in" -->
 
-Unprojects a 2d point $$(x', y')$$ to a 3d point $$(x, y, z)$$ knowing the
-depth $$z$$ with
+Unprojects a 2d point \\((x', y')\\) to a 3d point \\((x, y, z)\\) knowing the
+depth \\(z\\) with
 
 $$
 \begin{matrix}
@@ -32,7 +32,7 @@ x = \frac{z (x' - c_x)}{f_x}, & y = \frac{z(y' - c_y)}{f_y}, & z = z,
 \end{matrix}
 $$
 
-where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
+where \\((f_x, f_y)\\) is the focal length and \\((c_x, c_y)\\) the principal
 point.
 
 #### Note:

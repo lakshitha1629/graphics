@@ -90,7 +90,6 @@
 *  <a href="./tfg/image/pyramid.md"><code>tfg.image.pyramid</code></a>
 *  <a href="./tfg/image/pyramid/downsample.md"><code>tfg.image.pyramid.downsample</code></a>
 *  <a href="./tfg/image/pyramid/merge.md"><code>tfg.image.pyramid.merge</code></a>
-*  <a href="./tfg/image/pyramid/shape.md"><code>tfg.image.pyramid.shape</code></a>
 *  <a href="./tfg/image/pyramid/split.md"><code>tfg.image.pyramid.split</code></a>
 *  <a href="./tfg/image/pyramid/upsample.md"><code>tfg.image.pyramid.upsample</code></a>
 *  <a href="./tfg/math.md"><code>tfg.math</code></a>

@@ -22,8 +22,8 @@ Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/gra
 
 <!-- Placeholder for "Used in" -->
 
-Projects a 3d point $$(x, y, z)$$ to a 2d point $$(x', y')$$ onto the image
-plane with
+Projects a 3d point \\((x, y, z)\\) to a 2d point \\((x', y')\\) onto the
+image plane with
 
 $$
 \begin{matrix}
@@ -31,7 +31,7 @@ x' = \frac{f_x}{z}x + c_x, & y' = \frac{f_y}{z}y + c_y,
 \end{matrix}
 $$
 
-where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
+where \\((f_x, f_y)\\) is the focal length and \\((c_x, c_y)\\) the principal
 point.
 
 #### Note:

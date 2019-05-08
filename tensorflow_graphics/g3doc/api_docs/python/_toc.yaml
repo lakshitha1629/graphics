@@ -249,10 +249,6 @@ toc:
         path: /graphics/api_docs/python/tfg/image/pyramid/split
       - title: upsample
         path: /graphics/api_docs/python/tfg/image/pyramid/upsample
-      - title: shape
-        section:
-        - title: Overview
-          path: /graphics/api_docs/python/tfg/image/pyramid/shape
   - title: tfg.math
     section:
     - title: Overview

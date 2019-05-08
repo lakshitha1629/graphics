@@ -22,9 +22,9 @@ Defined in [`math/vector.py`](https://github.com/tensorflow/graphics/blob/master
 
 <!-- Placeholder for "Used in" -->
 
-For an incident vector $$\mathbf{v}$$ and normal $$\mathbf{n}$$ this function
-computes the reflected vector as
-$$\mathbf{r} = $$\mathbf{v}$$ - 2(\mathbf{n}^T\mathbf{v})\mathbf{n}$$.
+For an incident vector \\(\mathbf{v}\\) and normal $$\mathbf{n}$$ this
+function computes the reflected vector as
+\\(\mathbf{r} = \mathbf{v} - 2(\mathbf{n}^T\mathbf{v})\mathbf{n}\\).
 
 #### Note:
 

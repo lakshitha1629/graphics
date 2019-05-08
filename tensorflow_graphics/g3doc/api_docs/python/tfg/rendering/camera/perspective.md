@@ -14,8 +14,8 @@ Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/gra
 <!-- Placeholder for "Used in" -->
 
 The perspective camera model, also referred to as pinhole camera model, is
-defined using a focal length $$(f_x, f_y)$$ and a principal point
-$$(c_x, c_y)$$. The perspective camera model can be written as a calibration
+defined using a focal length \\((f_x, f_y)\\) and a principal point
+\\((c_x, c_y)\\). The perspective camera model can be written as a calibration
 matrix
 
 $$
@@ -28,7 +28,7 @@ f_x & 0 & c_x \\
 $$
 
 also referred to as the intrinsic parameter matrix. The camera focal length
-$$(f_x, f_y)$$, defined in pixels, is the physical focal length divided by the
+\\((f_x, f_y)\\), defined in pixels, is the physical focal length divided by the
 physical size of a camera pixel. The physical focal length is the distance
 between the camera center and the image plane. The principal point is the
 intersection of the camera axis with the image plane. The camera axis is the

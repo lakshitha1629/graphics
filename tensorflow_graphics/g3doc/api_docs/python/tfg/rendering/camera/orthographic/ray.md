@@ -20,7 +20,7 @@ Defined in [`rendering/camera/orthographic.py`](https://github.com/tensorflow/gr
 
 <!-- Placeholder for "Used in" -->
 
-Computes the 3d ray $$(r_x, r_y, 1)$$ for a 2d point $$(x', y')$$ on the
+Computes the 3d ray \\((r_x, r_y, 1)\\) for a 2d point \\((x', y')\\) on the
 image plane. For an orthographic camera the rays are constant over the image
 plane with
 

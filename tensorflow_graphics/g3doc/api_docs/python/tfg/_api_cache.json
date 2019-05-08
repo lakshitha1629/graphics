@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {
-  "current_doc_full_name": "tfg.nn.layer.graph_convolution.FeatureSteeredConvolutionKerasLayer.__call__", 
+  "current_doc_full_name": "tfg.geometry.transformation.axis_angle.from_quaternion", 
   "duplicate_of": {}, 
   "is_fragment": {
     "tfg": false, 
@@ -103,17 +103,8 @@
     "tfg.image.color_space.srgb.from_linear": false, 
     "tfg.image.color_space.srgb.to_linear": false, 
     "tfg.image.pyramid": false, 
-    "tfg.image.pyramid.__builtins__": true, 
-    "tfg.image.pyramid.__doc__": true, 
-    "tfg.image.pyramid.__file__": true, 
-    "tfg.image.pyramid.__name__": true, 
-    "tfg.image.pyramid.__package__": true, 
-    "tfg.image.pyramid.absolute_import": true, 
-    "tfg.image.pyramid.division": true, 
     "tfg.image.pyramid.downsample": false, 
     "tfg.image.pyramid.merge": false, 
-    "tfg.image.pyramid.print_function": true, 
-    "tfg.image.pyramid.shape": false, 
     "tfg.image.pyramid.split": false, 
     "tfg.image.pyramid.upsample": false, 
     "tfg.math": false, 

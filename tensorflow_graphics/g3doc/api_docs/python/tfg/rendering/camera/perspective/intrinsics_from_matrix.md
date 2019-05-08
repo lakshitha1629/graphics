@@ -20,8 +20,8 @@ Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/gra
 
 <!-- Placeholder for "Used in" -->
 
-Extracts the focal length $$(f_x, f_y)$$ and the principal point
-$$(c_x, c_y)$$ from a camera calibration matrix
+Extracts the focal length \\((f_x, f_y)\\) and the principal point
+\\((c_x, c_y)\\) from a camera calibration matrix
 
 $$
 \mathbf{C} =

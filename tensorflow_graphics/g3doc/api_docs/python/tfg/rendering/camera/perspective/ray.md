@@ -22,8 +22,8 @@ Defined in [`rendering/camera/perspective.py`](https://github.com/tensorflow/gra
 
 <!-- Placeholder for "Used in" -->
 
-Computes the 3d ray $$(r_x, r_y, 1)$$ from the camera center to a 2d point
-$$(x', y')$$ on the image plane with
+Computes the 3d ray \\((r_x, r_y, 1)\\) from the camera center to a 2d point
+\\((x', y')\\) on the image plane with
 
 $$
 \begin{matrix}
@@ -31,8 +31,8 @@ r_x = \frac{(x' - c_x)}{f_x}, & r_y = \frac{(y' - c_y)}{f_y}, & z = 1,
 \end{matrix}
 $$
 
-where $$(f_x, f_y)$$ is the focal length and $$(c_x, c_y)$$ the principal
-point. The camera optical center is assumed to be at $$(0, 0, 0)$$.
+where \\((f_x, f_y)\\) is the focal length and \\((c_x, c_y)\\) the principal
+point. The camera optical center is assumed to be at \\((0, 0, 0)\\).
 
 #### Note:
 

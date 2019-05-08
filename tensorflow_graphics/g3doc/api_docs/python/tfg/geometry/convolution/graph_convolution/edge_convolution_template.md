@@ -25,17 +25,13 @@ Defined in [`geometry/convolution/graph_convolution.py`](https://github.com/tens
 <!-- Placeholder for "Used in" -->
 
 This function implements a general edge convolution for graphs of the form
-$$
-y_i = \sum_{j \in \mathcal{N}(i)} w_{ij} f(x_i, x_j)
-$$
-
-Where
-$$\mathcal{N}(i)$$ is the set of vertices in the neighborhood of vertex $$i$$,
-$$x_i \in \mathbb{R}^C$$  are the features at vertex $$i$$,
-$$w_{ij} \in \mathbb{R}$$ is the weight for the edge between vertex $$i$$ and
-  vertex $$j$$, and finally
-$$f(x_i, x_j): \mathbb{R}^{C} \times \mathbb{R}^{C} \to \mathbb{R}^{D}$$ is a
-  user-supplied function.
+\\(y_i = \sum_{j \in \mathcal{N}(i)} w_{ij} f(x_i, x_j)\\), where
+\\(\mathcal{N}(i)\\) is the set of vertices in the neighborhood of vertex
+\\(i\\), \\(x_i \in \mathbb{R}^C\\) are the features at vertex \\(i\\),
+\\(w_{ij} \in \mathbb{R}\\) is the weight for the edge between vertex \\(i\\)
+and vertex \\(j\\), and finally
+\\(f(x_i, x_j): \mathbb{R}^{C} \times \mathbb{R}^{C} \to \mathbb{R}^{D}\\) is
+a user-supplied function.
 
 The shorthands used below are
   `V`: The number of vertices.
@@ -52,8 +48,8 @@ In the following, A1 to An are optional batch dimensions.
 * <b>`neighbors`</b>: A `SparseTensor` with the same type as `data` and with shape
   `[A1, ..., An, V, V]` representing vertex neighborhoods. The neighborhood
   of a vertex defines the support region for convolution. The value at
-  `neighbors[A1, ..., An, i, j]` corresponds to the weight $$w_{ij}$$ above.
-  Each vertex must have at least one neighbor.
+  `neighbors[A1, ..., An, i, j]` corresponds to the weight \\(w_{ij}\\)
+  above. Each vertex must have at least one neighbor.
 * <b>`sizes`</b>: An `int` tensor of shape `[A1, ..., An]` indicating the true input
   sizes in case of padding (`sizes=None` indicates no padding). Note that
   `sizes[A1, ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes` will
