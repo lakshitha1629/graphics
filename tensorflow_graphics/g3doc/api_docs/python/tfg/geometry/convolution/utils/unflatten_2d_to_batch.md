@@ -30,44 +30,46 @@ particular batch dimension (`sum(sizes) == D1`).
 #### Examples:
 
 
->>> data = [[1., 2.],
-            [3., 4.],
-            [5., 6.],
-            [7., 8.],
-            [9., 10.],
-            [11., 12.]]
->>> sizes = [2, 3, 1]
+```python
+data = [[1., 2.],
+        [3., 4.],
+        [5., 6.],
+        [7., 8.],
+        [9., 10.],
+        [11., 12.]]
+sizes = [2, 3, 1]
 
->>> output = unflatten_2d_to_batch(data, sizes, max_rows=None)
->>> print(output.shape)
-[3, 3, 2]
->>> print(output)
-[[[1., 2.],
- [3., 4.],
- [0., 0.]],
-[[5., 6.],
- [7., 8.],
- [9., 10.]],
-[[11., 12.],
- [0., 0.],
- [0., 0.]]]
+output = unflatten_2d_to_batch(data, sizes, max_rows=None)
+print(output.shape)
+>>> [3, 3, 2]
+print(output)
+>>> [[[1., 2.],
+      [3., 4.],
+      [0., 0.]],
+     [[5., 6.],
+      [7., 8.],
+      [9., 10.]],
+     [[11., 12.],
+      [0., 0.],
+      [0., 0.]]]
 
->>> output = unflatten_2d_to_batch(data, sizes, max_rows=4)
->>> print(output.shape)
-[3, 4, 2]
->>> print(output)
-[[[1., 2.],
- [3., 4.],
- [0., 0.],
- [0., 0.]],
-[[5., 6.],
- [7., 8.],
- [9., 10.],
- [0., 0.]],
-[[11., 12.],
- [0., 0.],
- [0., 0.],
- [0., 0.]]]
+output = unflatten_2d_to_batch(data, sizes, max_rows=4)
+print(output.shape)
+>>> [3, 4, 2]
+print(output)
+>>> [[[1., 2.],
+      [3., 4.],
+      [0., 0.],
+      [0., 0.]],
+     [[5., 6.],
+      [7., 8.],
+      [9., 10.],
+      [0., 0.]],
+     [[11., 12.],
+      [0., 0.],
+      [0., 0.],
+      [0., 0.]]]
+```
 
 
 #### Args:

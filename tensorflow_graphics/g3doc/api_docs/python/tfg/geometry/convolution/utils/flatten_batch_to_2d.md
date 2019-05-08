@@ -36,20 +36,23 @@ from D1 to select from each batch dimension.
 
 #### Examples:
 
-
+```python
 data = [[[1., 2.], [3., 4.]],
         [[5., 6.], [7., 8.]],
         [[9., 10.], [11., 12.]]]
 sizes = None
-output = [[1., 2.], [3., 4.], [5., 6.], [7., 8.], [9., 10.], [11., 12.]]
-unflatten(output) = data
+output = flatten(data, size)
+print(output)
+>>> [[1., 2.], [3., 4.], [5., 6.], [7., 8.], [9., 10.], [11., 12.]]
 
 data = [[[1., 2.], [0., 0.]],
         [[5., 6.], [7., 8.]],
         [[9., 10.], [0., 0.]]]
 sizes = [1, 2, 1]
-output = [[1., 2.], [5., 6.], [7., 8.], [9., 10.]]
-unflatten(output) = data
+output = flatten(data, size)
+print(output)
+>>> [[1., 2.], [5., 6.], [7., 8.], [9., 10.]]
+```
 
 
 #### Args:

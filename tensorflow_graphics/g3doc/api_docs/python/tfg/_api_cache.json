@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {
-  "current_doc_full_name": "tfg.geometry.transformation.axis_angle.from_quaternion", 
+  "current_doc_full_name": "tfg.geometry.transformation.rotation_matrix_common", 
   "duplicate_of": {}, 
   "is_fragment": {
     "tfg": false, 
