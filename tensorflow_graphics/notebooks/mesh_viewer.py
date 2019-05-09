@@ -41,6 +41,7 @@ class Viewer(object):
     material = self.context.THREE.MeshLambertMaterial.new_object({
         'color': 0xfffacd,
         'vertexColors': self.context.THREE.NoColors,
+        'side': self.context.THREE.DoubleSide,
     })
     mesh = {'vertices': vertices, 'faces': faces}
     if 'vertex_colors' in data:
@@ -48,6 +49,7 @@ class Viewer(object):
       material = self.context.THREE.MeshLambertMaterial.new_object({
           'color': 0xfffacd,
           'vertexColors': self.context.THREE.VertexColors,
+          'side': self.context.THREE.DoubleSide,
       })
     mesh['material'] = material
     return mesh

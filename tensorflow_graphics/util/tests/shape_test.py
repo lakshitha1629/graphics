@@ -192,6 +192,10 @@ class ShapeTest(test_case.TestCase):
                                                    (5, 1, 5)), 1, False),
       ("Not all batch dimensions are identical.", ((None, 2, 3), (5, None, 4),
                                                    (5, 1, None)), 1, False),
+      ("Not all batch dimensions are identical.",
+       ((None, 2, 3), (5, None, 4), (5, 2, None)), (1, 1, 2), False),
+      ("Not all batch dimensions are identical.",
+       ((1, 2, 3), (1, 2, 3), (1, 2, 3)), (1, 1, 2), False),
       ("Not all batch dimensions are broadcast-compatible.",
        ((None, 2, 3), (5, None, 4), (5, 3, None)), 1, True),
   )
@@ -232,6 +236,9 @@ class ShapeTest(test_case.TestCase):
       (((None, 2, 3), (5, None, 4), (5, 1, None)), 1, True, 0),
       (((None, 2, 3), (None, 2, 4), (None, 2, None)), 1, False, 0),
       (((None, 2, 3), (None, 2, 4), (None, 2, None)), 1, True, 0),
+      (((None, None, 3), (None, None, 4), (None, None, None)), 1, False, 0),
+      (((None, None, 3), (None, None, 4), (None, 2, None)), 1, False, 0),
+      (((2, None, 3), (2, None, 4), (None, 2, None)), 1, False, 0),
   )
   def test_compare_batch_dimensions_raises_no_exceptions(
       self, tensor_shapes, last_axes, broadcast_compatible, initial_axes):
