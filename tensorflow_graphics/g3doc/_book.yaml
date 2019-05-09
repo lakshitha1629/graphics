@@ -46,6 +46,15 @@ upper_tabs:
       - title: Non-rigid deformation
         path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/non_rigid_deformation.ipynb
         status: external
+      - title: Spherical harmonics rendering
+        path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_approximation.ipynb
+        status: external
+      - title: Environment map optimization
+        path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/spherical_harmonics_optimization.ipynb
+        status: external
+      - title: Semantic mesh segmentation
+        path: https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/notebooks/mesh_segmentation_demo.ipynb
+        status: external
 
     - name: API
       skip_translation: true

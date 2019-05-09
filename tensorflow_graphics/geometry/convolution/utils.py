@@ -23,6 +23,20 @@ from tensorflow_graphics.util import export_api
 from tensorflow_graphics.util import shape
 
 
+def _is_dynamic_shape(tensors):
+  """Helper function to test if any tensor in a list has a dynamic shape.
+
+  Args:
+    tensors: A list or tuple of tensors with shapes to test.
+
+  Returns:
+    True if any tensor in the list has a dynamic shape, False otherwise.
+  """
+  if not isinstance(tensors, (list, tuple)):
+    raise ValueError("'tensors' must be list of tuple.")
+  return not all([shape.is_static(tensor.shape) for tensor in tensors])
+
+
 def check_valid_graph_convolution_input(data, neighbors, sizes):
   """Checks that the inputs are valid for graph convolution ops.
 
@@ -45,21 +59,26 @@ def check_valid_graph_convolution_input(data, neighbors, sizes):
     raise TypeError("'neighbors' and 'data' must have the same type.")
   if sizes is not None and not sizes.dtype.is_integer:
     raise TypeError("'sizes' must have an integer type.")
+  if not isinstance(neighbors, tf.sparse.SparseTensor):
+    raise ValueError("'neighbors' must be a SparseTensor.")
 
   data_ndims = data.shape.ndims
   shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=1)
   shape.check_static(
       tensor=neighbors, tensor_name="neighbors", has_rank=data_ndims)
-  shape.compare_dimensions(
-      tensors=(data, neighbors, neighbors),
-      tensor_names=("data", "neighbors", "neighbors"),
-      axes=(-2, -2, -1))
+  if not _is_dynamic_shape(tensors=(data, neighbors)):
+    shape.compare_dimensions(
+        tensors=(data, neighbors, neighbors),
+        tensor_names=("data", "neighbors", "neighbors"),
+        axes=(-2, -2, -1))
+  # For dynamic-shape tensors in graph mode, compare_batch_dimensions attempts
+  # to match `None` dimensions using broadcast semantics.
   if sizes is None:
     shape.compare_batch_dimensions(
         tensors=(data, neighbors),
         tensor_names=("data", "neighbors"),
         last_axes=-3,
-        broadcast_compatible=False)
+        broadcast_compatible=_is_dynamic_shape(tensors=(data, neighbors)))
   else:
     shape.check_static(
         tensor=sizes, tensor_name="sizes", has_rank=data_ndims - 2)
@@ -67,7 +86,8 @@ def check_valid_graph_convolution_input(data, neighbors, sizes):
         tensors=(data, neighbors, sizes),
         tensor_names=("data", "neighbors", "sizes"),
         last_axes=(-3, -3, -1),
-        broadcast_compatible=False)
+        broadcast_compatible=_is_dynamic_shape(
+            tensors=(data, neighbors, sizes)))
 
 
 def check_valid_graph_pooling_input(data, pool_map, sizes):
@@ -92,21 +112,26 @@ def check_valid_graph_pooling_input(data, pool_map, sizes):
     raise TypeError("'pool_map' and 'data' must have the same type.")
   if sizes is not None and not sizes.dtype.is_integer:
     raise TypeError("'sizes' must have an integer type.")
+  if not isinstance(pool_map, tf.sparse.SparseTensor):
+    raise ValueError("'pool_map' must be a SparseTensor.")
 
   data_ndims = data.shape.ndims
   shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=1)
   shape.check_static(
       tensor=pool_map, tensor_name="pool_map", has_rank=data_ndims)
-  shape.compare_dimensions(
-      tensors=(data, pool_map),
-      tensor_names=("data", "pool_map"),
-      axes=(-2, -1))
+  if not _is_dynamic_shape(tensors=(data, pool_map)):
+    shape.compare_dimensions(
+        tensors=(data, pool_map),
+        tensor_names=("data", "pool_map"),
+        axes=(-2, -1))
+  # For dynamic-shape tensors in graph mode, compare_batch_dimensions attempts
+  # to match `None` dimensions using broadcast semantics.
   if sizes is None:
     shape.compare_batch_dimensions(
         tensors=(data, pool_map),
         tensor_names=("data", "pool_map"),
         last_axes=-3,
-        broadcast_compatible=False)
+        broadcast_compatible=_is_dynamic_shape(tensors=(data, pool_map)))
   else:
     shape.check_static(
         tensor=sizes, tensor_name="sizes", has_rank=data_ndims - 1)
@@ -114,7 +139,7 @@ def check_valid_graph_pooling_input(data, pool_map, sizes):
         tensors=(data, pool_map, sizes),
         tensor_names=("data", "pool_map", "sizes"),
         last_axes=(-3, -3, -2),
-        broadcast_compatible=False)
+        broadcast_compatible=_is_dynamic_shape(tensors=(data, pool_map, sizes)))
 
 
 def check_valid_graph_unpooling_input(data, pool_map, sizes):
@@ -139,22 +164,27 @@ def check_valid_graph_unpooling_input(data, pool_map, sizes):
     raise TypeError("'pool_map' and 'data' must have the same type.")
   if sizes is not None and not sizes.dtype.is_integer:
     raise TypeError("'sizes' must have an integer type.")
+  if not isinstance(pool_map, tf.sparse.SparseTensor):
+    raise ValueError("'pool_map' must be a SparseTensor.")
 
   data_ndims = data.shape.ndims
   shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=1)
   shape.check_static(tensor=data, tensor_name="data", has_rank_less_than=6)
   shape.check_static(
       tensor=pool_map, tensor_name="pool_map", has_rank=data_ndims)
-  shape.compare_dimensions(
-      tensors=(data, pool_map),
-      tensor_names=("data", "pool_map"),
-      axes=(-2, -2))
+  if not _is_dynamic_shape(tensors=(data, pool_map)):
+    shape.compare_dimensions(
+        tensors=(data, pool_map),
+        tensor_names=("data", "pool_map"),
+        axes=(-2, -2))
+  # For dynamic-shape tensors in graph mode, compare_batch_dimensions attempts
+  # to match `None` dimensions using broadcast semantics.
   if sizes is None:
     shape.compare_batch_dimensions(
         tensors=(data, pool_map),
         tensor_names=("data", "pool_map"),
         last_axes=-3,
-        broadcast_compatible=False)
+        broadcast_compatible=_is_dynamic_shape(tensors=(data, pool_map)))
   else:
     shape.check_static(
         tensor=sizes, tensor_name="sizes", has_rank=data_ndims - 1)
@@ -162,7 +192,7 @@ def check_valid_graph_unpooling_input(data, pool_map, sizes):
         tensors=(data, pool_map, sizes),
         tensor_names=("data", "pool_map", "sizes"),
         last_axes=(-3, -3, -2),
-        broadcast_compatible=False)
+        broadcast_compatible=_is_dynamic_shape(tensors=(data, pool_map, sizes)))
 
 
 def flatten_batch_to_2d(data, sizes=None, name=None):
@@ -176,8 +206,8 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
   function that returns any tensor with shape `[A1*...*An*D1, D3]` to one
   with shape `[A1, ..., An, D1, D3]`.
 
-  Padded inputs in dim D1 are allowed. `sizes` determines the first elements
-  from D1 to select from each batch dimension.
+  Padded inputs in dimension D1 are allowed. `sizes` determines the first
+  elements from D1 to select from each batch dimension.
 
   Examples:
     ```python
@@ -202,7 +232,7 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
     data: A tensor with shape `[A1, ..., An, D1, D2]`.
     sizes: An `int` tensor with shape `[A1, ..., An]`. Can be `None`. `sizes[i]
       <= D1`.
-    name: A name for this op. Defaults to `utils_flatten_batch_to_2d`.
+    name: A name for this op. Defaults to 'utils_flatten_batch_to_2d'.
 
   Returns:
     A tensor with shape `[A1*...*An*D1, D2]` if `sizes == None`, otherwise a
@@ -224,6 +254,8 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
     if sizes is not None and not sizes.dtype.is_integer:
       raise TypeError("'sizes' must have an integer type.")
     shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=2)
+    # For dynamic-shape tensors in graph mode, compare_batch_dimensions attempts
+    # to match `None` dimensions using broadcast semantics.
     if sizes is not None:
       shape.check_static(
           tensor=sizes, tensor_name="sizes", has_rank=data.shape.ndims - 2)
@@ -231,7 +263,7 @@ def flatten_batch_to_2d(data, sizes=None, name=None):
           tensors=(data, sizes),
           tensor_names=("data", "sizes"),
           last_axes=(-3, -1),
-          broadcast_compatible=False)
+          broadcast_compatible=_is_dynamic_shape(tensors=(data, sizes)))
 
     data_shape = tf.shape(input=data)
     if sizes is None:
@@ -321,7 +353,7 @@ def unflatten_2d_to_batch(data, sizes, max_rows=None, name=None):
     sizes: An `int` tensor with shape `[A1, ..., An]`.
     max_rows: An `int` specifying the maximum number of rows in the
       unflattened output. `max_rows >= max(sizes)`.
-    name: A name for this op. Defaults to `utils_unflatten_2d_to_batch`.
+    name: A name for this op. Defaults to 'utils_unflatten_2d_to_batch'.
 
   Returns:
     A tensor with shape `[A1, A2, ..., max_rows, D2]`.
@@ -375,7 +407,7 @@ def convert_to_block_diag_2d(data,
     validate_indices: A boolean. Ignored if `sizes==None`. If True,
       out-of-bounds indices in `data` are explicitly ignored, otherwise
       out-of-bounds indices will cause undefined behavior.
-    name: A name for this op. Defaults to `utils_convert_to_block_diag_2d`.
+    name: A name for this op. Defaults to 'utils_convert_to_block_diag_2d'.
 
   Returns:
     A 2d block-diagonal SparseTensor.
@@ -395,6 +427,8 @@ def convert_to_block_diag_2d(data,
     if sizes is not None and not sizes.dtype.is_integer:
       raise TypeError("'sizes' must have an integer type.")
     shape.check_static(tensor=data, tensor_name="data", has_rank_greater_than=2)
+    # For dynamic-shape tensors in graph mode, compare_batch_dimensions attempts
+    # to match `None` dimensions using broadcast semantics.
     if sizes is not None:
       shape.check_static(
           tensor=sizes,
@@ -405,7 +439,7 @@ def convert_to_block_diag_2d(data,
           tensors=(data, sizes),
           tensor_names=("data", "sizes"),
           last_axes=(-3, -2),
-          broadcast_compatible=False)
+          broadcast_compatible=_is_dynamic_shape(tensors=(data, sizes)))
 
     data_shape = tf.shape(input=data)
     data = tf.sparse.reshape(data, [-1, data_shape[-2], data_shape[-1]])
@@ -441,12 +475,12 @@ def partition_sums_2d(data, group_ids, row_weights=None, name=None):
     data: 2-D tensor with shape `[D1, D2]`.
     group_ids: 1-D `int` tensor with shape `[D1]`.
     row_weights: 1-D tensor with shape `[D1]`. Can be `None`.
-    name: A name for this op. Defaults to `utils_partition_sums_2d`.
+    name: A name for this op. Defaults to 'utils_partition_sums_2d'.
 
   Returns:
     A 2-D tensor with shape `[max(group_ids) + 1, D2]` where
-      `output[i, :] = sum(data[j, :] * weight[j] * 1(group_ids[j] == i)),
-      1(.) is the indicator function.
+      `output[i, :] = sum(data[j, :] * weight[j] * 1(group_ids[j] == i)), 1(.)`
+      is the indicator function.
 
   Raises:
     ValueError: if the inputs have invalid dimensions or types.

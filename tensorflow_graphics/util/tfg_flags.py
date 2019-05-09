@@ -25,7 +25,7 @@ TFG_ADD_ASSERTS_TO_GRAPH = 'tfg_add_asserts_to_graph'
 flags.DEFINE_boolean(
     TFG_ADD_ASSERTS_TO_GRAPH, False,
     'If True, calling tensorflow_graphics functions may add assert '
-    'nodes to the graph where necessary.')
+    'nodes to the graph where necessary.', short_name='tfg_debug')
 
 # The util functions or classes are not exported.
 __all__ = []

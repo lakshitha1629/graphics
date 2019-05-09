@@ -69,10 +69,10 @@ def feature_steered_convolution(data,
       sizes in case of padding (`sizes=None` indicates no padding).Note that
       `sizes[A1, ..., An] <= V`. If `data` and `neighbors` are 2-D, `sizes` will
       be ignored. An example usage of `sizes`: consider an input consisting of
-      three graphs G0, G1, and G2 with V0, V1, and V2 vertices respectively.
-      The padded input would have the following shapes: `data.shape = [3, V, C]`
-      and `neighbors.shape = [3, V, V]`, where `V = max([V0, V1, V2])`. The true
-      sizes of each graph will be specified by `sizes=[V0, V1, V2]`
+      three graphs G0, G1, and G2 with V0, V1, and V2 vertices respectively. The
+      padded input would have the following shapes: `data.shape = [3, V, C]` and
+      `neighbors.shape = [3, V, V]`, where `V = max([V0, V1, V2])`. The true
+      sizes of each graph will be specified by `sizes=[V0, V1, V2]`,
       `data[i, :Vi, :]` and `neighbors[i, :Vi, :Vi]` will be the vertex and
       neighborhood data of graph Gi. The `SparseTensor` `neighbors` should have
       no nonzero entries in the padded regions.
@@ -183,7 +183,7 @@ def edge_convolution_template(data,
   `edge_convolution_template` can be used to perform Laplacian smoothing by
   setting
   $$w_{ij} = \frac{1}{|\mathcal{N(i)}|}$$, `edge_function=lambda x, y: y`,
-  and reduction='weighted'.
+  and `reduction='weighted'`.
 
   The shorthands used below are
     `V`: The number of vertices.

@@ -84,18 +84,24 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
               diff.argmax(), diff.shape)
       return max_error, row_max_error, column_max_error
 
-  def _create_placeholders_from_shapes(self, shapes, dtypes=None):
+  def _create_placeholders_from_shapes(self, shapes, dtypes=None,
+                                       sparse_tensors=None):
     """Creates a list of placeholders based on a list of shapes.
 
     Args:
       shapes: A tuple or list of the input shapes.
       dtypes: A list of input types.
+      sparse_tensors: A `bool` list denoting if placeholder is a SparseTensor.
+        This is ignored in eager mode - in eager execution, only dense
+        placeholders will be created.
 
     Returns:
       A list of placeholders.
     """
     if dtypes is None:
       dtypes = [tf.float32] * len(shapes)
+    if sparse_tensors is None:
+      sparse_tensors = [False] * len(shapes)
     if tf.executing_eagerly():
       placeholders = [
           tf.compat.v1.placeholder_with_default(
@@ -104,8 +110,9 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       ]
     else:
       placeholders = [
-          tf.compat.v1.placeholder(shape=shape, dtype=dtype)
-          for shape, dtype in zip(shapes, dtypes)
+          tf.compat.v1.sparse.placeholder(dtype, shape=shape)
+          if is_sparse else tf.compat.v1.placeholder(shape=shape, dtype=dtype)
+          for shape, dtype, is_sparse in zip(shapes, dtypes, sparse_tensors)
       ]
     return placeholders
 
@@ -125,13 +132,21 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
     ]
     return tensors
 
-  def assert_exception_is_not_raised(self, func, shapes, dtypes=None, **kwargs):
+  def assert_exception_is_not_raised(self,
+                                     func,
+                                     shapes,
+                                     dtypes=None,
+                                     sparse_tensors=None,
+                                     **kwargs):
     """Runs the function to make sure an exception is not raised.
 
     Args:
       func: A function to exectute.
       shapes: A tuple or list of the input shapes.
       dtypes: A list of input types.
+      sparse_tensors: A list of `bool` indicating if the inputs are
+        SparseTensors. Defaults to all `False`. This is used for creating
+        SparseTensor placeholders in graph mode.
       **kwargs: A dict of keyword arguments to be passed to the function.
     """
     if tf.executing_eagerly() and shapes:
@@ -140,7 +155,8 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       # But if only kwargs are passed and shapes is empty, this function
       # still should run correctly.
       return
-    placeholders = self._create_placeholders_from_shapes(shapes, dtypes)
+    placeholders = self._create_placeholders_from_shapes(
+        shapes=shapes, dtypes=dtypes, sparse_tensors=sparse_tensors)
     try:
       func(*placeholders, **kwargs)
     except Exception as e:  # pylint: disable=broad-except
@@ -151,6 +167,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
                                  error_msg,
                                  shapes,
                                  dtypes=None,
+                                 sparse_tensors=None,
                                  **kwargs):
     """Runs the function to make sure an exception is raised.
 
@@ -159,6 +176,9 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       error_msg: The error message of the exception.
       shapes: A tuple or list of the input shapes.
       dtypes: A list of input types.
+      sparse_tensors: A list of `bool` indicating if the inputs are
+        SparseTensors. Defaults to all `False`. This is used for creating
+        SparseTensor placeholders in graph mode.
       **kwargs: A dict of keyword arguments to be passed to the function.
     """
     if tf.executing_eagerly():
@@ -167,7 +187,8 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       shapes = self._remove_dynamic_shapes(shapes)
       if shapes is None:
         return
-    placeholders = self._create_placeholders_from_shapes(shapes, dtypes)
+    placeholders = self._create_placeholders_from_shapes(
+        shapes=shapes, dtypes=dtypes, sparse_tensors=sparse_tensors)
     with self.assertRaisesRegexp(ValueError, error_msg):
       func(*placeholders, **kwargs)
 

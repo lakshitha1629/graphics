@@ -23,7 +23,6 @@ import tensorflow_graphics.geometry.convolution.graph_convolution as gc
 from tensorflow_graphics.util import export_api
 
 
-# pyformat: disable
 def feature_steered_convolution_layer(
     data,
     neighbors,
@@ -34,6 +33,7 @@ def feature_steered_convolution_layer(
     initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.1),
     name=None,
     var_name=None):
+  # pyformat: disable
   """Wraps the function `feature_steered_convolution` as a TensorFlow layer.
 
   The shorthands used below are
@@ -215,8 +215,8 @@ class FeatureSteeredConvolutionKerasLayer(tf.keras.layers.Layer):
         name='b',
         trainable=True)
 
-  # pyformat: disable
   def call(self, inputs, sizes=None):
+    # pyformat: disable
     """Executes the convolution.
 
     The shorthands used below are
@@ -358,8 +358,8 @@ class DynamicGraphConvolutionKerasLayer(tf.keras.layers.Layer):
         kernel_constraint=self._kernel_constraint,
         bias_constraint=self._bias_constraint)
 
-  # pyformat: disable
   def call(self, inputs, sizes=None):
+    # pyformat: disable
     """Executes the convolution.
 
     The shorthands used below are

@@ -61,10 +61,10 @@ machine learning system similar to an autoencoder, which can be trained in a
 self-supervised manner.
 
 Tensorflow Graphics is being developed to help tackle these types of challenges
-and to do so, provides a set of differentiable graphics layers (e.g. cameras and
-reflectance models) and 3D functionalities (e.g. mesh convolution, 3D
-tensorboard) that can be used to train and debug your machine learning models of
-choice.
+and to do so, provides a set of differentiable graphics and geometry layers
+(e.g. cameras, reflectance models, spatial transformations, mesh convolutions)
+and 3D viewer functionalities (e.g. 3D tensorboard) that can be used to train
+and debug your machine learning models of choice.
 
 ## Installing TensorFlow Graphics
 
