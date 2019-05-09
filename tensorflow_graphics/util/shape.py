@@ -268,6 +268,13 @@ def _all_are_equal(list_of_objects):
   return len(set(list_of_objects)) == 1
 
 
+def _raise_error(tensor_names, batch_shapes):
+  formatted_list = [(name, batch_shape)
+                    for name, batch_shape in zip(tensor_names, batch_shapes)]
+  raise ValueError(
+      'Not all batch dimensions are identical: {}'.format(formatted_list))
+
+
 def compare_batch_dimensions(tensors,
                              last_axes,
                              broadcast_compatible,
@@ -311,31 +318,23 @@ def compare_batch_dimensions(tensors,
   if tensor_names is None:
     tensor_names = _give_default_names(tensors, 'tensor')
   if not broadcast_compatible:
-
-    def _raise_error():
-      formatted_list = [(name, batch_shape)
-                        for name, batch_shape in zip(tensor_names, batch_shapes)
-                       ]
-      raise ValueError(
-          'Not all batch dimensions are identical: {}'.format(formatted_list))
-
     batch_ndims = [batch_shape.ndims for batch_shape in batch_shapes]
     batch_shapes = [batch_shape.as_list() for batch_shape in batch_shapes]
     if not _all_are_equal(batch_ndims):
       # If not all batch shapes have the same length, they cannot be identical.
-      _raise_error()
+      _raise_error(tensor_names, batch_shapes)
     for dims in zip(*batch_shapes):
       if _all_are_equal(dims):
         # Continue if all dimensions are None or have the same value.
         continue
       if None not in dims:
         # If all dimensions are known at this point, they are not identical.
-        _raise_error()
+        _raise_error(tensor_names, batch_shapes)
       # At this point dims must consist of both None's and int's.
       if len(set(dims)) != 2:
         # set(dims) should return (None, some_int).
         # Otherwise shapes are not identical.
-        _raise_error()
+        _raise_error(tensor_names, batch_shapes)
   else:
     if not all(
         is_broadcast_compatible(shape1, shape2)

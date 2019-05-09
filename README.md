@@ -76,6 +76,9 @@ TensorFlow Graphics is fully compatible with the latest stable release of
 TensorFlow, tf-nightly, and tf-nightly-2.0-preview. All the functions are
 compatible with graph and eager execution.
 
+## Debugging
+[here](https://github.com/tensorflow/graphics/blob/master/tensorflow_graphics/g3doc/debug_mode.md)
+
 ## Colab tutorials
 To help you get started with some of the functionalities provided by TF
 Graphics, some Colab notebooks are available below and roughly ordered by
